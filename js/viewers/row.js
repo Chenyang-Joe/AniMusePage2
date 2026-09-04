@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, groundModel, alignBlobToMesh, playClip, styleBlob, styleMesh, observeResize } from './stage.js';
+import { createStage, loadGLB, groundModel, alignBlobToMesh, restBox, playClip, styleBlob, styleMesh, observeResize } from './stage.js';
 
 /**
  * Several representations of one animal, side by side, each in its own viewport.
@@ -62,13 +62,15 @@ export function initRow(host, samples, opts = {}) {
     dist = 0;
     for (const r of roots) {
       r.updateMatrixWorld(true);
-      const size = new THREE.Box3().setFromObject(r).getSize(new THREE.Vector3());
+      const size = restBox(r).getSize(new THREE.Vector3());
       groundY = Math.max(groundY, size.y / 2);
       dist = Math.max(dist,
         (size.y / 2) / Math.tan(vFov / 2),
         (size.x / 2) / Math.tan(hFov / 2),
         (size.z / 2) / Math.tan(hFov / 2));
     }
+    // The rest box does not cover the swing of the animation, so the padding
+    // has to leave room for it rather than hugging the first frame.
     dist *= padding;
 
     // A single eye height across the columns keeps the ground line level even

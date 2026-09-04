@@ -34,10 +34,10 @@
   <p class="subtitle">Animating any raw animal mesh from text — with no skeleton, no joint names, and no manual rigging.</p>
 
   <p class="authors">
-    Chenyang Xu<sup>1</sup>
-    <span class="todo">[TODO: co-authors and affiliations]</span>
+    Chenyang Xu &nbsp;·&nbsp; Haoran Li &nbsp;·&nbsp; Guangzhao He &nbsp;·&nbsp; Zeyu Jiang &nbsp;·&nbsp; Shichen Zhang<br>
+    Juexiao Zhang &nbsp;·&nbsp; Sihang Li &nbsp;·&nbsp; Chen Feng &nbsp;·&nbsp; Jing Zhang
   </p>
-  <p class="affil"><sup>1</sup>New York University</p>
+  <p class="affil">Author list tentative &nbsp;·&nbsp; <span class="todo">[TODO: affiliations]</span></p>
 
   <div class="buttons">
     <a class="btn" href="#video">▶ Video</a>
@@ -472,17 +472,23 @@
       standard frame-0 anchor is just a special case of (ii).
     </p>
     <p>
-      In the viewer below, the four <b>grey</b> bones are the pinned ones — the same four SGB slots on every
-      animal. Everything else is what the model generated around them, under each species' own prompt.
+      In the viewer below the pinned slots are <b>pink</b> — the same four indices on all six species,
+      driven by one shared cadence. Start with <b>Constraint only</b> to see what the user actually
+      supplies, then bring in the bones the model wrote around it, then the surface those bones drive.
     </p>
   </div>
 
   <div class="wrap">
     <div class="viewer is-loading" id="v-inpaint">
-      <div class="viewer-frame"><div class="viewer-canvas h-md"></div></div>
-      <div class="viewer-labels"></div>
-      <p class="viewer-caption"></p>
-      <div class="viewer-chips"></div>
+      <div class="viewer-frame"><div class="viewer-canvas h-lg"></div><div class="grid-labels"></div></div>
+      <div class="viewer-controls">
+        <span class="seg">
+          <button data-mode="feet">Constraint only</button>
+          <button data-mode="bones" class="on">Bones</button>
+          <button data-mode="mesh">Mesh</button>
+        </span>
+      </div>
+      <p class="viewer-note">The same four bone slots are pinned on every species, to the same cadence. Everything else is what the model generated around them.</p>
     </div>
   </div>
 
@@ -506,16 +512,12 @@
 
   <div class="wrap">
     <div class="viewer is-loading" id="v-edit">
-      <div class="viewer-frame"><div class="viewer-canvas h-md"></div></div>
-      <div class="edit-controls">
+      <div class="viewer-frame"><div class="viewer-canvas h-lg"></div></div>
+      <div class="viewer-controls">
         <label for="edit-slider">Shift left front leg</label>
         <input class="edit-slider" id="edit-slider" type="range" min="-100" max="100" value="0" step="1">
-        <span class="edit-mode">
-          <button data-mode="blob" class="on">Bones</button>
-          <button data-mode="mesh">Mesh</button>
-        </span>
       </div>
-      <p class="viewer-note">The highlighted bones are the leg group. Switch to <b>Mesh</b> to see the surface follow through linear blend skinning.</p>
+      <p class="viewer-note">Top row: the surface. Bottom row: the bones driving it. The highlighted slots are the leg group — one slider, three species, no per-animal setup.</p>
     </div>
   </div>
 

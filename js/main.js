@@ -65,14 +65,9 @@ whenNear('v-stage1', async (el) => {
 });
 
 whenNear('v-inpaint', async (el) => {
-  const [{ initRow }, m] = await Promise.all([import('./viewers/row.js'), manifest()]);
-  initRow(el, withBase(m.inpainting, ['mesh', 'blob']).map((s) => ({ ...s, label: speciesLabel(s.prompt, s.id) })), {
-    columns: [
-      { key: 'blob', label: 'Generated bone trajectory — pink bones are the pinned constraint',
-        kind: 'blob', blob: { highlight: m.pinnedBones } },
-      { key: 'mesh', label: 'Inpainted full-body motion', kind: 'mesh' },
-    ],
-  });
+  const [{ initGrid }, m] = await Promise.all([import('./viewers/grid.js'), manifest()]);
+  initGrid(el, withBase(m.inpainting, ['mesh', 'blob'])
+    .map((s) => ({ ...s, label: speciesLabel(s.prompt, s.id) })), m.pinnedBones);
 });
 
 whenNear('v-edit', async (el) => {

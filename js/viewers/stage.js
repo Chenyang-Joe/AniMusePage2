@@ -67,16 +67,15 @@ export function createStage(host, opts = {}) {
     controls.maxDistance = 6;
     controls.update();
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const key = new THREE.DirectionalLight(0xffffff, 1.5);
+    // Same rig as the authors' scene_1/scene_2 prototypes: one key, one cool
+    // fill, no rim. A rim light on a white background just eats the silhouette.
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const key = new THREE.DirectionalLight(0xffffff, 1.2);
     key.position.set(3, 5, 4);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0xc4d2e0, 0.45);
+    const fill = new THREE.DirectionalLight(0xb8c8d8, 0.4);
     fill.position.set(-3, 2.5, -2);
     scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xffffff, 0.35);
-    rim.position.set(0, 2, -5);
-    scene.add(rim);
 
     Object.assign(stage, { renderer, scene, camera, controls });
     stages.add(stage);
@@ -145,7 +144,7 @@ tick();
 export function groundModel(root, { rotateY = 0, profile = true, nudgeX = 0 } = {}) {
   root.rotation.y = rotateY * Math.PI / 180;
   root.updateMatrixWorld(true);
-  let box = new THREE.Box3().setFromObject(root);
+  let box = restBox(root);
 
   // Animals are exported nose-along-Z, so a front-facing camera would look
   // straight down the body. Turn whichever horizontal axis is longer to face
@@ -156,7 +155,7 @@ export function groundModel(root, { rotateY = 0, profile = true, nudgeX = 0 } = 
     applied += 90;
     root.rotation.y = applied * Math.PI / 180;
     root.updateMatrixWorld(true);
-    box = new THREE.Box3().setFromObject(root);
+    box = restBox(root);
   }
 
   // Adjust relative, never absolute: callers may have already moved this root
@@ -168,6 +167,27 @@ export function groundModel(root, { rotateY = 0, profile = true, nudgeX = 0 } = 
   // Callers showing several representations of one animal reuse this so the
   // auto-orientation can't decide differently for two near-identical meshes.
   return { rotateY: applied, offset: root.position.clone() };
+}
+
+/**
+ * The box of a mesh in its rest pose, ignoring morph targets.
+ *
+ * `Box3.setFromObject` cannot be used for this: GLTFLoader inflates a morph
+ * target mesh's bounding box to cover the whole animation, so it reports the
+ * envelope the mesh sweeps rather than the shape on screen. Registering bones
+ * against that envelope makes them come out a third too large.
+ */
+export function restBox(root) {
+  const box = new THREE.Box3();
+  const one = new THREE.Box3();
+  root.updateMatrixWorld(true);
+  root.traverse((o) => {
+    const pos = o.isMesh && o.geometry?.attributes?.position;
+    if (!pos) return;
+    one.setFromBufferAttribute(pos).applyMatrix4(o.matrixWorld);
+    box.union(one);
+  });
+  return box;
 }
 
 /**
@@ -190,9 +210,13 @@ export function alignBlobToMesh(blobRoot, meshRoot, override = {}) {
   blobRoot.updateMatrixWorld(true);
   meshRoot.updateMatrixWorld(true);
   const bb = new THREE.Box3().setFromObject(blobRoot);
-  const mb = new THREE.Box3().setFromObject(meshRoot);
+  const mb = restBox(meshRoot);
   if (bb.isEmpty() || mb.isEmpty()) return 1;
 
+  // Both boxes are now the rest pose, so the per-axis ratios agree to within a
+  // few percent and the median is a stable estimate of the one true factor. It
+  // is preferred over the mean because bones stop short of nose and tail, which
+  // pulls the long axis low.
   const bs = bb.getSize(new THREE.Vector3());
   const ms = mb.getSize(new THREE.Vector3());
   const ratios = [ms.x / bs.x, ms.y / bs.y, ms.z / bs.z]
@@ -217,16 +241,25 @@ export function alignBlobToMesh(blobRoot, meshRoot, override = {}) {
  * bones do not sit at the origin, so turning each half separately after aligning
  * them would swing them apart again.
  */
-export function pairModels(meshRoot, blobRoot, { align, scaleTo, ...groundOpts } = {}) {
+export function pairModels(meshRoot, blobRoot, { align, scaleTo, stack = 0, ...groundOpts } = {}) {
   const pair = new THREE.Group();
   pair.add(meshRoot, blobRoot);
   alignBlobToMesh(blobRoot, meshRoot, align || {});
   if (scaleTo) {
     // A row of species is a UI, not a size comparison: an elephant rendered at
-    // true scale beside a fox leaves the fox unreadable.
-    pair.updateMatrixWorld(true);
-    const h = new THREE.Box3().setFromObject(pair).getSize(new THREE.Vector3()).y;
-    if (h > 1e-4) pair.scale.multiplyScalar(scaleTo / h);
+    // true scale beside a fox leaves the fox unreadable. Normalise the mesh's
+    // largest extent, not its height -- these animals are caught mid-motion, and
+    // a running cat is long and low where a standing elephant is tall.
+    const size = restBox(meshRoot).getSize(new THREE.Vector3());
+    const span = Math.max(size.x, size.y, size.z);
+    if (span > 1e-4) pair.scale.multiplyScalar(scaleTo / span);
+  }
+  if (stack) {
+    // Bones under the surface they drive, rather than a toggle between the two:
+    // the edit and its effect are then legible in one glance.
+    blobRoot.updateMatrixWorld(true);
+    const h = restBox(blobRoot).getSize(new THREE.Vector3()).y / (pair.scale.y || 1);
+    blobRoot.position.y -= h * (1 + stack);
   }
   const res = groundModel(pair, groundOpts);
   return { pair, ...res };
@@ -241,7 +274,7 @@ export function pairModels(meshRoot, blobRoot, { align, scaleTo, ...groundOpts }
 export function layoutRow(roots, { gap = 0.18 } = {}) {
   const widths = roots.map((r) => {
     r.updateMatrixWorld(true);
-    const b = new THREE.Box3().setFromObject(r);
+    const b = restBox(r);
     return Math.max(b.max.x - b.min.x, 1e-3);
   });
   const pad = gap * Math.max(...widths);
@@ -265,7 +298,7 @@ export function fitCamera(stage, roots, { padding = 1.25, keepDirection = true }
   const box = new THREE.Box3();
   for (const r of roots) {
     r.updateMatrixWorld(true);
-    box.expandByObject(r);
+    box.union(restBox(r));
   }
   if (box.isEmpty()) return;
   const centre = box.getCenter(new THREE.Vector3());
@@ -290,11 +323,21 @@ export function fitCamera(stage, roots, { padding = 1.25, keepDirection = true }
   stage.fitted = true;
 }
 
+/**
+ * Every clip here is authored STEP at 10 fps, which stutters visibly on a 60 Hz
+ * display. LINEAR interpolates between keyframes -- SLERP for the bones'
+ * quaternion tracks, and a free in-between mesh for the morph-weight tracks.
+ */
+export function forceLinearInterp(clip) {
+  for (const track of clip.tracks) track.setInterpolation(THREE.InterpolateLinear);
+  return clip;
+}
+
 /** Play a GLB's first clip on a model, registering the mixer with the stage. */
 export function playClip(stage, gltf, root) {
   if (!gltf.animations || !gltf.animations.length) return null;
   const mixer = new THREE.AnimationMixer(root);
-  mixer.clipAction(gltf.animations[0]).play();
+  mixer.clipAction(forceLinearInterp(gltf.animations[0])).play();
   mixer.update(0);
   stage.mixers.push(mixer);
   return mixer;
@@ -305,21 +348,28 @@ export function playClip(stage, gltf, root) {
  * bone index that is identical across species. Lift them out of shadow without
  * changing the hue, since that hue *is* the semantic label.
  */
-export function styleBlob(root, { emissive = 0.55, highlight = null,
-                                  highlightColor = 0xff2e93, dimColor = 0xc3c8cf } = {}) {
+export function styleBlob(root, { emissive = 0.55, highlight = null, near = null,
+                                  highlightColor = 0xff2e93, nearColor = 0xff6fb5,
+                                  dimColor = 0x9a9a9a, hide = null } = {}) {
   const meshes = [];
   root.traverse((o) => { if (o.isMesh) meshes.push(o); });
   const picked = highlight ? new Set(highlight) : null;
+  const nearSet = near ? new Set(near) : null;
+  const hidden = hide ? new Set(hide) : null;
   meshes.forEach((m, k) => {
     m.material = m.material.clone();
+    if (hidden?.has(k)) { m.visible = false; return; }
     if (picked) {
       // When a handful of slots are the story -- the pinned feet, the leg group
-      // -- the index ramp is noise. Everything else goes grey.
+      // -- the index ramp is noise. Body goes to one flat grey, the way the
+      // authors' scene_2 prototype does it, so the highlight reads as the message.
       const on = picked.has(k);
-      m.material.color = new THREE.Color(on ? highlightColor : dimColor);
-      m.material.emissive = new THREE.Color(on ? highlightColor : dimColor);
-      m.material.emissiveIntensity = on ? 1.1 : 0.18;
-      m.material.roughness = on ? 0.4 : 0.95;
+      const col = new THREE.Color(on ? (nearSet?.has(k) ? nearColor : highlightColor) : dimColor);
+      m.material.color = col;
+      m.material.emissive = col.clone();
+      m.material.emissiveIntensity = on ? 1.0 : 0.35;
+      m.material.roughness = on ? 0.5 : 0.65;
+      m.material.metalness = 0;
     } else if (m.material.emissive) {
       m.material.emissive = new THREE.Color().copy(m.material.color);
       m.material.emissiveIntensity = emissive;

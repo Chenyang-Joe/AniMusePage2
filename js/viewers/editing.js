@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, pairModels, styleBlob, styleMesh, observeResize } from './stage.js';
+import { createStage, loadGLB, pairModels, fitCamera, styleBlob, styleMesh, observeResize } from './stage.js';
 
 // Framing constants copied from references/repos/scene_1/main.js. That prototype
 // was tuned by eye against these exact three exports, so the orientation, the
@@ -9,7 +9,7 @@ const MAX_SHIFT = 0.05;   // must match MAX_LEG_SHIFT in the morph bake
 const SPACING = 0.9;
 const LIFT = 0.25;
 const LEG_COLOR = 0xff2e93;
-const TARGET_HEIGHT = 0.5;   // every species drawn at the same on-screen size
+const TARGET_SPAN = 0.6;     // every species drawn at the same on-screen size
 
 /**
  * Part-level editing: one slider drags a named group of bone slots.
@@ -17,24 +17,19 @@ const TARGET_HEIGHT = 0.5;   // every species drawn at the same on-screen size
  * No skinning runs in the browser. The bones move because we translate their
  * nodes directly; the surface follows because the export carries a single morph
  * target baked from the LBS solve at the slider's positive extreme, and three.js
- * accepts negative morph weights, so one target covers the full sweep. Bones and
- * mesh are shown alternately rather than side by side, because the point is that
- * they are the same edit.
+ * accepts negative morph weights, so one target covers the full sweep. The bones
+ * sit directly under the surface they drive, so the handle and its effect are
+ * visible in the same glance.
  */
 export function initEditing(host, samples, legBones) {
   const canvasHost = host.querySelector('.viewer-canvas');
   const slider = host.querySelector('.edit-slider');
-  const toggles = host.querySelectorAll('.edit-mode button');
 
   const animals = [];
 
   const stage = createStage(canvasHost, {
-    fov: 35,
-    cameraPos: [0, 0.5, 1.95],
-    target: [0, 0.5, 0],
+    fov: 32,
     onReady: async (s) => {
-      s.controls.minDistance = 0.9;
-      s.controls.maxDistance = 6;
       const span = (samples.length - 1) * SPACING;
 
       const loaded = await Promise.all(samples.map(async (sample) => ({
@@ -69,12 +64,11 @@ export function initEditing(host, samples, legBones) {
         // Register and ground as one object, so toggling Bones/Mesh doesn't
         // shift or resize anything.
         const { pair } = pairModels(meshRoot, blobRoot,
-          { rotateY: rot, profile: false, scaleTo: TARGET_HEIGHT });
+          { rotateY: rot, profile: false, scaleTo: TARGET_SPAN, stack: 0.18 });
         pair.position.x += x;
         pair.position.y += LIFT;
         s.scene.add(pair);
-        meshRoot.visible = false;
-
+      
         // The shift is authored in world space so all three animals sweep the
         // same way; rotate it into each model's own frame to undo their
         // per-file rotation.
@@ -95,9 +89,11 @@ export function initEditing(host, samples, legBones) {
         });
       });
 
+      const pairs = s.scene.children.filter((o) => !o.isLight);
+      fitCamera(s, pairs, { padding: 1.1 });
+      s.onResize = () => fitCamera(s, pairs, { padding: 1.1 });
       host.classList.remove('is-loading');
       apply(+slider.value);
-      setMode('blob');
     },
   });
   observeResize(canvasHost);
@@ -114,16 +110,7 @@ export function initEditing(host, samples, legBones) {
     }
   }
 
-  function setMode(m) {
-    for (const a of animals) {
-      a.blobRoot.visible = m !== 'mesh';
-      a.meshRoot.visible = m !== 'blob';
-    }
-    toggles.forEach((b) => b.classList.toggle('on', b.dataset.mode === m));
-  }
-
   slider.addEventListener('input', () => apply(+slider.value));
-  toggles.forEach((b) => b.addEventListener('click', () => { stage.mountNow(); setMode(b.dataset.mode); }));
 
   return stage;
 }
