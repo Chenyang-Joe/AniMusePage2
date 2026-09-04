@@ -431,11 +431,14 @@
     <figure>
       <img src="assets/img/eval.jpg" alt="Eight-frame contact sheet comparing AniMuse, AnimateAnyMesh, AniMo and ground truth." loading="lazy">
       <figcaption>
-        8-frame contact sheet for the AnimalML3D sample <code>bear9AK_Runforward</code>, top to bottom:
-        AniMuse (Ours), AnimateAnyMesh, AniMo, GT. As a skeleton-based method, AniMo requires a
-        template-conforming input mesh — the very dependence our rig removes — so its row uses the closest
-        same-species mesh among AniMo's assets; an appearance-only substitution that does not affect the
-        motion comparison.
+        Qualitative comparison on AnimalML3D, four frames per clip. Rows, top to bottom: AniMuse (Ours),
+        the Semantic Gaussian Bones our Stage 1 predicts, AniMo, AnimateAnyMesh, and ground truth.
+        AnimateAnyMesh's four frames are near-identical — the near-static failure its Motion Diversity
+        score of 2.12 reflects. As a skeleton-based method, AniMo requires a template-conforming input mesh
+        — the very dependence our rig removes — so its row uses the closest same-species mesh among
+        AniMo's assets; an appearance-only substitution that does not affect the motion comparison.
+        <span class="todo">[TODO: this figure no longer matches the caption in 7_figure.tex, which still
+        describes an 8-frame bear9AK_Runforward sheet with four rows — worth syncing the paper.]</span>
       </figcaption>
     </figure>
   </div>
