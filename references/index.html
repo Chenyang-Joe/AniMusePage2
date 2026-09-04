@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AniMuse Page — 参考页面 Review</title>
+<style>
+  :root{
+    --bg:#fbfbfa; --fg:#16181d; --muted:#6b7280; --line:#e4e4e0;
+    --card:#ffffff; --accent:#1a56db; --accent-soft:#eef2ff;
+    --tag:#f3f4f6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB",Roboto,sans-serif;}
+  .wrap{max-width:1280px;margin:0 auto;padding:48px 28px 96px}
+  h1{font-size:30px;letter-spacing:-.02em;margin:0 0 6px}
+  .sub{color:var(--muted);margin:0 0 32px;font-size:15px}
+  h2{font-size:19px;margin:52px 0 6px;letter-spacing:-.01em;
+     border-left:3px solid var(--accent);padding-left:10px}
+  h2 .en{color:var(--muted);font-weight:400;font-size:14px;margin-left:8px}
+  .dirnote{color:var(--muted);font-size:14px;margin:0 0 20px;padding-left:13px;max-width:70ch}
+
+  .axes{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin-bottom:8px}
+  .axes table{border-collapse:collapse;width:100%;font-size:14px}
+  .axes td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  .axes tr:last-child td{border-bottom:none}
+  .axes td:first-child{width:130px;font-weight:600;white-space:nowrap}
+  .axes td:last-child{color:var(--muted)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;
+        display:flex;flex-direction:column}
+  .card.rec{border-color:#b9c8f5;box-shadow:0 0 0 3px #eef2ff}
+  .chead{padding:14px 16px 12px;border-bottom:1px solid var(--line)}
+  .ctitle{font-weight:650;font-size:15.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ctitle a{color:var(--fg);text-decoration:none}
+  .ctitle a:hover{color:var(--accent)}
+  .badge{font-size:11px;font-weight:600;padding:2px 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+  .badge.user{background:#fef3c7;color:#92400e}
+  .badge.rival{background:#fee2e2;color:#991b1b}
+  .curl{font-size:12px;color:var(--muted);margin-top:3px;word-break:break-all;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .cbody{padding:12px 16px 14px;font-size:13.5px;color:#374151;flex:1}
+  .cbody b{color:var(--fg)}
+  .tags{padding:0 16px 12px;display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-size:11.5px;background:var(--tag);color:#4b5563;padding:2px 8px;border-radius:5px}
+  .cfoot{padding:10px 16px 14px;display:flex;gap:8px;border-top:1px solid var(--line)}
+  button,.btn{font:inherit;font-size:13px;padding:6px 13px;border-radius:7px;border:1px solid var(--line);
+    background:#fff;color:var(--fg);cursor:pointer;text-decoration:none;display:inline-block}
+  button:hover,.btn:hover{border-color:var(--accent);color:var(--accent)}
+  .prev{background:#111;border-color:#111;color:#fff}
+  .prev:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  .shot{display:none;height:640px;overflow:hidden;border-top:1px solid var(--line);background:#fff;position:relative}
+  .shot.on{display:block}
+  .shot iframe{width:1440px;height:2286px;border:0;transform:scale(.28);transform-origin:0 0}
+  .hint{color:var(--muted);font-size:12.5px;margin-top:26px;padding-left:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>AniMuse 新主页 — 参考页面 Review</h1>
+<p class="sub">按「方向」分组。点 <b>预览</b> 在卡片内加载实页（缩略 28%），点 <b>打开</b> 在新标签看真实效果。<br>
+看完告诉我走哪个方向 / 或者「A 的骨架 + C 的交互」这种组合也行。</p>
+
+<div class="axes">
+<table>
+<tr><td>要决定的</td><td>不用一次全定，先挑「骨架」和「交互深度」两个就够我开工</td></tr>
+<tr><td>① 排版骨架</td><td>居中窄栏（Nerfies 经典） vs. 宽栏分 section vs. 左侧 sticky 目录导航（适合你「介绍要详细 + 分 stage」的诉求）</td></tr>
+<tr><td>② 视觉温度</td><td>纯白 + 黑字 + 蓝链接（最学术） vs. 米白/浅灰底 + 细边框卡片 vs. 深色 hero + 白色正文</td></tr>
+<tr><td>③ 交互深度</td><td>只有视频/图 vs. 视频 + 少量 3D viewer vs. 大量 three.js 组件（我们要的 blob↔mesh slider、editing slider 属于这档）</td></tr>
+<tr><td>④ 首屏</td><td>大 teaser 图 vs. 自动播放的 muted 视频 vs. 直接一个可交互 3D</td></tr>
+</table>
+</div>
+
+<!-- ============ A ============ -->
+<h2>方向 A：经典 Nerfies 学术模板 <span class="en">safe / 最“传统学术”</span></h2>
+<p class="dirnote">居中窄栏、Bulma 排版、作者行 + 一排 pill 按钮 + 大 teaser 视频 + Abstract + Method + Results + BibTeX。
+审稿人最熟悉，绝对不会显得“过于艺术”。缺点：分 stage 展示的空间有限，容易显得平。</p>
+<div class="grid">
+
+  <div class="card">
+    <div class="chead">
+      <div class="ctitle"><a href="https://nerfies.github.io/" target="_blank">Nerfies</a><span class="badge">祖师爷</span></div>
+      <div class="curl">nerfies.github.io</div>
+    </div>
+    <div class="cbody">所有学术 project page 的原型。<b>值得抄</b>：作者行排版、按钮组、carousel、视频对比 slider（它自带一个 juxtapose 式 before/after）。</div>
+    <div class="tags"><span class="tag">Bulma</span><span class="tag">居中窄栏</span><span class="tag">纯白</span><span class="tag">视频为主</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://nerfies.github.io/">预览</button><a class="btn" href="https://nerfies.github.io/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+  <div class="card">
+    <div class="chead">
+      <div class="ctitle"><a href="https://eliahuhorwitz.github.io/Academic-project-page-template/" target="_blank">Academic Project Page Template</a><span class="badge">模板本体</span></div>
+      <div class="curl">eliahuhorwitz.github.io/Academic-project-page-template</div>
+    </div>
+    <div class="cbody">Nerfies 的现代维护版，还在更新。<b>值得抄</b>：直接 fork 就能用，自带 poster 嵌入、视频 carousel、YouTube 嵌入位。选它的话我第一天就能出成品。</div>
+    <div class="tags"><span class="tag">可直接 fork</span><span class="tag">Bulma</span><span class="tag">零构建</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://eliahuhorwitz.github.io/Academic-project-page-template/">预览</button><a class="btn" href="https://eliahuhorwitz.github.io/Academic-project-page-template/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+  <div class="card">
+    <div class="chead">
+      <div class="ctitle"><a href="https://guytevet.github.io/mdm-page/" target="_blank">MDM: Motion Diffusion Model</a></div>
+      <div class="curl">guytevet.github.io/mdm-page</div>
+    </div>
+    <div class="cbody">motion 领域最被模仿的一版。<b>值得抄</b>：把「一句 prompt → 一段动作」做成成排小视频网格的展示方式，正好对应我们的 text→animation gallery。</div>
+    <div class="tags"><span class="tag">Bulma</span><span class="tag">prompt 视频网格</span><span class="tag">motion 同行</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://guytevet.github.io/mdm-page/">预览</button><a class="btn" href="https://guytevet.github.io/mdm-page/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+</div>
+
+<!-- ============ B ============ -->
+<h2>方向 B：现代极简排版流 <span class="en">你给的三个例子基本都在这一档</span></h2>
+<p class="dirnote">还是学术味，但脱掉 Bulma：自定义 CSS / Tailwind，宽一点的栏、明确的 section 分隔、顶部 sticky 导航（Abstract / Method / Results）。
+最贴合你「不要艺术、但要分段、要能塞很多内容」的诉求。</p>
+<div class="grid">
+
+  <div class="card rec">
+    <div class="chead">
+      <div class="ctitle"><a href="https://rigmo-page.github.io/" target="_blank">RigMo</a><span class="badge user">你给的例子</span><span class="badge rival">直接相关</span></div>
+      <div class="curl">rigmo-page.github.io</div>
+    </div>
+    <div class="cbody">我们论文里 Gaussian-bone 的来源，最该对标的一页。顶部 logo + nav（Abstract/Method/Results），TLDR 一句话，大 teaser，然后逐节配图。
+    <b>值得抄</b>：TLDR 卡片、每张图配一句解释性 caption——这正好治「介绍太简单」的毛病。</div>
+    <div class="tags"><span class="tag">sticky nav</span><span class="tag">TLDR 卡片</span><span class="tag">图+caption</span><span class="tag">灰白</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://rigmo-page.github.io/">预览</button><a class="btn" href="https://rigmo-page.github.io/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+  <div class="card">
+    <div class="chead">
+      <div class="ctitle"><a href="https://eyeline-labs.github.io/Vista4D/" target="_blank">Vista4D</a><span class="badge user">你给的例子</span></div>
+      <div class="curl">eyeline-labs.github.io/Vista4D</div>
+    </div>
+    <div class="cbody">Nerfies 底子但重做了皮肤。<b>值得抄</b>：可折叠的 <code>Ablations ▸</code> 区块 + tab 切换——把长内容藏起来，页面既详细又不显得冗长；对我们的 stage 分段很有用。</div>
+    <div class="tags"><span class="tag">折叠区块</span><span class="tag">tabs</span><span class="tag">对比 grid</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://eyeline-labs.github.io/Vista4D/">预览</button><a class="btn" href="https://eyeline-labs.github.io/Vista4D/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+  <div class="card">
+    <div class="chead">
+      <div class="ctitle"><a href="https://animateanymesh.github.io/AnimateAnyMesh/" target="_blank">AnimateAnyMesh</a><span class="badge rival">我们的 baseline</span></div>
+      <div class="curl">animateanymesh.github.io/AnimateAnyMesh</div>
+    </div>
+    <div class="cbody">论文里被我们比下去的那家。<b>必须看</b>：至少要比它好看、比它信息量大。注意它怎么组织 text-prompt → mesh 动画的展示。</div>
+    <div class="tags"><span class="tag">竞品</span><span class="tag">mesh 动画网格</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://animateanymesh.github.io/AnimateAnyMesh/">预览</button><a class="btn" href="https://animateanymesh.github.io/AnimateAnyMesh/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+  <div class="card">
+    <div class="chead">
+      <div class="ctitle"><a href="https://anytop2025.github.io/Anytop-page/" target="_blank">AnyTop (SIGGRAPH'25)</a><span class="badge rival">同赛道</span></div>
+      <div class="curl">anytop2025.github.io/Anytop-page</div>
+    </div>
+    <div class="cbody">任意骨架拓扑的动物动作 diffusion，和我们最像的问题设定。<b>值得抄</b>：大量成排的循环动画视频、按「骨架/物种」分组的浏览方式。</div>
+    <div class="tags"><span class="tag">SIGGRAPH</span><span class="tag">动物动作</span><span class="tag">视频网格</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://anytop2025.github.io/Anytop-page/">预览</button><a class="btn" href="https://anytop2025.github.io/Anytop-page/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+  <div class="card">
+    <div class="chead">
+      <div class="ctitle"><a href="https://zjp-shadow.github.io/works/UniRig/" target="_blank">UniRig</a><span class="badge rival">我们的 baseline</span></div>
+      <div class="curl">zjp-shadow.github.io/works/UniRig</div>
+    </div>
+    <div class="cbody">我们 Stage 1 表格里的主要对手。看它怎么把「骨架 + skinning weight」这种技术细节讲清楚。</div>
+    <div class="tags"><span class="tag">rigging</span><span class="tag">竞品</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://zjp-shadow.github.io/works/UniRig/">预览</button><a class="btn" href="https://zjp-shadow.github.io/works/UniRig/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+  <div class="card">
+    <div class="chead">
+      <div class="ctitle"><a href="https://chaoyuesong.github.io/Puppeteer/" target="_blank">Puppeteer</a><span class="badge rival">我们的 baseline</span></div>
+      <div class="curl">chaoyuesong.github.io/Puppeteer</div>
+    </div>
+    <div class="cbody">Stage 1 的另一个对手。同上，主要看 rigging 结果的可视化方式。</div>
+    <div class="tags"><span class="tag">rigging</span><span class="tag">竞品</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://chaoyuesong.github.io/Puppeteer/">预览</button><a class="btn" href="https://chaoyuesong.github.io/Puppeteer/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+</div>
+
+<!-- ============ C ============ -->
+<h2>方向 C：强交互 / 3D-first <span class="en">我们那两个 slider 组件的技术参照</span></h2>
+<p class="dirnote">页面里嵌真正的 three.js / model-viewer 画布，读者能转、能拖 slider。
+这是我们「blob ↔ mesh slider」和「editing slider」要落地的形态。风险是加载慢——所以这些页里我重点看的是它们<b>怎么懒加载</b>。</p>
+<div class="grid">
+
+  <div class="card rec">
+    <div class="chead">
+      <div class="ctitle"><a href="https://ai4ce.github.io/GARF/" target="_blank">GARF</a><span class="badge user">你给的例子</span></div>
+      <div class="curl">ai4ce.github.io/GARF</div>
+    </div>
+    <div class="cbody">Nerfies 骨架 + 一堆内嵌可交互 3D viewer（可转可缩放）。<b>值得抄</b>：把交互 3D 按数据集分区块、每个区块只在滚到时才加载——正是解决「加载太慢」的做法。</div>
+    <div class="tags"><span class="tag">内嵌 3D viewer</span><span class="tag">分区块</span><span class="tag">NYU / AI4CE</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://ai4ce.github.io/GARF/">预览</button><a class="btn" href="https://ai4ce.github.io/GARF/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+  <div class="card">
+    <div class="chead">
+      <div class="ctitle"><a href="https://jasongzy.github.io/Make-It-Animatable/" target="_blank">Make-It-Animatable</a><span class="badge rival">rigging 同行</span></div>
+      <div class="curl">jasongzy.github.io/Make-It-Animatable</div>
+    </div>
+    <div class="cbody">自动 rigging 的项目页，带在线 demo。<b>值得抄</b>：它把「静态 mesh → 骨架 → 动起来」这个流程做成了可交互的分步展示，跟我们 Stage1→Stage2 的结构完全对应。</div>
+    <div class="tags"><span class="tag">分步交互</span><span class="tag">在线 demo</span><span class="tag">rigging</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://jasongzy.github.io/Make-It-Animatable/">预览</button><a class="btn" href="https://jasongzy.github.io/Make-It-Animatable/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+  <div class="card">
+    <div class="chead">
+      <div class="ctitle"><a href="https://svraster.github.io/" target="_blank">SVRaster (NVIDIA)</a></div>
+      <div class="curl">svraster.github.io</div>
+    </div>
+    <div class="cbody">工业级的干净：宽栏、内嵌实时 viewer、非常克制的配色。<b>值得抄</b>：viewer 外面那圈控制条的做法（我们的两个 slider 就该长这样）。</div>
+    <div class="tags"><span class="tag">实时 viewer</span><span class="tag">控件条</span><span class="tag">克制配色</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://svraster.github.io/">预览</button><a class="btn" href="https://svraster.github.io/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+  <div class="card">
+    <div class="chead">
+      <div class="ctitle"><a href="https://zju3dv.github.io/Motion-2-to-3/" target="_blank">Motion-2-to-3 (ICCV'25)</a></div>
+      <div class="curl">zju3dv.github.io/Motion-2-to-3</div>
+    </div>
+    <div class="cbody">motion 领域比较新的一版排版。<b>值得抄</b>：prompt 输入框样式的展示（把 text prompt 做成 UI 元素而不是纯文字），我们 text-driven 的卖点可以这么呈现。</div>
+    <div class="tags"><span class="tag">prompt UI</span><span class="tag">motion</span></div>
+    <div class="cfoot"><button class="prev" data-u="https://zju3dv.github.io/Motion-2-to-3/">预览</button><a class="btn" href="https://zju3dv.github.io/Motion-2-to-3/" target="_blank">打开 ↗</a></div>
+    <div class="shot"></div>
+  </div>
+
+</div>
+
+<p class="hint">注：3D Gaussian Splatting 官方页（repo-sam.inria.fr）也很值得看，但它禁止被 iframe 嵌入，只能
+<a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/" target="_blank">直接打开 ↗</a>。</p>
+
+<script>
+document.querySelectorAll('.prev').forEach(function(b){
+  b.addEventListener('click', function(){
+    var shot = b.closest('.card').querySelector('.shot');
+    if (shot.classList.contains('on')) { shot.classList.remove('on'); shot.innerHTML=''; b.textContent='预览'; return; }
+    var f = document.createElement('iframe');
+    f.src = b.dataset.u; f.loading='lazy'; f.setAttribute('scrolling','no');
+    shot.appendChild(f); shot.classList.add('on'); b.textContent='收起';
+  });
+});
+</script>
+</div>
+</body>
+</html>
