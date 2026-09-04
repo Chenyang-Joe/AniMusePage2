@@ -1,12 +1,15 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, groundModel, layoutRow, fitCamera, styleBlob, styleMesh, observeResize } from './stage.js';
+import { createStage, loadGLB, pairModels, styleBlob, styleMesh, observeResize } from './stage.js';
 
-// The left front leg, as 12 SGB slots. Straight from the authors' own scene_1
-// prototype -- these indices are properties of the shared query book, so they
-// name the same leg on every animal in the row.
+// Framing constants copied from references/repos/scene_1/main.js. That prototype
+// was tuned by eye against these exact three exports, so the orientation, the
+// spacing and the shift axis come from there rather than from a bounding box.
 const SHIFT_DIR_WORLD = new THREE.Vector3(1, 0, -1).normalize();
-const MAX_SHIFT = 0.05;      // must match MAX_LEG_SHIFT in the morph bake
-const LEG_COLOR = 0xff4466;
+const MAX_SHIFT = 0.05;   // must match MAX_LEG_SHIFT in the morph bake
+const SPACING = 0.9;
+const LIFT = 0.25;
+const LEG_COLOR = 0xff2e93;
+const TARGET_HEIGHT = 0.5;   // every species drawn at the same on-screen size
 
 /**
  * Part-level editing: one slider drags a named group of bone slots.
@@ -14,7 +17,7 @@ const LEG_COLOR = 0xff4466;
  * No skinning runs in the browser. The bones move because we translate their
  * nodes directly; the surface follows because the export carries a single morph
  * target baked from the LBS solve at the slider's positive extreme, and three.js
- * accepts negative morph weights, so one target covers the full sweep. Blob and
+ * accepts negative morph weights, so one target covers the full sweep. Bones and
  * mesh are shown alternately rather than side by side, because the point is that
  * they are the same edit.
  */
@@ -24,18 +27,26 @@ export function initEditing(host, samples, legBones) {
   const toggles = host.querySelectorAll('.edit-mode button');
 
   const animals = [];
-  let mode = 'blob';
 
   const stage = createStage(canvasHost, {
-    fov: 30,
+    fov: 35,
+    cameraPos: [0, 0.5, 1.95],
+    target: [0, 0.5, 0],
     onReady: async (s) => {
+      s.controls.minDistance = 0.9;
+      s.controls.maxDistance = 6;
+      const span = (samples.length - 1) * SPACING;
+
       const loaded = await Promise.all(samples.map(async (sample) => ({
         sample,
         blobGltf: await loadGLB(sample.blob),
         meshGltf: await loadGLB(sample.mesh),
       })));
 
-      const pairs = loaded.map(({ sample, blobGltf, meshGltf }) => {
+      loaded.forEach(({ sample, blobGltf, meshGltf }, i) => {
+        const rot = sample.rotateY || 0;
+        const x = -span / 2 + i * SPACING + (sample.nudgeX || 0);
+
         const blobRoot = blobGltf.scene.clone(true);
         // Freeze the bones at their rest frame; the slider, not the clip, is
         // what should be moving them here.
@@ -44,35 +55,31 @@ export function initEditing(host, samples, legBones) {
           m.clipAction(blobGltf.animations[0]).play();
           m.update(0);
         }
-        // Keep every other bone at its index colour -- that ramp is the paper's
-        // evidence for slot semantics -- and just make the leg group glow.
-        const blobMeshes = styleBlob(blobRoot);
-        legBones.forEach((k) => {
-          const mesh = blobMeshes[k];
-          if (!mesh) return;
-          mesh.material.color = new THREE.Color(LEG_COLOR);
-          mesh.material.emissive = new THREE.Color(LEG_COLOR);
-          mesh.material.emissiveIntensity = 1.0;
-        });
-        // Auto-profile turns each animal side-on; the mesh then has to take the
-        // exact rotation the bones resolved to, and so does the shift axis.
-        const rot = groundModel(blobRoot, { rotateY: sample.rotateY || 0 });
-        s.scene.add(blobRoot);
+        // Same treatment as the inpainting viewer: the slots under control are
+        // the subject, everything else is context.
+        const blobMeshes = styleBlob(blobRoot, { highlight: legBones, highlightColor: LEG_COLOR });
 
         const meshRoot = meshGltf.scene.clone(true);
-        styleMesh(meshRoot, { emissive: 0.3, brighten: /bear/i.test(sample.id) ? 1.8 : 1 });
+        styleMesh(meshRoot, { brighten: /bear/i.test(sample.id) ? 1.8 : 1 });
         let morphMesh = null;
         meshRoot.traverse((o) => {
           if (o.isMesh && o.morphTargetInfluences?.length) morphMesh = o;
         });
-        groundModel(meshRoot, { rotateY: rot, profile: false });
+
+        // Register and ground as one object, so toggling Bones/Mesh doesn't
+        // shift or resize anything.
+        const { pair } = pairModels(meshRoot, blobRoot,
+          { rotateY: rot, profile: false, scaleTo: TARGET_HEIGHT });
+        pair.position.x += x;
+        pair.position.y += LIFT;
+        s.scene.add(pair);
         meshRoot.visible = false;
-        s.scene.add(meshRoot);
 
         // The shift is authored in world space so all three animals sweep the
         // same way; rotate it into each model's own frame to undo their
         // per-file rotation.
-        const dir = SHIFT_DIR_WORLD.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), -rot * Math.PI / 180);
+        const dir = SHIFT_DIR_WORLD.clone()
+          .applyAxisAngle(new THREE.Vector3(0, 1, 0), -rot * Math.PI / 180);
         const legs = legBones.map((k) => blobMeshes[k]).filter(Boolean);
         const ys = legs.map((m) => m.position.y);
         const yMin = Math.min(...ys), yMax = Math.max(...ys);
@@ -86,16 +93,8 @@ export function initEditing(host, samples, legBones) {
           // of sliding rigidly.
           falloff: ys.map((y) => (yMax - y) / range),
         });
-        return { blobRoot, meshRoot };
       });
 
-      // Both representations occupy the same slot, so lay out the bones and move
-      // each mesh to match -- otherwise switching modes would shuffle the row.
-      layoutRow(pairs.map((p) => p.blobRoot), { gap: 0.14 });
-      pairs.forEach((p) => { p.meshRoot.position.x = p.blobRoot.position.x; });
-      const all = pairs.flatMap((p) => [p.blobRoot, p.meshRoot]);
-      fitCamera(s, all, { padding: 1.22 });
-      s.onResize = () => fitCamera(s, all, { padding: 1.22 });
       host.classList.remove('is-loading');
       apply(+slider.value);
       setMode('blob');
@@ -116,7 +115,6 @@ export function initEditing(host, samples, legBones) {
   }
 
   function setMode(m) {
-    mode = m;
     for (const a of animals) {
       a.blobRoot.visible = m !== 'mesh';
       a.meshRoot.visible = m !== 'blob';

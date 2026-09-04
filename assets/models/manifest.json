@@ -122,6 +122,7 @@
    "id": "tiger",
    "label": "Bengal Tiger",
    "rotateY": 180,
+   "nudgeX": 0.08,
    "mesh": "editing/tiger.mesh.glb",
    "blob": "editing/tiger.blob.glb"
   },
@@ -129,13 +130,15 @@
    "id": "elephant",
    "label": "African Elephant",
    "rotateY": 0,
+   "nudgeX": 0.0,
    "mesh": "editing/elephant.mesh.glb",
    "blob": "editing/elephant.blob.glb"
   },
   {
    "id": "bear",
    "label": "Grizzly Bear",
-   "rotateY": 180,
+   "rotateY": 90,
+   "nudgeX": 0.0,
    "mesh": "editing/bear.mesh.glb",
    "blob": "editing/bear.blob.glb"
   }

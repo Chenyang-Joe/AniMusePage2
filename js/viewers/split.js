@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, groundModel, fitCamera, playClip, styleBlob, styleMesh, observeResize } from './stage.js';
+import { createStage, loadGLB, pairModels, fitCamera, playClip, styleBlob, styleMesh, observeResize } from './stage.js';
 
 /**
  * Blob | mesh split viewer.
@@ -77,7 +77,7 @@ export function initSplit(host, samples, opts = {}) {
     if (token !== loadToken) return;   // a faster click won the race
 
     if (current) {
-      stage.scene.remove(current.blobRoot, current.meshRoot);
+      stage.scene.remove(current.pair);
       stage.mixers.length = 0;
     }
 
@@ -85,18 +85,17 @@ export function initSplit(host, samples, opts = {}) {
     const meshRoot = meshGltf.scene.clone(true);
     styleBlob(blobRoot);
     styleMesh(meshRoot);
-    stage.scene.add(blobRoot, meshRoot);
 
     // Bone nodes carry no default transform -- they exist only as animation
     // tracks -- so the clip has to be applied before anything measures them.
     playClip(stage, blobGltf, blobRoot);
     playClip(stage, meshGltf, meshRoot);
-    groundModel(blobRoot);
-    groundModel(meshRoot);
-    fitCamera(stage, [blobRoot, meshRoot]);
-    stage.onResize = () => fitCamera(stage, [blobRoot, meshRoot]);
+    const { pair } = pairModels(meshRoot, blobRoot, { align: s.align });
+    stage.scene.add(pair);
+    fitCamera(stage, [pair]);
+    stage.onResize = () => fitCamera(stage, [pair]);
 
-    current = { blobRoot, meshRoot };
+    current = { pair, blobRoot, meshRoot };
     host.classList.remove('is-loading');
   }
 

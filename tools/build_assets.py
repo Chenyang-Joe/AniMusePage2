@@ -27,8 +27,8 @@ TEASER = [
     ("warthog",  "Common_Warthog_Juvenile__common_warth_f072c9b5ba93.glb", "Common Warthog"),
 ]
 
-# Stage-1 rigging comparison. Untextured on purpose: a flat surface reads
-# deformation error far better than an albedo map does.
+# Stage-1 rigging comparison, textured: the point of the row is that the mesh we
+# deform still looks like the animal, which an untextured clay render hides.
 STAGE1 = [
     ("lynx",      "s042_Eurasian_Lynx_Juvenile_runbase",                  "Eurasian Lynx",   "run"),
     ("arcticfox", "s058_Arctic_Fox_Juvenile_walkbaseturnl",               "Arctic Fox",      "walk, turn left"),
@@ -44,12 +44,13 @@ PINNED_BONES = [4, 55, 76, 77]
 # Left front leg, from references/repos/scene_1/main.js.
 LEG_BONES = [44, 45, 46, 47, 48, 49, 50, 51, 26, 110, 111, 13]
 
-# rotateY is a manual override on top of the automatic profile turn -- add 180
-# if an animal ends up facing the wrong way down the row.
+# Framing straight from references/repos/scene_1/main.js -- these were tuned by
+# eye against these three exports, so the viewer reuses them rather than
+# re-deriving an orientation from bounding boxes.
 EDITING = [
-    ("tiger",    "Bengal_Tiger_Female__bengal_tiger_fem_85a98badff8b.glb", "Bengal Tiger",     180),
-    ("elephant", "African_Elephant_Female__african_elep_cc89c098eb78.glb", "African Elephant", 0),
-    ("bear",     "Grizzly_Bear_Female__grizzly_bear_fem_11bc3ce97aa2.glb", "Grizzly Bear",     180),
+    ("tiger",    "Bengal_Tiger_Female__bengal_tiger_fem_85a98badff8b.glb", "Bengal Tiger",     180, 0.08),
+    ("elephant", "African_Elephant_Female__african_elep_cc89c098eb78.glb", "African Elephant", 0,   0.0),
+    ("bear",     "Grizzly_Bear_Female__grizzly_bear_fem_11bc3ce97aa2.glb", "Grizzly Bear",     90,  0.0),
 ]
 
 stats = [0, 0]
@@ -88,8 +89,8 @@ def main():
     for key, d, label, action in STAGE1:
         m["stage1"].append({
             "id": key, "label": label, "action": action,
-            "gt":   emit(f"{DATA}/stage1/{d}/gt.glb",   f"stage1/{key}.gt.glb"),
-            "pred": emit(f"{DATA}/stage1/{d}/pred.glb", f"stage1/{key}.pred.glb"),
+            "gt":   emit(f"{DATA}/stage1/{d}/gt_textured.glb",   f"stage1/{key}.gt.glb"),
+            "pred": emit(f"{DATA}/stage1/{d}/pred_textured.glb", f"stage1/{key}.pred.glb"),
             "blob": emit(f"{DATA}/stage1/{d}/blob_nopiles.glb", f"stage1/{key}.blob.glb",
                          do_jpeg=False, do_quant=False),
         })
@@ -116,9 +117,9 @@ def main():
 
     print("editing (leg slider)")
     m["editing"] = []
-    for key, fn, label, rot in EDITING:
+    for key, fn, label, rot, nudge in EDITING:
         m["editing"].append({
-            "id": key, "label": label, "rotateY": rot,
+            "id": key, "label": label, "rotateY": rot, "nudgeX": nudge,
             "mesh": emit(f"{DATA}/editing/mesh/{fn}", f"editing/{key}.mesh.glb"),
             "blob": emit(f"{DATA}/editing/blob/{fn}", f"editing/{key}.blob.glb",
                          do_jpeg=False, do_quant=False),

@@ -48,10 +48,12 @@ export function initCorrespondence(host, samples) {
     for (const m of models) {
       m.meshes.forEach((mesh, k) => {
         const on = bone < 0 || k === bone;
-        mesh.material.opacity = on ? 1 : 0.12;
+        mesh.material.opacity = on ? 1 : 0.1;
         mesh.material.transparent = !on;
-        mesh.material.emissiveIntensity = on ? (bone < 0 ? 0.6 : 1.4) : 0.1;
-        mesh.scale.setScalar(bone >= 0 && k === bone ? 1.35 : 1);
+        mesh.material.depthWrite = on;
+        // Only brightness changes. Scaling the hovered bone made it balloon over
+        // its neighbours and misrepresented the ellipsoid's actual extent.
+        mesh.material.emissiveIntensity = on ? (bone < 0 ? 0.6 : 1.5) : 0.06;
       });
     }
     readout.textContent = bone < 0

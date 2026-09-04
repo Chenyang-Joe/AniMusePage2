@@ -142,7 +142,7 @@ tick();
  * to each independently still lines them up to within a millimetre -- which is
  * what lets the split viewer draw one as the left half of the other.
  */
-export function groundModel(root, { rotateY = 0, profile = true } = {}) {
+export function groundModel(root, { rotateY = 0, profile = true, nudgeX = 0 } = {}) {
   root.rotation.y = rotateY * Math.PI / 180;
   root.updateMatrixWorld(true);
   let box = new THREE.Box3().setFromObject(root);
@@ -159,13 +159,77 @@ export function groundModel(root, { rotateY = 0, profile = true } = {}) {
     box = new THREE.Box3().setFromObject(root);
   }
 
+  // Adjust relative, never absolute: callers may have already moved this root
+  // (registering bones onto a mesh, for instance) and that offset has to survive.
   const c = box.getCenter(new THREE.Vector3());
-  root.position.x -= c.x;
-  root.position.z -= c.z;
+  root.position.x -= c.x - nudgeX;
   root.position.y -= box.min.y;
+  root.position.z -= c.z;
   // Callers showing several representations of one animal reuse this so the
   // auto-orientation can't decide differently for two near-identical meshes.
-  return applied;
+  return { rotateY: applied, offset: root.position.clone() };
+}
+
+/**
+ * Register a bone cloud onto the mesh it belongs to, then ground the pair.
+ *
+ * The two exports are not in one coordinate frame: the surface carries a scale
+ * wrapper the bones never got, and in the teaser set the bones additionally sit
+ * in a normalised cube while the mesh sits near the origin. Measured across the
+ * shipped pairs the bone box is a uniformly smaller, sometimes re-centred copy of
+ * the mesh box, so a similarity fit -- one scale plus a translation, both read
+ * off the frame-0 boxes -- puts them back on top of each other.
+ *
+ * The scale comes from the median axis ratio rather than the mean: bones stop
+ * short of the nose and tail, so the long axis reads systematically low and
+ * would drag an average down with it.
+ *
+ * `override` ({ scale, offset }) is the escape hatch for a pair the fit misses.
+ */
+export function alignBlobToMesh(blobRoot, meshRoot, override = {}) {
+  blobRoot.updateMatrixWorld(true);
+  meshRoot.updateMatrixWorld(true);
+  const bb = new THREE.Box3().setFromObject(blobRoot);
+  const mb = new THREE.Box3().setFromObject(meshRoot);
+  if (bb.isEmpty() || mb.isEmpty()) return 1;
+
+  const bs = bb.getSize(new THREE.Vector3());
+  const ms = mb.getSize(new THREE.Vector3());
+  const ratios = [ms.x / bs.x, ms.y / bs.y, ms.z / bs.z]
+    .filter((v) => Number.isFinite(v) && v > 0)
+    .sort((a, b) => a - b);
+  const s = override.scale ?? (ratios.length ? ratios[Math.floor(ratios.length / 2)] : 1);
+
+  blobRoot.scale.multiplyScalar(s);
+  blobRoot.updateMatrixWorld(true);
+  const bc = new THREE.Box3().setFromObject(blobRoot).getCenter(new THREE.Vector3());
+  const mc = mb.getCenter(new THREE.Vector3());
+  blobRoot.position.add(mc).sub(bc);
+  if (override.offset) blobRoot.position.add(new THREE.Vector3(...override.offset));
+  blobRoot.updateMatrixWorld(true);
+  return s;
+}
+
+/**
+ * Register the bones onto the mesh, then frame the two as one rigid object.
+ *
+ * The pair has to share a parent: grounding rotates about the origin, and the
+ * bones do not sit at the origin, so turning each half separately after aligning
+ * them would swing them apart again.
+ */
+export function pairModels(meshRoot, blobRoot, { align, scaleTo, ...groundOpts } = {}) {
+  const pair = new THREE.Group();
+  pair.add(meshRoot, blobRoot);
+  alignBlobToMesh(blobRoot, meshRoot, align || {});
+  if (scaleTo) {
+    // A row of species is a UI, not a size comparison: an elephant rendered at
+    // true scale beside a fox leaves the fox unreadable.
+    pair.updateMatrixWorld(true);
+    const h = new THREE.Box3().setFromObject(pair).getSize(new THREE.Vector3()).y;
+    if (h > 1e-4) pair.scale.multiplyScalar(scaleTo / h);
+  }
+  const res = groundModel(pair, groundOpts);
+  return { pair, ...res };
 }
 
 /**
@@ -241,16 +305,26 @@ export function playClip(stage, gltf, root) {
  * bone index that is identical across species. Lift them out of shadow without
  * changing the hue, since that hue *is* the semantic label.
  */
-export function styleBlob(root, { emissive = 0.55 } = {}) {
+export function styleBlob(root, { emissive = 0.55, highlight = null,
+                                  highlightColor = 0xff2e93, dimColor = 0xc3c8cf } = {}) {
   const meshes = [];
   root.traverse((o) => { if (o.isMesh) meshes.push(o); });
-  for (const m of meshes) {
+  const picked = highlight ? new Set(highlight) : null;
+  meshes.forEach((m, k) => {
     m.material = m.material.clone();
-    if (m.material.emissive) {
+    if (picked) {
+      // When a handful of slots are the story -- the pinned feet, the leg group
+      // -- the index ramp is noise. Everything else goes grey.
+      const on = picked.has(k);
+      m.material.color = new THREE.Color(on ? highlightColor : dimColor);
+      m.material.emissive = new THREE.Color(on ? highlightColor : dimColor);
+      m.material.emissiveIntensity = on ? 1.1 : 0.18;
+      m.material.roughness = on ? 0.4 : 0.95;
+    } else if (m.material.emissive) {
       m.material.emissive = new THREE.Color().copy(m.material.color);
       m.material.emissiveIntensity = emissive;
     }
-  }
+  });
   return meshes;
 }
 

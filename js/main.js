@@ -57,11 +57,10 @@ whenNear('v-stage1', async (el) => {
   const [{ initRow }, m] = await Promise.all([import('./viewers/row.js'), manifest()]);
   initRow(el, withBase(m.stage1, ['gt', 'pred', 'blob']).map((s) => ({ ...s, label: `${s.label} — ${s.action}` })), {
     columns: [
-      { key: 'gt',   label: 'Ground truth',            kind: 'plain' },
-      { key: 'blob', label: 'Predicted SGBs',          kind: 'blob'  },
-      { key: 'pred', label: 'AniMuse LBS deformation', kind: 'plain' },
+      { key: 'gt',   label: 'Ground truth',            kind: 'mesh' },
+      { key: 'blob', label: 'Predicted SGBs',          kind: 'blob' },
+      { key: 'pred', label: 'AniMuse LBS deformation', kind: 'mesh' },
     ],
-    gap: 0.14,
   });
 });
 
@@ -69,10 +68,10 @@ whenNear('v-inpaint', async (el) => {
   const [{ initRow }, m] = await Promise.all([import('./viewers/row.js'), manifest()]);
   initRow(el, withBase(m.inpainting, ['mesh', 'blob']).map((s) => ({ ...s, label: speciesLabel(s.prompt, s.id) })), {
     columns: [
-      { key: 'blob', label: 'Generated bone trajectory — grey bones are pinned', kind: 'blob' },
-      { key: 'mesh', label: 'Inpainted full-body motion',                        kind: 'mesh' },
+      { key: 'blob', label: 'Generated bone trajectory — pink bones are the pinned constraint',
+        kind: 'blob', blob: { highlight: m.pinnedBones } },
+      { key: 'mesh', label: 'Inpainted full-body motion', kind: 'mesh' },
     ],
-    gap: 0.16,
   });
 });
 
@@ -92,3 +91,16 @@ const spy = new IntersectionObserver((entries) => {
   }
 }, { rootMargin: '-45% 0px -50% 0px' });
 targets.forEach((t) => spy.observe(t));
+
+// YouTube facade: the embed's own scripts and cookies stay off the page until
+// someone actually asks to watch.
+for (const box of document.querySelectorAll('.video-embed[data-youtube]')) {
+  box.querySelector('.video-placeholder')?.addEventListener('click', () => {
+    const f = document.createElement('iframe');
+    f.src = `https://www.youtube-nocookie.com/embed/${box.dataset.youtube}?autoplay=1&rel=0`;
+    f.title = 'AniMuse overview video';
+    f.allow = 'accelerometer; autoplay; encrypted-media; picture-in-picture';
+    f.allowFullscreen = true;
+    box.replaceChildren(f);
+  }, { once: true });
+}
