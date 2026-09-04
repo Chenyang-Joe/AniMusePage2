@@ -35,9 +35,16 @@ export function initGrid(host, samples, pinned, opts = {}) {
   let mode = 'bones';
 
   if (labelGrid) {
+    const rowCount = Math.ceil(samples.length / COLS);
     labelGrid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
-    labelGrid.style.gridTemplateRows = `repeat(${Math.ceil(samples.length / COLS)}, 1fr)`;
-    labelGrid.innerHTML = samples.map((s) => `<span>${s.label}</span>`).join('');
+    labelGrid.style.gridTemplateRows = `repeat(${rowCount}, 1fr)`;
+    labelGrid.innerHTML = samples.map((s, i) => {
+      // A short final row is centred in 3D, so its labels have to shift too.
+      const row = Math.floor(i / COLS);
+      const inRow = Math.min(COLS, samples.length - row * COLS);
+      const offset = i % COLS === 0 && inRow < COLS ? Math.floor((COLS - inRow) / 2) + 1 : 0;
+      return `<span${offset ? ` style="grid-column:${offset + 1}"` : ''}>${s.label}</span>`;
+    }).join('');
   }
 
   const stage = createStage(canvasHost, {
@@ -53,6 +60,8 @@ export function initGrid(host, samples, pinned, opts = {}) {
       loaded.forEach(({ sample, blobGltf, meshGltf }, i) => {
         const col = i % COLS;
         const row = Math.floor(i / COLS);
+        // Centre a final row that doesn't fill the grid.
+        const inRow = Math.min(COLS, samples.length - row * COLS);
 
         const blobRoot = blobGltf.scene.clone(true);
         const meshRoot = meshGltf.scene.clone(true);
@@ -65,6 +74,10 @@ export function initGrid(host, samples, pinned, opts = {}) {
         const meshMixer = new THREE.AnimationMixer(meshRoot);
         if (blobGltf.animations?.length) blobMixer.clipAction(forceLinearInterp(blobGltf.animations[0])).play();
         if (meshGltf.animations?.length) meshMixer.clipAction(forceLinearInterp(meshGltf.animations[0])).play();
+        // Bone nodes carry no default transform, only animation tracks, so
+        // nothing below can measure them until the clip has been evaluated once.
+        blobMixer.setTime(0);
+        meshMixer.setTime(0);
 
         // Centre each in its own frame, then hang both off one pivot, so the
         // state switch can never nudge a cell sideways.
@@ -73,32 +86,58 @@ export function initGrid(host, samples, pinned, opts = {}) {
           model.position.sub(restBox(model).getCenter(new THREE.Vector3()));
         }
 
+        // Two nested groups: `inner` takes the automatic orientation, `pivot`
+        // takes the cell's position, its scale, and any manual roll -- which is
+        // then expressed in screen axes, where it is easy to reason about.
+        const inner = new THREE.Group();
+        inner.add(blobRoot, meshRoot);
         const pivot = new THREE.Group();
         pivot.position.set(
-          (col - (COLS - 1) / 2) * SPACING_X,
+          (col - (inRow - 1) / 2) * SPACING_X,
           ((rows - 1) / 2 - row) * SPACING_Y,
           0,
         );
-        pivot.add(blobRoot, meshRoot);
+        pivot.add(inner);
         s.scene.add(pivot);
 
-        // A couple of these clips come out of the exporter standing on end.
-        // Lay any cell down whose bones are taller than they are wide, then
-        // normalise every cell to one size so the grid reads as a grid.
+        // These clips leave the exporter at arbitrary rolls -- some standing on
+        // end, one belly-up -- so orientation is resolved in two steps. First lay
+        // the body down, turning its longer horizontal axis across the screen.
+        // That leaves two possibilities 180 apart, and the pinned feet decide
+        // between them: whichever way puts them below the body is the right way
+        // up. No per-animal constant needed.
+        const pinnedSet = new Set(pinned);
+        const glitchy = new Set(GLITCHY);
+        const feetMeshes = bones.filter((_, k) => pinnedSet.has(k));
+        const bodyMeshes = bones.filter((_, k) => !pinnedSet.has(k) && !glitchy.has(k));
+        const centroidY = (list) => list.reduce(
+          (sum, mesh) => sum + mesh.getWorldPosition(new THREE.Vector3()).y, 0) / (list.length || 1);
+
         pivot.updateMatrixWorld(true);
-        let size = restBox(blobRoot).getSize(new THREE.Vector3());
-        if (size.y > size.x) {
-          pivot.rotation.z = -Math.PI / 2 + (sample.rotateZ || 0) * Math.PI / 180;
+        let roll = 0;
+        const boxSize = () => restBox(blobRoot).getSize(new THREE.Vector3());
+        if (boxSize().y > boxSize().x) {
+          roll = -Math.PI / 2;
+          inner.rotation.z = roll;
           pivot.updateMatrixWorld(true);
-          size = restBox(blobRoot).getSize(new THREE.Vector3());
-        } else if (sample.rotateZ) {
-          pivot.rotation.z = sample.rotateZ * Math.PI / 180;
         }
+        if (feetMeshes.length && bodyMeshes.length && centroidY(feetMeshes) > centroidY(bodyMeshes)) {
+          roll += Math.PI;
+        }
+        inner.rotation.z = roll;
+        pivot.updateMatrixWorld(true);
+
+        // Manual roll on top, in screen axes. Needed only when a generated clip
+        // leaves the animal on its back: its feet then straddle the body and no
+        // in-plane rotation can bring them down.
+        pivot.rotation.x = (sample.rotateX || 0) * Math.PI / 180;
+        pivot.rotation.z = (sample.rotateZ || 0) * Math.PI / 180;
+        pivot.updateMatrixWorld(true);
+
+        const size = restBox(blobRoot).getSize(new THREE.Vector3());
         const span = Math.max(size.x, size.y, 1e-4);
         pivot.scale.setScalar(scale * (CELL_SPAN / span));
 
-        const pinnedSet = new Set(pinned);
-        const glitchy = new Set(GLITCHY);
         cells.push({
           blobRoot, meshRoot, blobMixer, meshMixer,
           feet: bones.filter((_, k) => pinnedSet.has(k)),

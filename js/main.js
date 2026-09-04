@@ -66,7 +66,7 @@ whenNear('v-stage1', async (el) => {
 
 whenNear('v-inpaint', async (el) => {
   const [{ initGrid }, m] = await Promise.all([import('./viewers/grid.js'), manifest()]);
-  initGrid(el, withBase(m.inpainting, ['mesh', 'blob'])
+  initGrid(el, withBase(m.inpainting.filter((s) => s.inGrid !== false), ['mesh', 'blob'])
     .map((s) => ({ ...s, label: speciesLabel(s.prompt, s.id) })), m.pinnedBones);
 });
 

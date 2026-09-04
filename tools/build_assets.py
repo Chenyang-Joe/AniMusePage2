@@ -41,12 +41,16 @@ STAGE1 = [
 # every species, which is the whole claim.
 PINNED_BONES = [4, 55, 76, 77]
 
-# A couple of the inpainting clips come out of the exporter standing on end and
-# the viewer lays them down automatically; the panda then reads head-down, so it
-# needs a half turn on top. Degrees, applied after the automatic lay-down.
-INPAINT_ROTZ = {
-    "The_juvenile_giant_panda_treads_water_a6e7e7b03aaf": 180,
-}
+# The grid viewer orients each cell by rolling it until the pinned feet point
+# down, so no per-animal constant is normally needed. This is the override for
+# any clip that still lands wrong: extra degrees of roll on top.
+# The generated panda clip has the animal on its back with its legs paddling in
+# the air. A sweep of all 96 whole-degree-multiple orientations puts its four
+# pinned feet at best level with its body, never below, so no camera or rotation
+# makes it read as a quadruped -- the clip itself needs regenerating. Kept in the
+# manifest, held out of the grid until then.
+INPAINT_SKIP = {"The_juvenile_giant_panda_treads_water_a6e7e7b03aaf"}
+INPAINT_ROTZ = {}
 
 # Left front leg, from references/repos/scene_1/main.js.
 LEG_BONES = [44, 45, 46, 47, 48, 49, 50, 51, 26, 110, 111, 13]
@@ -118,6 +122,7 @@ def main():
             "id": key,
             "prompt": caps.get(fn, ""),
             "rotateZ": INPAINT_ROTZ.get(key, 0),
+            "inGrid": key not in INPAINT_SKIP,
             "mesh": emit(f"{DATA}/inpainting/mesh/{fn}", f"inpainting/{key}.mesh.glb", max_frames=90),
             "blob": emit(f"{DATA}/inpainting/blob/{fn}", f"inpainting/{key}.blob.glb",
                          do_jpeg=False, do_quant=False),
