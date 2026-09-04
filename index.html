@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AniMuse — Text-Driven Motion Generation via Semantic Gaussian Bones</title>
+<meta name="description" content="AniMuse animates any raw animal mesh from a text prompt — no skeleton, no joint names, no manual rigging.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
+<script type="importmap">
+{ "imports": {
+    "three": "./vendor/three/three.module.js",
+    "three/addons/": "./vendor/three/addons/"
+} }
+</script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <span class="brand">AniMuse</span>
+    <a href="#abstract">Abstract</a>
+    <a href="#stage1">Stage 1</a>
+    <a href="#stage2">Stage 2</a>
+    <a href="#control">Control</a>
+    <a href="#bibtex">BibTeX</a>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <span class="venue">SIGGRAPH Asia 2026 — Technical Papers (under review)</span>
+  <h1>Night at the Museum:<br>Text-Driven Motion Generation via Semantic Gaussian Bones</h1>
+  <p class="subtitle">Animating any raw animal mesh from text — with no skeleton, no joint names, and no manual rigging.</p>
+
+  <p class="authors">
+    Anonymous Author<sup>1</sup> &nbsp;·&nbsp;
+    Anonymous Author<sup>1</sup> &nbsp;·&nbsp;
+    Anonymous Author<sup>2</sup>
+    <span class="todo">[TODO: authors — double-blind]</span>
+  </p>
+  <p class="affil"><sup>1</sup>Anonymous Institution &nbsp;&nbsp; <sup>2</sup>Anonymous Institution</p>
+
+  <div class="buttons">
+    <a class="btn" href="data/Text_Driven_Motion_Generation_via_Semantic_Gaussian_Bones_V1.pdf">Paper</a>
+    <a class="btn" aria-disabled="true">arXiv</a>
+    <a class="btn" aria-disabled="true">Code</a>
+    <a class="btn" aria-disabled="true">WebAnimal3D</a>
+    <a class="btn" href="#video">Video</a>
+  </div>
+</header>
+
+<section id="teaser">
+  <div class="wrap">
+    <figure>
+      <img src="assets/img/teaser.jpg" alt="AniMuse teaser: static animal meshes, their predicted Semantic Gaussian Bones, and the generated motion." loading="lazy" width="1600" height="700">
+      <figcaption>
+        <b>AniMuse brings static animal meshes to life from text.</b> From a single raw mesh and a prompt,
+        AniMuse predicts Semantic Gaussian Bones (SGBs) and generates SE(3) bone trajectories to animate
+        diverse species. The shared SGB index space also enables sparse control: users can clamp selected
+        slots — such as the wallabies' ears — and inpaint the remaining full-body motion.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="abstract">
+  <div class="wrap narrow">
+    <h2>Abstract</h2>
+
+    <p class="tldr">
+      <b>TL;DR</b> — AniMuse animates <em>any</em> raw animal mesh from a text prompt, with
+      <strong>no skeleton, no joint names, and no manual rigging</strong>. It learns 120
+      <em>Semantic Gaussian Bones</em> that mean the same body part on every animal, then diffuses
+      SE(3) trajectories over them — so you can also pin a few bones and let the model inpaint the rest.
+    </p>
+
+    <p>
+      We introduce <b>AniMuse</b>, a two-stage framework for text-driven animal mesh animation directly
+      from raw meshes, without predefined skeletons, joint names, or manual rigging. At its core are
+      <b>Semantic Gaussian Bones</b> (SGBs), a compact skeleton-free deformation representation decoded
+      from a globally shared learnable query book and trained through explicit linear blend skinning with
+      topology-aware mask-gated weights. The shared query book yields stable cross-instance bone slots,
+      providing a mesh-native control space for text-conditioned generation and SGB-slot motion
+      inpainting. A DiT-based diffusion model generates per-bone SE(3) trajectories from text and
+      geometric bone latents, while allowing users to clamp selected SGB slots and inpaint the remaining
+      full-body motion. On DeformingThings4D, our rig reduces bidirectional CD-L1 by <b>39%</b> over the
+      best neural skeleton baseline, and a forward-only variant achieves the lowest CD-L2 overall. On the
+      out-of-domain AnimalML3D benchmark, AniMuse improves overall motion quality over skeleton-based and
+      vertex-based baselines.
+    </p>
+  </div>
+</section>
+
+<section id="video">
+  <div class="wrap narrow">
+    <h2>Overview Video</h2>
+    <div class="video-embed">
+      <div class="video-placeholder">
+        <span>Overview video</span>
+        <span class="todo">[TODO: paste a YouTube / Bilibili embed URL — external, never self-hosted]</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="problem">
+  <div class="wrap narrow">
+    <h2>Why animals are hard</h2>
+    <p class="lead">
+      A museum specimen preserves the shape of an animal, but not the motion that made it alive. A static
+      3D animal mesh has the same problem: it captures limbs, proportions and species identity, but
+      contains no recipe for how that body should move.
+    </p>
+    <p>
+      For humans this is a solved bridge — SMPL and a standard skeleton connect <em>how to deform</em> with
+      <em>what motion to generate</em>. Animals have no such template. Skeletal topology, limb count, body
+      proportions and articulation patterns all vary across species. A universal animal animation system
+      has to be morphologically flexible, computationally compact, and usable without per-species rigging
+      annotation.
+    </p>
+
+    <h3>Two existing control spaces, two bottlenecks</h3>
+    <div class="table-wrap">
+      <table class="compare">
+        <thead>
+          <tr><th></th><th style="text-align:left">Skeleton-based</th><th style="text-align:left">Vertex-based</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Examples</td><td style="text-align:left">AniMo, AnyTop, Dragon, OmniMotionGPT</td><td style="text-align:left">AnimateAnyMesh, ActionMesh</td></tr>
+          <tr><td>Control space</td><td style="text-align:left">a joint hierarchy</td><td style="text-align:left">all <em>V</em> vertices</td></tr>
+          <tr><td>Cost</td><td style="text-align:left">needs predefined joints, names, or per-species rigs</td><td style="text-align:left">scales as <em>O(V · F)</em></td></tr>
+          <tr><td>Breaks when</td><td style="text-align:left">the mesh doesn't match the template</td><td style="text-align:left">the mesh is dense or the clip is long</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="takeaway">
+      <strong>AniMuse takes a third space:</strong> compact like a skeleton, but learned directly from raw
+      meshes and not tied to any fixed joint topology.
+    </p>
+  </div>
+</section>
+
+<section id="pipeline">
+  <div class="wrap">
+    <h2>Pipeline</h2>
+    <figure>
+      <img src="assets/img/pipeline.jpg" alt="AniMuse two-stage pipeline diagram." loading="lazy">
+      <figcaption>
+        <b>AniMuse's two-stage pipeline.</b> <em>Top — Stage 1 (Rigging):</em> from a static mesh, a
+        PointTransformer with a shared learnable query book predicts <em>K</em> Semantic Gaussian Bones and
+        per-vertex rigging weights. <em>Bottom — Stage 2 (Generation):</em> a DiT denoises an SE(3)
+        trajectory over the SGBs, conditioned on a text prompt and the Stage-1 per-bone latents; linear
+        blend skinning recovers the deformed mesh sequence at decoding.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= STAGE 1 ================= -->
+<section id="stage1" class="stage-section">
+  <div class="stage-mark"><span class="tag">Stage 1</span><span class="name">AniMuse Rigging</span><span class="rule"></span></div>
+  <div class="wrap narrow">
+
+    <h2>What is a Semantic Gaussian Bone?</h2>
+    <p>
+      A Semantic Gaussian Bone is a soft, oriented deformation handle — a 3D anisotropic Gaussian that
+      replaces a skeletal bone in classical linear blend skinning:
+    </p>
+    <p class="eq">
+      𝓑 = ( <b>c</b>, <b>s</b>, <b>q</b>, <b>h</b> )
+      <span class="where">centre <b>c</b> ∈ ℝ³ · per-axis scale <b>s</b> ∈ ℝ³₊ · orientation quaternion
+      <b>q</b> ∈ S³ · per-bone geometric latent <b>h</b> ∈ ℝᴰ</span>
+    </p>
+    <p>
+      The Gaussian-bone parameters (<b>c</b>, <b>s</b>, <b>q</b>) follow RigMo. What makes an SGB
+      <em>semantic</em> is <b>where it comes from</b>: every bone is decoded from one slot of a
+      <b>globally shared learnable query book</b>. Because slot <em>k</em> decodes bone <em>k</em> on
+      <em>every</em> input mesh, each slot settles into a stable cross-instance role — slot 37 is the same
+      body part on a fox and on a warthog. That is what turns the SGB index into a control interface, and
+      what makes <b>h</b> a meaningful conditioning token for Stage 2 rather than an instance-specific
+      feature.
+    </p>
+
+    <div class="cards">
+      <div class="card"><h5>Compact</h5><p>K = 120 ≪ V. The per-frame motion state is orders of magnitude smaller than a per-vertex trajectory, so long high-resolution sequences don't blow up the generator.</p></div>
+      <div class="card"><h5>Skeleton-free</h5><p>SGBs are learned, not designed per species. One model handles every topology — no joint hierarchy, no joint names, no rig.</p></div>
+      <div class="card"><h5>Grounded</h5><p>Each bone ships with a geometric context vector <b>h</b> at no extra cost, giving Stage 2 per-bone structural grounding for free.</p></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="viewer is-loading" id="v-split">
+      <div class="viewer-frame">
+        <div class="viewer-canvas"></div>
+        <span class="split-label-left"></span>
+        <span class="split-label-right"></span>
+        <button class="split-divider" tabindex="0" aria-label="Drag to move the split between bones and mesh"></button>
+      </div>
+      <div class="viewer-chips"></div>
+      <p class="viewer-note">Drag the divider to move the split. Drag anywhere else to orbit — both halves share one camera, so they can never fall out of step.</p>
+    </div>
+  </div>
+
+  <div class="wrap narrow">
+    <p>
+      AniMuse Generation never touches the mesh. It produces a temporal sequence of SGB poses, and linear
+      blend skinning is applied per frame at decoding time:
+    </p>
+    <p class="eq">
+      v<sub>i</sub>¹ = Σ<sub>k</sub> w<sub>ik</sub> ( R<sub>k</sub><sup>rel</sup> (v<sub>i</sub>⁰ − c<sub>k</sub>⁰) + c<sub>k</sub>¹ ),
+      &nbsp;&nbsp; R<sub>k</sub><sup>rel</sup> = R(q<sub>k</sub>¹) R(q<sub>k</sub>⁰)<sup>⊤</sup>
+    </p>
+
+    <h2>The same slot means the same part</h2>
+    <p>
+      Because every bone comes out of the same query slot, the SGB index is stable <em>across meshes</em>,
+      not just within one. In the viewer below, bone colour is a ramp over the slot index — and it is the
+      identical ramp on every animal. Hover any bone to see its counterpart on the other species.
+    </p>
+  </div>
+
+  <div class="wrap">
+    <div class="viewer is-loading" id="v-corr">
+      <div class="viewer-frame"><div class="viewer-canvas h-sm"></div></div>
+      <p class="corr-readout">Hover any bone — its counterpart lights up on every species.</p>
+    </div>
+  </div>
+
+  <div class="wrap narrow">
+    <h2>Topology-aware rigging</h2>
+    <p>
+      Rigging weights from a plain Gaussian softmax over K bones are <b>topology-unaware</b>: a quadruped's
+      front and back legs are spatially close but topologically distant, so they attract weight from the
+      same bones and leak deformation into each other.
+    </p>
+    <p>
+      RigMo fixes this with exact mesh-surface geodesics. We get the same effect with a <b>K-ring topology
+      mask</b> computed entirely as GPU sparse matrix multiplication — a binary mask M<sub>ik</sub> that
+      <em>only disables</em> bones a vertex cannot topologically reach, while the softmax still supplies
+      continuous magnitudes.
+    </p>
+    <p class="eq">
+      w<sub>ik</sub> = M<sub>ik</sub> exp(−½ d<sub>ik</sub><sup>⊤</sup> S<sub>k</sub><sup>−2</sup> d<sub>ik</sub>)
+      &nbsp;/&nbsp; Σ<sub>j</sub> M<sub>ij</sub> exp(−½ d<sub>ij</sub><sup>⊤</sup> S<sub>j</sub><sup>−2</sup> d<sub>ij</sub>)
+      <span class="where">with d<sub>ik</sub> = R(q<sub>k</sub>)<sup>⊤</sup>(v<sub>i</sub> − c<sub>k</sub>) and S<sub>k</sub> = diag(s<sub>k</sub>) — a Mahalanobis exponent evaluated in each bone's own frame.</span>
+    </p>
+
+    <div class="table-wrap">
+      <table class="compare">
+        <thead><tr><th style="text-align:left">Knob</th><th style="text-align:left">Value</th><th style="text-align:left">What it does</th></tr></thead>
+        <tbody>
+          <tr><td style="text-align:left">Physical reach ρ</td><td style="text-align:left">0.2</td><td style="text-align:left">BFS radius around each bone. With mean edge length ē it sets the hop budget k<sub>hops</sub> = ⌊ρ/ē⌋, keeping the gate constant in <em>physical</em> units regardless of vertex count.</td></tr>
+          <tr><td style="text-align:left">Delay scale β</td><td style="text-align:left">0.7</td><td style="text-align:left">Converts each seed's Euclidean offset from the bone centre into a delay in BFS iterations, so far seeds activate later than near ones.</td></tr>
+          <tr><td style="text-align:left">Fallback count K<sub>near</sub></td><td style="text-align:left">—</td><td style="text-align:left">Any vertex with no reachable bone is force-attached to its K<sub>near</sub> nearest bones, guaranteeing full coverage.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Self-supervised training</h2>
+    <p>
+      We supervise the rig <b>through differentiable mesh deformation</b> — no rigging ground truth is ever
+      used. Given two posed meshes V<sup>a</sup>, V<sup>b</sup> from the same animation, the network
+      independently predicts an SGB set for each, and we minimise a <b>symmetric</b> reconstruction loss
+      across both deformation directions:
+    </p>
+    <p class="eq">ℒ<sub>rig</sub> = ℒ<sup>a→b</sup> + ℒ<sup>b→a</sup> + λ<sub>s</sub> · ℒ<sub>scale</sub></p>
+    <p>
+      The bidirectional form makes every predicted SGB set act as <em>both</em> source and target rig within
+      a training step — doubling supervision per frame pair and avoiding any privileged "rest" frame.
+      Because the whole path is differentiable, gradients flow back through the rigging weights into bone
+      placement, scale, orientation, and the per-bone latent.
+    </p>
+
+    <h4>Why the scale loss matters</h4>
+    <p class="takeaway">
+      Trained on the ℓ₂ term alone, the network finds a degenerate shortcut: instead of <em>rotating</em>
+      each bone to track its part, it shifts the bone centre and shrinks the anisotropic scale, so every
+      bone collapses to an isotropic sphere and deformation is explained almost entirely by translation.
+      Normal consistency alleviates this but doesn't kill it — the bones can still use frame-to-frame scale
+      fluctuation to fake rotation. <strong>ℒ<sub>scale</sub></strong> ties the scales predicted from two
+      different poses of the same mesh together, locking bone geometry across frames and forcing genuine
+      rotation.
+    </p>
+
+    <h2>Rigging results</h2>
+    <p>
+      This experiment isolates Stage 1: extract a rig from a rest-pose mesh, use it to deform that mesh onto
+      a posed target, and measure the residual. On the animal subset of <b>DeformingThings4D</b> (25 species)
+      we sample 40 pairs per species; targets come either from the <em>same</em> sequence (<b>per-motion</b>)
+      or a <em>different</em> sequence of the same species (<b>cross-motion</b>), the latter probing whether a
+      rig generalises beyond the motion it was extracted from.
+    </p>
+  </div>
+
+  <div class="wrap">
+    <div class="viewer is-loading" id="v-stage1">
+      <div class="viewer-frame"><div class="viewer-canvas h-md"></div></div>
+      <div class="viewer-labels"></div>
+      <div class="viewer-chips"></div>
+      <p class="viewer-note">Ground truth, the SGBs predicted from the rest pose, and the mesh our rig deforms — same instant, same camera. Drag to orbit.</p>
+    </div>
+  </div>
+
+  <div class="wrap narrow">
+    <div class="table-wrap">
+      <table>
+        <caption><b>Table 1 — Rigging evaluation on DeformingThings4D</b> (25 species). Bidirectional Chamfer Distance (↓) between the LBS-deformed and target meshes. Worst 1% of pairs excluded as optimisation outliers.</caption>
+        <thead>
+          <tr><th rowspan="2">Method</th><th colspan="2">Per-Motion</th><th colspan="2">Cross-Motion</th></tr>
+          <tr><th>CD-L1 ↓</th><th>CD-L2 ↓</th><th>CD-L1 ↓</th><th>CD-L2 ↓</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>UniRig + Opt.</td><td>0.0228</td><td>0.0076</td><td>0.0318</td><td>0.0108</td></tr>
+          <tr><td>Puppeteer + Opt.</td><td>0.0306</td><td>0.0065</td><td>0.0451</td><td>0.0122</td></tr>
+          <tr class="ours"><td><b>AniMuse + Opt.</b></td><td class="best">0.0138</td><td>0.0056</td><td class="best">0.0198</td><td>0.0083</td></tr>
+          <tr class="ours"><td><b>AniMuse (network only)</b></td><td>0.0283</td><td class="best">0.0050</td><td>0.0372</td><td class="best">0.0075</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="takeaway">
+      Under matched optimisation, AniMuse cuts the best skeleton baseline's CD-L1 by <strong>39%</strong>
+      per-motion (0.0228 → 0.0138) and <strong>38%</strong> cross-motion (0.0318 → 0.0198).
+      The <strong>network-only</strong> variant — no per-pair fitting at all — still takes the lowest CD-L2
+      in both settings: a single forward pass matches several hundred steps of test-time optimisation on
+      top of the skeleton baselines.
+    </p>
+  </div>
+</section>
+
+<!-- ================= STAGE 2 ================= -->
+<section id="stage2">
+  <div class="stage-mark"><span class="tag">Stage 2</span><span class="name">AniMuse Generation</span><span class="rule"></span></div>
+  <div class="wrap narrow">
+
+    <h2>SE(3) trajectory diffusion</h2>
+    <p>
+      Conditioned on the rest-pose SGB set from Stage 1 and a text prompt, Stage 2 generates an
+      <em>F</em>-frame trajectory. The (k, f)-th token encodes bone <em>k</em> at frame <em>f</em> as a
+      9-D vector:
+    </p>
+    <p class="eq">
+      T<sub>k,f</sub> = [ c<sub>k,f</sub> , r<sup>6D</sup><sub>k,f</sub> ] ∈ ℝ⁹
+      <span class="where">a bone centre plus a 6-D continuous rotation. Per-bone scale is held at its rest value — the trajectory never predicts scale.</span>
+    </p>
+    <p>
+      Unlike latent-space approaches such as RigMo, our diffusion runs <b>directly in SE(3) parameter
+      space</b> — there is no autoencoder wrapped around the trajectory. Standard DDPM training, cosine
+      ᾱ<sub>t</sub> schedule, x₀-prediction, and an L2 loss split by translation and rotation channels.
+      Frame 0 is held to its clean target throughout noising and sampling, acting as a fixed identity
+      anchor the rest of the trajectory denoises around. 50 DDIM steps at sampling.
+    </p>
+
+    <h2>Network design</h2>
+    <p>
+      The denoiser is a standard <b>DiT</b>. We flatten the K × F trajectory grid into L = K·F tokens, with
+      bone and frame indices encoded by a <b>2-D rotary positional embedding</b> on the self-attention
+      queries and keys. Because self-attention runs over the flat sequence, it mixes spatial (cross-bone)
+      and temporal (cross-frame) context in a single pass.
+    </p>
+    <div class="cards">
+      <div class="card"><h5>Text conditioning</h5><p>A frozen <b>umT5-XXL</b> encoder produces e<sub>text</sub>; every block cross-attends to it.</p></div>
+      <div class="card"><h5>Geometry conditioning</h5><p>The Stage-1 prefix p<sub>k</sub> = [ s<sub>k</sub> ‖ h<sub>k</sub> ] is projected once and consumed by <em>every</em> block as cross-attention keys/values, in parallel with the text stream — so each motion token can retrieve its bone's geometric identity at every depth.</p></div>
+    </div>
+
+    <details>
+      <summary>Full configuration</summary>
+      <div class="table-wrap">
+        <table class="compare">
+          <thead><tr><th></th><th style="text-align:left">Stage 1</th><th style="text-align:left">Stage 2</th></tr></thead>
+          <tbody>
+            <tr><td>Backbone</td><td style="text-align:left">5-block PointTransformer, widths 512–2048</td><td style="text-align:left">16-layer DiT, hidden 512</td></tr>
+            <tr><td>Input</td><td style="text-align:left">4096-point cloud (FPS)</td><td style="text-align:left">K × F trajectory grid</td></tr>
+            <tr><td>Bones K</td><td style="text-align:left">120</td><td style="text-align:left">120</td></tr>
+            <tr><td>Query book</td><td style="text-align:left">D = 512, globally shared</td><td style="text-align:left">—</td></tr>
+            <tr><td>Text encoder</td><td style="text-align:left">—</td><td style="text-align:left">frozen umT5-XXL</td></tr>
+            <tr><td>Mask params</td><td style="text-align:left">ρ = 0.2, β = 0.7</td><td style="text-align:left">—</td></tr>
+            <tr><td>Objective</td><td style="text-align:left">ℓ₂ + ℒ<sub>normal</sub> + ℒ<sub>scale</sub>, bidirectional</td><td style="text-align:left">DDPM, x₀-prediction, cosine schedule</td></tr>
+            <tr><td>Optimiser</td><td style="text-align:left">AdamW, lr 2×10⁻⁵, no warmup</td><td style="text-align:left">AdamW, lr 5×10⁻⁵, no warmup</td></tr>
+            <tr><td>Sampling</td><td style="text-align:left">—</td><td style="text-align:left">50 DDIM steps</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <h2>Motion generation results</h2>
+    <p>
+      We compare against the two representative paradigms: <b>AniMo</b> (bone-based, joint-level transforms
+      over a learned skeleton) and <b>AnimateAnyMesh</b> (mesh-based, per-vertex trajectories). Training
+      uses <b>AniMo4D*</b>, our reproduction of the AniMo training set — only their curation <em>tool</em>
+      was open-sourced, not the dataset, so we rebuilt the corpus from scratch with their pipeline,
+      obtaining <b>75,083</b> clips against the 78,149 reported originally. AniMuse and AniMo are both
+      trained on AniMo4D*; AnimateAnyMesh uses its released checkpoint. All three are tested on
+      <b>AnimalML3D</b>, which is fully <b>out-of-distribution</b> with respect to AniMo4D*.
+    </p>
+
+    <h4>How we evaluate</h4>
+    <p>
+      Per-frame distance metrics don't capture whether an animation <em>reads</em> correctly. We use a
+      <b>pairwise vision–language judge</b>: render 8 frames sampled uniformly along each generated
+      sequence, stack two methods' renders on the <em>same</em> mesh and prompt into a 2×8 contact sheet,
+      and have a strong VLM score each row independently 1–5 on six attributes. Three pairwise tracks
+      centred on AniMuse (vs. GT, vs. AniMo, vs. AnimateAnyMesh); we report each method's mean
+      per-attribute score.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <caption><b>Table 2 — Pairwise VLM evaluation on AnimalML3D</b> (out-of-domain). Higher is better.</caption>
+        <thead>
+          <tr><th>Method</th><th>Action<br>Alignment</th><th>Pose<br>Plausibility</th><th>Motion<br>Coherence</th><th>Motion<br>Diversity</th><th>Visual<br>Integrity</th><th>Species<br>Consistency</th><th>Overall ↑</th></tr>
+        </thead>
+        <tbody>
+          <tr class="ours"><td><b>AniMuse (Ours)</b></td><td class="best">2.92</td><td>3.89</td><td>4.15</td><td class="best">3.12</td><td>4.20</td><td>4.22</td><td class="best">3.50</td></tr>
+          <tr><td>AnimateAnyMesh</td><td>2.24</td><td class="best">4.04</td><td class="best">4.40</td><td>2.12</td><td class="best">4.41</td><td class="best">4.24</td><td>3.16</td></tr>
+          <tr><td>AniMo</td><td>2.60</td><td>3.03</td><td>3.33</td><td>3.10</td><td>3.46</td><td>3.84</td><td>3.05</td></tr>
+          <tr class="ref rule-above"><td>GT (reference)</td><td>4.14</td><td>4.60</td><td>4.79</td><td>4.42</td><td>4.82</td><td>4.63</td><td>4.56</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="takeaway">
+      AnimateAnyMesh wins the "looks clean" attributes for a simple reason — <strong>it barely moves</strong>.
+      Its Motion Diversity collapses to 1.00 on the <code>bear9AK_Runforward</code> sample, and a near-static
+      sequence is trivially coherent and visually intact. AniMuse leads on the attributes that actually
+      measure whether the prompt was followed: <strong>Action Alignment</strong>, <strong>Motion
+      Diversity</strong>, and <strong>Overall Quality</strong>.
+    </p>
+
+    <figure>
+      <img src="assets/img/eval.jpg" alt="Eight-frame contact sheet comparing AniMuse, AnimateAnyMesh, AniMo and ground truth." loading="lazy">
+      <figcaption>
+        8-frame contact sheet for the AnimalML3D sample <code>bear9AK_Runforward</code>, top to bottom:
+        AniMuse (Ours), AnimateAnyMesh, AniMo, GT. As a skeleton-based method, AniMo requires a
+        template-conforming input mesh — the very dependence our rig removes — so its row uses the closest
+        same-species mesh among AniMo's assets; an appearance-only substitution that does not affect the
+        motion comparison.
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="wrap">
+    <figure>
+      <img src="assets/img/gallery.jpg" alt="Gallery of AniMuse text-driven animations on diverse animal meshes." loading="lazy">
+      <figcaption>
+        Gallery of AniMuse text-driven animations. Each row, left to right: the text prompt, the input
+        static mesh, the predicted Semantic Gaussian Bones, and the generated motion across five frames.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= CONTROL ================= -->
+<section id="control" class="stage-section">
+  <div class="stage-mark"><span class="tag">Control</span><span class="name">Beyond generation</span><span class="rule"></span></div>
+  <div class="wrap narrow">
+
+    <h2>Motion inpainting</h2>
+    <p>
+      Because SGBs share semantic indices across species, <b>a constraint placed on bone k in one mesh
+      applies to the same body part in any other mesh.</b> We turn this into <em>motion inpainting</em>: a
+      user pins the trajectory of a chosen subset of bones, and the model generates coherent full-body
+      motion consistent with that specification — simultaneously across multiple meshes.
+    </p>
+    <p>
+      We generalise the frame-0 anchor. Each token already carries a 1-bit anchor flag, originally raised
+      only on frame-0 tokens; we extend it to <em>any</em> (k, f) token whose trajectory should be held
+      fixed, and re-clamp those tokens to their target values at every diffusion step during sampling. To
+      make the model accept arbitrary user masks, we fine-tune with a randomised mask drawn uniformly from
+      three patterns per step: <b>(i)</b> one bone fixed across all frames, <b>(ii)</b> all bones fixed in
+      one frame, <b>(iii)</b> a sparse random subset of bones at a sparse random subset of frames. The
+      standard frame-0 anchor is just a special case of (ii).
+    </p>
+    <p>
+      In the viewer below, the four <b>grey</b> bones are the pinned ones — the same four SGB slots on every
+      animal. Everything else is what the model generated around them, under each species' own prompt.
+    </p>
+  </div>
+
+  <div class="wrap">
+    <div class="viewer is-loading" id="v-inpaint">
+      <div class="viewer-frame"><div class="viewer-canvas h-md"></div></div>
+      <div class="viewer-labels"></div>
+      <p class="viewer-caption"></p>
+      <div class="viewer-chips"></div>
+    </div>
+  </div>
+
+  <div class="wrap narrow">
+    <figure>
+      <img src="assets/img/inpaint.jpg" alt="Cross-species motion inpainting figure." loading="lazy">
+      <figcaption>
+        Cross-species motion inpainting. We pin the four foot-tip SGB indices (magenta) of fox, panda and
+        otter to a synchronised sinusoidal vertical motion and run AniMuse under species-specific text
+        prompts. All three share the same periodic foot pace while their bodies adapt to each morphology.
+      </figcaption>
+    </figure>
+
+    <h2>Part-level editing</h2>
+    <p>
+      The same index space gives direct manual control. Below, one slider drags the twelve SGB slots that
+      make up the left front leg. Because those slots mean the same leg on every animal, the <em>same</em>
+      slider drives all three species at once — no per-animal setup.
+    </p>
+  </div>
+
+  <div class="wrap">
+    <div class="viewer is-loading" id="v-edit">
+      <div class="viewer-frame"><div class="viewer-canvas h-md"></div></div>
+      <div class="edit-controls">
+        <label for="edit-slider">Shift left front leg</label>
+        <input class="edit-slider" id="edit-slider" type="range" min="-100" max="100" value="0" step="1">
+        <span class="edit-mode">
+          <button data-mode="blob" class="on">Bones</button>
+          <button data-mode="mesh">Mesh</button>
+        </span>
+      </div>
+      <p class="viewer-note">The highlighted bones are the leg group. Switch to <b>Mesh</b> to see the surface follow through linear blend skinning.</p>
+    </div>
+  </div>
+
+  <div class="wrap narrow">
+    <h2>WebAnimal3D</h2>
+    <p>
+      Because AniMuse trains directly on raw mesh sequences — no template, no predefined skeleton, no
+      manual rigging annotation — the training corpus can be extended with mesh sequences <b>from any
+      source</b>. We exploit this to curate <b>WebAnimal3D</b>, an annotation-free animal motion corpus
+      reconstructed from publicly available web video.
+    </p>
+    <div class="stats">
+      <div class="stat"><b>8,602</b><span>animal motion clips</span></div>
+      <div class="stat"><b>AniMer+</b><span>reconstruction, over the Animal4D web video collection</span></div>
+      <div class="stat"><b>LLM captions</b><span>species and action per clip — the text supervision Stage 2 consumes</span></div>
+    </div>
+    <p>
+      The AniMuse model that produces the teaser is trained jointly on <b>DT4D + WebAnimal3D</b>. We release
+      WebAnimal3D as a starting point for future research on skeleton-free animal motion at larger scale.
+    </p>
+
+    <details>
+      <summary>Data provenance and licensing</summary>
+      <p>
+        The three corpora are built by independent pipelines and contain no overlapping motion sequences.
+        DT4D is the publicly released benchmark of Li et al. AniMo4D* is regenerated solely from AniMo's
+        curation tool, whose original dataset was not released; we provide our reproduction recipe only to
+        support apples-to-apples evaluation. WebAnimal3D contains mesh trajectories reconstructed via
+        AniMer+ from a publicly available web video corpus — we plan to release the mesh-level motion data
+        and captions, but not the underlying videos.
+      </p>
+    </details>
+  </div>
+</section>
+
+<section id="ablations">
+  <div class="wrap narrow">
+    <h2>Ablations &amp; limitations</h2>
+
+    <details>
+      <summary>Ablation — auxiliary losses on Stage-1 rigging</summary>
+      <div class="table-wrap">
+        <table>
+          <caption>DT4D subset. CD-L2 in units of 10⁻⁴.</caption>
+          <thead>
+            <tr><th rowspan="2">Loss configuration</th><th colspan="2">Per-Motion</th><th colspan="2">Cross-Motion</th></tr>
+            <tr><th>CD-L1 ↓</th><th>CD-L2 ↓</th><th>CD-L1 ↓</th><th>CD-L2 ↓</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>ℓ₂ only</td><td>0.0139</td><td>4.64</td><td>0.0147</td><td>4.83</td></tr>
+            <tr><td>ℓ₂ + ℒ<sub>normal</sub></td><td>0.0111</td><td>3.45</td><td>0.0110</td><td>2.11</td></tr>
+            <tr><td>ℓ₂ + ℒ<sub>scale</sub></td><td>0.0108</td><td>2.57</td><td>0.0123</td><td>2.88</td></tr>
+            <tr class="ours"><td><b>ℓ₂ + ℒ<sub>normal</sub> + ℒ<sub>scale</sub></b></td><td class="best">0.0108</td><td class="best">2.50</td><td class="best">0.0109</td><td class="best">2.05</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Either auxiliary loss already beats the ℓ₂-only baseline on every metric, but only the combination
+        wins all four columns — confirming that the two terms address complementary failure modes.
+      </p>
+    </details>
+
+    <details>
+      <summary>Additional qualitative results on AniMo4D*</summary>
+      <figure>
+        <img src="assets/img/figure2.jpg" alt="Additional qualitative results on AniMo4D*." loading="lazy">
+      </figure>
+    </details>
+
+    <h3>Limitations</h3>
+    <ul>
+      <li><b>Stage 1</b> — the topology mask can still fail when a Gaussian bone sits <em>between</em> two
+        close-but-topologically-distant surfaces, causing them to share that bone and leaking deformation
+        across them.</li>
+      <li><b>Stage 2</b> — currently caps at <b>300 frames</b> per pass. We have not yet adopted
+        long-horizon techniques such as Diffusion Forcing, despite the compact bone-trajectory
+        representation being naturally suited to minute-long generation.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="bibtex">
+  <div class="wrap narrow">
+    <h2>BibTeX</h2>
+<pre><code>@article{animuse2026,
+  title   = {Night at the Museum: Text-Driven Motion Generation via Semantic Gaussian Bones},
+  author  = {Anonymous},
+  journal = {ACM Transactions on Graphics (TOG)},
+  year    = {2026}
+}</code></pre>
+    <p class="todo">[TODO: final citation once the submission is de-anonymised]</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Layout after the <a href="https://nerfies.github.io">Nerfies</a> project page. Interactive viewers built with three.js.</p>
+  </div>
+</footer>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

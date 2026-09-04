@@ -1,0 +1,143 @@
+{
+ "pinnedBones": [
+  4,
+  55,
+  76,
+  77
+ ],
+ "legBones": [
+  44,
+  45,
+  46,
+  47,
+  48,
+  49,
+  50,
+  51,
+  26,
+  110,
+  111,
+  13
+ ],
+ "teaser": [
+  {
+   "id": "fox",
+   "label": "Fennec Fox",
+   "mesh": "teaser/fox.mesh.glb",
+   "blob": "teaser/fox.blob.glb"
+  },
+  {
+   "id": "elephant",
+   "label": "Indian Elephant",
+   "mesh": "teaser/elephant.mesh.glb",
+   "blob": "teaser/elephant.blob.glb"
+  },
+  {
+   "id": "wallaby",
+   "label": "Red-necked Wallaby",
+   "mesh": "teaser/wallaby.mesh.glb",
+   "blob": "teaser/wallaby.blob.glb"
+  },
+  {
+   "id": "warthog",
+   "label": "Common Warthog",
+   "mesh": "teaser/warthog.mesh.glb",
+   "blob": "teaser/warthog.blob.glb"
+  }
+ ],
+ "stage1": [
+  {
+   "id": "lynx",
+   "label": "Eurasian Lynx",
+   "action": "run",
+   "gt": "stage1/lynx.gt.glb",
+   "pred": "stage1/lynx.pred.glb",
+   "blob": "stage1/lynx.blob.glb"
+  },
+  {
+   "id": "arcticfox",
+   "label": "Arctic Fox",
+   "action": "walk, turn left",
+   "gt": "stage1/arcticfox.gt.glb",
+   "pred": "stage1/arcticfox.pred.glb",
+   "blob": "stage1/arcticfox.blob.glb"
+  },
+  {
+   "id": "caracal",
+   "label": "Caracal",
+   "action": "stand to run",
+   "gt": "stage1/caracal.gt.glb",
+   "pred": "stage1/caracal.pred.glb",
+   "blob": "stage1/caracal.blob.glb"
+  },
+  {
+   "id": "leopard",
+   "label": "Clouded Leopard",
+   "action": "walk to run",
+   "gt": "stage1/leopard.gt.glb",
+   "pred": "stage1/leopard.pred.glb",
+   "blob": "stage1/leopard.blob.glb"
+  }
+ ],
+ "inpainting": [
+  {
+   "id": "The_female_bairds_tapir_swims_and_the_a2aa43eb31be",
+   "prompt": "The female bairds tapir swims and then stands in place without turning at all.",
+   "mesh": "inpainting/The_female_bairds_tapir_swims_and_the_a2aa43eb31be.mesh.glb",
+   "blob": "inpainting/The_female_bairds_tapir_swims_and_the_a2aa43eb31be.blob.glb"
+  },
+  {
+   "id": "The_female_dhole_swims_and_then_stand_cc13c147b2da",
+   "prompt": "The female dhole swims and then stands in place without turning at all",
+   "mesh": "inpainting/The_female_dhole_swims_and_then_stand_cc13c147b2da.mesh.glb",
+   "blob": "inpainting/The_female_dhole_swims_and_then_stand_cc13c147b2da.blob.glb"
+  },
+  {
+   "id": "The_juvenile_giant_panda_treads_water_a6e7e7b03aaf",
+   "prompt": "The juvenile giant panda treads water and then swims forward with gentle paddles.",
+   "mesh": "inpainting/The_juvenile_giant_panda_treads_water_a6e7e7b03aaf.mesh.glb",
+   "blob": "inpainting/The_juvenile_giant_panda_treads_water_a6e7e7b03aaf.blob.glb"
+  },
+  {
+   "id": "The_juvenile_gray_wolf_swims_and_then_treads_water",
+   "prompt": "The juvenile gray wolf swims and then treads water.",
+   "mesh": "inpainting/The_juvenile_gray_wolf_swims_and_then_treads_water.mesh.glb",
+   "blob": "inpainting/The_juvenile_gray_wolf_swims_and_then_treads_water.blob.glb"
+  },
+  {
+   "id": "The_juvenile_hippopotamus_swims_low_i_f6625608990a",
+   "prompt": "The juvenile hippopotamus swims low in the water and then treads water before turning left 0 degrees.",
+   "mesh": "inpainting/The_juvenile_hippopotamus_swims_low_i_f6625608990a.mesh.glb",
+   "blob": "inpainting/The_juvenile_hippopotamus_swims_low_i_f6625608990a.blob.glb"
+  },
+  {
+   "id": "The_male_asian_small_clawed_otter_swi_27a9b42ca295",
+   "prompt": "The male asian small clawed otter swims and then treads water.",
+   "mesh": "inpainting/The_male_asian_small_clawed_otter_swi_27a9b42ca295.mesh.glb",
+   "blob": "inpainting/The_male_asian_small_clawed_otter_swi_27a9b42ca295.blob.glb"
+  }
+ ],
+ "editing": [
+  {
+   "id": "tiger",
+   "label": "Bengal Tiger",
+   "rotateY": 180,
+   "mesh": "editing/tiger.mesh.glb",
+   "blob": "editing/tiger.blob.glb"
+  },
+  {
+   "id": "elephant",
+   "label": "African Elephant",
+   "rotateY": 0,
+   "mesh": "editing/elephant.mesh.glb",
+   "blob": "editing/elephant.blob.glb"
+  },
+  {
+   "id": "bear",
+   "label": "Grizzly Bear",
+   "rotateY": 180,
+   "mesh": "editing/bear.mesh.glb",
+   "blob": "editing/bear.blob.glb"
+  }
+ ]
+}

@@ -70,6 +70,8 @@
 ## 进度
 
 - [x] 0. Git 连接
-- [ ] 1. 参考页面 → 等 review
-- [ ] 2. draft.md
-- [ ] 3. 建站
+- [x] 1. 参考页面 → 定了 Nerfies 排版 + 3DGS 式 slider
+- [x] 2. draft.md
+- [x] 3. 建站（本地跑通，见 PLAN.md 第七节；等 review）
+
+计划和踩坑记录在 `PLAN.md`，本地启动方式在 `README.md`。

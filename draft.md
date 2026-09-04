@@ -493,15 +493,25 @@
 
 ---
 
-# 附录：给 Chenyang 的待确认清单
+# 附录：待确认清单（2026-09-04 更新）
 
-1. **作者信息**能不能公开？（double-blind 期间）arXiv / code 链接有吗？
-2. **overview 视频**有吗？没有的话先放占位。
-3. **`blob_nopiles.glb`** 是什么？是 "no topology mask" 的对照版吗？
-4. **`blob.glb` 里椭球的顺序** = SGB index 顺序吗？（组件②③⑦都依赖这个）
-5. **语义 index 表**：脚 / 头 / 尾 / 耳 分别是哪些 SGB index？（组件⑦必需）
-6. **rigging weights** 有没有导出？前端做实时 LBS 需要 (V×K) 稀疏权重。
-7. **baseline 的 glb**（UniRig / Puppeteer 结果）有吗？没有就用静态图。
-8. **组件① slider 方向**：左 mesh → 右 blob，还是反过来？
-9. **inpainting demo**：现有素材是 swim/tread water，和论文里 fox/panda/otter 的 foot-pin 对不上，
-   要补素材还是改 demo 内容？
+读完 `references/repos/CANOR_GAUSS` 和 `scene_1` 之后，原来 9 个问题里 6 个自问自答了：
+
+| 原问题 | 答案 | 出处 |
+|---|---|---|
+| blob 椭球顺序 = SGB index？ | 是，`node[i] = mesh[i] = material[i] = slot i` | 实测 GLB + Chenyang 确认 |
+| 哪些 index 是脚？ | inpainting 里 pin 的是 **4, 55, 76, 77**，GLB 里已经涂成灰色 | 对上了 `configs/eval_inpaint` 的 `inpaint_color` |
+| 哪些 index 是腿？ | **44–51, 26, 110, 111, 13**（左前腿，12 个） | `scene_1/main.js` |
+| rigging weights 要导出吗？ | **不需要**。动画全烘焙好了，前端只要 `AnimationMixer` | GLB 结构 |
+| `blob_nopiles` 是什么？ | 去掉表示朝向的 3 根插针的版本，全站只用它 | Chenyang |
+| slider 方向？ | 分割线，**左 blob 右 mesh** | Chenyang |
+
+还没解决的：
+
+1. **作者信息**能不能公开？（double-blind 期间）arXiv / code / dataset 链接有吗？
+2. **overview 视频**有吗？现在页面上是个占位卡片。
+3. **灰熊在 editing 组件里朝向是歪的**，老虎和大象已经正了。
+   改 `assets/models/manifest.json` 的 `editing[].rotateY` 就行，你说个数我改。
+4. **teaser gallery 的选片** —— 我先按体积和物种差异挑了 4 只，你后面认真挑。
+5. **baseline 的 glb**（UniRig / Puppeteer 结果）有吗？有的话 Stage 1 那个对比组件
+   可以从「GT / SGB / 我们」扩成四栏。
