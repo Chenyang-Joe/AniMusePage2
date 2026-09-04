@@ -139,6 +139,7 @@ export function initGrid(host, samples, pinned, opts = {}) {
         pivot.scale.setScalar(scale * (CELL_SPAN / span));
 
         cells.push({
+          id: sample.id, label: sample.label, pivot, inner,
           blobRoot, meshRoot, blobMixer, meshMixer,
           feet: bones.filter((_, k) => pinnedSet.has(k)),
           // Hidden slots must stay out of `body`, or the state switch drags
@@ -147,6 +148,10 @@ export function initGrid(host, samples, pinned, opts = {}) {
         });
       });
 
+      // Handy for dialling in a stubborn clip from the console:
+      //   const c = __animuse.grid.find(c => /panda/i.test(c.id));
+      //   c.pivot.rotation.x = THREE.MathUtils.degToRad(90);
+      if (typeof window !== 'undefined') window.__animuse.grid = cells;
       fitCamera(s, s.scene.children.filter((o) => !o.isLight), { padding: 1.12 });
       s.onResize = () => fitCamera(s, s.scene.children.filter((o) => !o.isLight), { padding: 1.12 });
       s.onFrame = frame;

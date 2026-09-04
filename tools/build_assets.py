@@ -44,12 +44,11 @@ PINNED_BONES = [4, 55, 76, 77]
 # The grid viewer orients each cell by rolling it until the pinned feet point
 # down, so no per-animal constant is normally needed. This is the override for
 # any clip that still lands wrong: extra degrees of roll on top.
-# The generated panda clip has the animal on its back with its legs paddling in
-# the air. A sweep of all 96 whole-degree-multiple orientations puts its four
-# pinned feet at best level with its body, never below, so no camera or rotation
-# makes it read as a quadruped -- the clip itself needs regenerating. Kept in the
-# manifest, held out of the grid until then.
-INPAINT_SKIP = {"The_juvenile_giant_panda_treads_water_a6e7e7b03aaf"}
+# Per-clip overrides for the inpainting grid. `INPAINT_SKIP` holds a clip out of
+# the grid without deleting the asset; ROTX/ROTZ are extra degrees of roll in
+# screen axes, on top of the automatic orientation.
+INPAINT_SKIP = set()
+INPAINT_ROTX = {}
 INPAINT_ROTZ = {}
 
 # Left front leg, from references/repos/scene_1/main.js.
@@ -121,6 +120,7 @@ def main():
         m["inpainting"].append({
             "id": key,
             "prompt": caps.get(fn, ""),
+            "rotateX": INPAINT_ROTX.get(key, 0),
             "rotateZ": INPAINT_ROTZ.get(key, 0),
             "inGrid": key not in INPAINT_SKIP,
             "mesh": emit(f"{DATA}/inpainting/mesh/{fn}", f"inpainting/{key}.mesh.glb", max_frames=90),
