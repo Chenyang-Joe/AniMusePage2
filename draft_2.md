@@ -9,7 +9,9 @@
 > 但不应该能照着实现出来。
 >
 > 约定同 v1：正文英文，`〔〕`是中文施工备注，`[[DEMO:x]]` / `[[FIG:x]]` 是占位符。
-> **`⚠️ 决策点`** 标的是需要你拍板的地方。
+>
+> **状态：所有决策点已定（2026-09-04），这份是最终施工稿。** 唯一还没定的是
+> teaser gallery 选哪几只（你说最后再挑），不影响开工。
 
 ---
 
@@ -27,7 +29,7 @@
 | 超参对照表（backbone / lr / 层数 / 采样步数） | **删** | 这是给复现用的 |
 | Ablation（辅助损失表） | **删** | 同上 |
 | Stage 1 benchmark（Table 1） | **保留** | 你说 part 1 可以放 |
-| Stage 2 benchmark | **⚠️ 决策点，见下** | |
+| Stage 2 benchmark | **只留一句匿名化的 user study**，表格全砍 | 见 ⑦ |
 | Pipeline 图 | **保留但简化说明** | 你说保留 |
 | WebAnimal3D | **保留** | contribution |
 | 四个互动组件 | **全部保留，且提到更靠前** | 这才是这页的主角 |
@@ -46,7 +48,7 @@
 ④ Overview video
 ⑤ How it works    Pipeline 图 + 5 句话，无公式
 ⑥ Stage 1         SGB 是什么 + 三个组件 + Table 1
-⑦ Stage 2         text → motion + gallery + ⚠️结果
+⑦ Stage 2         text → motion + gallery + 一句 user study 结论
 ⑧ Control         inpainting + part editing  ← 差异化重点
 ⑨ WebAnimal3D
 ⑩ Capability summary
@@ -63,14 +65,13 @@
 **Subtitle**
 > Animate any raw animal mesh from a text prompt — no skeleton, no joint names, no manual rigging.
 
-**Authors**
-> Chenyang Xu¹  ·  〔TODO: 其他作者〕
-> ¹New York University 〔TODO: 确认单位排列〕
+**Authors** ✅ 已定
+> Chenyang Xu¹ · Zeyu Jiang¹ · Guangzhao He² · Haoran Li¹ · Shichen Zhang¹
+> Juexiao Zhang¹ · Sihang Li¹ · Chen Feng¹ · Jing Zhang¹
+> ¹New York University　²Cornell University　· author list tentative
 
-**Venue line**
-> ⚠️ 决策点：现在写的是 `SIGGRAPH Asia 2026 — Technical Papers (under review)`。
-> 既然还要 further develop、不挂 arXiv，建议改成中性的
-> **`Work in progress · 2026`**，避免让人去搜投稿状态。
+**Venue line** ✅ 已定
+> `Under Review · 2026` —— 不出现 SIGGRAPH Asia。
 
 **Buttons**
 - ▶ Video（跳到 ④）
@@ -118,7 +119,10 @@
 
 `[[VIDEO]]` → https://youtu.be/UVx4sUNARUM ✅ 已接（点击才加载 iframe）
 
-**Caption** 〔TODO: 视频里讲了什么，一句话〕
+**Caption** ✅ 已定
+> Five minutes of AniMuse in motion — the same material as this page, but moving.
+
+〔视频本身是这页内容的视频版 / teaser。**caption 里不提任何会议名。**〕
 
 ---
 
@@ -200,43 +204,28 @@
 
 **Caption**: `Each row: the prompt, the input static mesh, the bones AniMuse places in it, and the motion it generates.`
 
-### ⚠️ 决策点：Stage 2 的定量结果放不放？
+### How good is it? ✅ 已定：走 Option A（匿名化 user study，不放表格）
 
-〔你的顾虑是对的：**页面上出现 "AnimateAnyMesh" 和 "AniMo" 这两个词，
-就等于给这两篇的作者做了一个可搜索的锚点。** 他们搜自己方法名就可能搜到这页。〕
+〔**页面上就写下面这段，不出现任何对手的名字。**
+不放 VLM judge 表、不放 VBench、不放 Bear/Horse 那张五行对比图 ——
+那张图的行标题就是表格的图片版。Table 1（Stage 1 绑定）照常保留，
+UniRig / Puppeteer 是神经绑定的工作，和 Stage 2 不是同一条赛道。〕
 
-**我的建议：折中方案 —— 放一个匿名化的 user study 数字，不放表格。**
+> **How good is it?** We ran a **50-participant user study** on the out-of-domain
+> benchmark — 30 samples, two-alternative forced choice, following the protocol used
+> in the text-to-motion literature. Against the strongest published skeleton-free
+> baseline, participants preferred AniMuse's result **74.6%** of the time overall and
+> **84.0%** on whether the motion matched the prompt. Against a skeleton-based
+> baseline the margins are wider still. Against ground-truth capture we are, fairly,
+> still behind — which is the honest state of the problem.
 
-理由：
-1. **面试官不会去核对表格。** 他要的是"这东西好不好"的一句可信断言。
-   一个 50 人的 user study 结论比一张 VLM judge 表有说服力得多，
-   而且它不需要点名对手就能成立。
-2. **表格必须点名才有意义**，而点名正是你要避免的。
-3. **VBench 直接不放** —— 你自己在 rebuttal 里就说了 "scores are saturated"，
-   放上去既不加分，又多两个可搜索的方法名。
-4. Table 1 保留没问题：UniRig / Puppeteer 是**神经绑定**的工作，
-   和你 Stage 2 的技术路线不是同一条赛道，不构成"被防御"的风险。
+〔三个大数字卡片〕
 
-**建议的写法（Option A，推荐）**
-
-> **How good is it?** We ran a 50-participant user study on the out-of-domain benchmark
-> — 30 samples, two-alternative forced choice, following the protocol used in the
-> text-to-motion literature. Against the strongest published skeleton-free baseline,
-> participants preferred AniMuse's result **74.6%** of the time overall, and **84.0%**
-> on whether the motion matched the prompt. Against a skeleton-based baseline the
-> margins are wider still. Against ground-truth capture we are, fairly, still behind.
-
-〔三个卡片：`74.6%` overall preference · `84.0%` text match · `50` participants〕
-
-**Option B（更保守）**：连百分比都不放，只写
-> A 50-participant user study on out-of-domain data puts AniMuse ahead of both published
-> baselines on text match, motion quality and shape integrity. Details on request.
-
-**Option C（全放）**：放 rebuttal 的 Tab.A + Tab.B 两张表，点名。
-→ 我不建议。收益只有"看起来更硬"，成本是把两个竞争团队的注意力引过来。
-
-〔无论选哪个，`[[FIG:eval]]`（Bear/Horse 五行对比图）**都建议不放** ——
-那张图的行标题直接写着两个对手的名字，等于表格的图片版。〕
+| | |
+|---|---|
+| **74.6%** | overall preference over the strongest published baseline |
+| **84.0%** | preference on text–motion match |
+| **50** | participants, 30 samples, 2AFC |
 
 ---
 
@@ -268,10 +257,15 @@
 ### `[[DEMO:part-editing]]` ✅ 已实现
 **Caption**: `Drag the slider. Switch to Mesh to watch the surface follow.`
 
-〔**可加分**：rebuttal 里提到 SGB 还支持 **motion transfer**（"semantic editing, motion
-inpainting, and motion transfer, none of which RigMo supports"）。
-如果有 motion transfer 的素材，这里加第三个组件会很强 —— 把 A 的骨骼轨迹套到 B 身上。
-⚠️ 需要你确认有没有导出。〕
+### 8.3 Motion transfer ✅ 已定：只写一句，不做组件
+
+〔没有好素材，不做第三个互动组件。就在 8.2 末尾补一句，把这个能力提一嘴，
+面试时可以顺着这句往下聊。〕
+
+> The same property makes motion transfer fall out for free: a trajectory authored
+> on one animal is, by construction, already addressed to the right body parts on
+> any other. We show pinning and dragging here; the transfer case is the same
+> mechanism with the whole trajectory supplied instead of a few slots.
 
 ---
 
@@ -287,8 +281,9 @@ inpainting, and motion transfer, none of which RigMo supports"）。
 - **reconstructed from web video**, no manual annotation
 - **captioned**, so it can be used for text-conditioned training directly
 
-> ⚠️ 决策点：要不要写"we plan to release"？现在项目还要继续做，
-> 建议先写成 **`Release planned.`** 一句，不给时间表。
+✅ 已定：可以写 release。用一句不带时间表的：
+> **Release planned.** We release the mesh-level motion data and captions, not the
+> underlying videos.
 
 ---
 
@@ -317,25 +312,40 @@ inpainting, and motion transfer, none of which RigMo supports"）。
 > **Status.** AniMuse is under active development; a paper is in preparation. This page
 > shows results, not implementation. Happy to go deeper in person.
 >
-> **Contact.** 〔TODO: 邮箱？要不要放 GitHub / 个人主页？〕
+> **Contact.** Chenyang Xu — cx2219@nyu.edu
 
-〔把 BibTeX 那一节换成这个。没发表的东西挂 BibTeX 会显得奇怪，
+〔✅ 已定：**不放任何官方/项目联系方式**（no project email, no org account），
+要联系就联系个人。把 BibTeX 那一节整个换成这个 —— 没发表的东西挂 BibTeX 会显得奇怪，
 而 "paper in preparation / happy to go deeper in person" 恰恰是面试场景想要的钩子。〕
 
 ---
 
-# 附录 A：还需要你确认的
+# 附录 A：决策记录
 
-1. **共同作者名单和单位**（现在只有 Chenyang Xu + NYU）。
-2. **Venue line** 写什么？（建议 `Work in progress · 2026`）
-3. **⚠️ Stage 2 结果** 选 Option A / B / C？（我建议 A）
-4. **Contact** 放什么？邮箱 / 个人主页 / GitHub。
-5. **Motion transfer** 有没有导出好的素材？有的话 ⑧ 再加一个组件。
-6. Overview video 一句话说明。
+| # | 问题 | 结论 |
+|---|---|---|
+| 1 | Venue line | `Under Review · 2026`，不提 SIGGRAPH Asia |
+| 2 | 标题用哪版 | tex 版：*…via Semantic Gaussian Bones* |
+| 3 | 作者 / 单位 | Chenyang Xu · Zeyu Jiang · Guangzhao He · Haoran Li · Shichen Zhang · Juexiao Zhang · Sihang Li · Chen Feng · Jing Zhang；Guangzhao He 在 Cornell，其余 NYU |
+| 4 | Stage 2 结果 | **Option A** —— 匿名化 user study 数字，不放表格、不放 VBench、不放对比图 |
+| 5 | WebAnimal3D release | 可以写，`Release planned.`，不给时间表 |
+| 6 | Contact | 只放个人邮箱 cx2219@nyu.edu，不放任何官方渠道 |
+| 7 | Motion transfer | 没好素材，不做组件，正文提一句 |
+| 8 | 新页面落地 | **替换 `index.html`，旧的挪到 `legacy/`** |
+| 9 | 视频 caption | 这页内容的视频版 / teaser，**不提会议名** |
+| 10 | teaser gallery 选片 | 最后再挑（不阻塞开工） |
+
+**还挂着的一条**（和 draft 无关，属于素材问题）：
+inpainting 的熊猫片段是仰面划水的，96 个刚体朝向都救不回四足着地；
+现在靠一个手动 −45° 的 roll 摆成了斜姿。要么接受，要么重新生成那段。
+另外 `captions.txt` 里第 7 条 alaskan moose 没有对应 GLB，补上就能凑满六宫格。
 
 # 附录 B：v1 页面怎么处理
 
-`index.html` 保留不动，作为互动组件的技术参考。
-新页面另开一个文件（比如 `v2.html` 或者直接换掉 `index.html`、把旧的挪到 `legacy/`）。
-⚠️ 你定：**新页面是替换 `index.html`，还是并存？** 我建议替换，旧的挪到 `legacy/index.html`，
-这样 GitHub Pages 的根路径就是新版。
+✅ 已定：**替换 + 挪动。**
+
+- 现在的 `index.html` 挪到 `legacy/index.html`，连同它引用的东西一起，
+  作为互动组件的技术参考留着（内部用，不从新页面链过去）。
+- 新页面写成根目录的 `index.html`，GitHub Pages 的根路径就是新版。
+- `js/viewers/*`、`css/`、`assets/`、`vendor/` 全部复用，不重写 —— 四个互动组件
+  已经调好了，新页面只是换文字骨架和章节顺序。

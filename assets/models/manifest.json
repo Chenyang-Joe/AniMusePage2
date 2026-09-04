@@ -103,7 +103,7 @@
    "prompt": "The juvenile giant panda treads water and then swims forward with gentle paddles.",
    "mesh": "inpainting/The_juvenile_giant_panda_treads_water_a6e7e7b03aaf.mesh.glb",
    "blob": "inpainting/The_juvenile_giant_panda_treads_water_a6e7e7b03aaf.blob.glb",
-   "rotateZ": 0,
+   "rotateZ": -45,
    "inGrid": true,
    "rotateX": 0
   },
@@ -130,7 +130,7 @@
    "prompt": "The male asian small clawed otter swims and then treads water.",
    "mesh": "inpainting/The_male_asian_small_clawed_otter_swi_27a9b42ca295.mesh.glb",
    "blob": "inpainting/The_male_asian_small_clawed_otter_swi_27a9b42ca295.blob.glb",
-   "rotateZ": 0,
+   "rotateZ": -45,
    "inGrid": true,
    "rotateX": 0
   }

@@ -49,7 +49,12 @@ PINNED_BONES = [4, 55, 76, 77]
 # screen axes, on top of the automatic orientation.
 INPAINT_SKIP = set()
 INPAINT_ROTX = {}
-INPAINT_ROTZ = {}
+# Negative = clockwise on screen. These two are laid down automatically but land
+# a quarter-turn off; a 45 degree roll settles them.
+INPAINT_ROTZ = {
+    "The_juvenile_giant_panda_treads_water_a6e7e7b03aaf": -45,
+    "The_male_asian_small_clawed_otter_swi_27a9b42ca295": -45,
+}
 
 # Left front leg, from references/repos/scene_1/main.js.
 LEG_BONES = [44, 45, 46, 47, 48, 49, 50, 51, 26, 110, 111, 13]
