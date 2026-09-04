@@ -7,3 +7,6 @@ dist/
 # 原始素材（几个 GB），不入库；建站时只把挑选并压缩过的资源放进 public/
 data/
 editing/
+
+# 方法侧代码，独立仓库，只作参考
+references/repos/CANOR_GAUSS/
