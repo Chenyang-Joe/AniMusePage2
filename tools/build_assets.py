@@ -20,11 +20,27 @@ MAX_TEX = 1024
 
 # Four species with obviously different body plans -- the point of the split
 # viewer is that one shared bone book covers all of them.
+# rotateY is extra degrees on top of the automatic profile turn; 180 turns an
+# animal that ends up facing tail-first.
 TEASER = [
-    ("fox",      "Fennec_Fox_Female__fennec_fox_female__4558f40ab8dc.glb", "Fennec Fox"),
-    ("elephant", "Indian_Elephant_Female__indian_elepha_64be1af510c4.glb", "Indian Elephant"),
-    ("wallaby",  "Rednecked_Wallaby_Male__rednecked_wal_36a87e28b6c0.glb", "Red-necked Wallaby"),
-    ("warthog",  "Common_Warthog_Juvenile__common_warth_f072c9b5ba93.glb", "Common Warthog"),
+    ("fox",      "Fennec_Fox_Female__fennec_fox_female__4558f40ab8dc.glb", "Fennec Fox", 0),
+    ("elephant", "Indian_Elephant_Female__indian_elepha_64be1af510c4.glb", "Indian Elephant", 0),
+    ("wallaby",  "Rednecked_Wallaby_Male__rednecked_wal_36a87e28b6c0.glb", "Red-necked Wallaby", 180),
+    ("warthog",  "Common_Warthog_Juvenile__common_warth_f072c9b5ba93.glb", "Common Warthog", 0),
+]
+
+# A second, larger draw for the Stage-2 wall. Deliberately disjoint from TEASER
+# so the two split viewers never show the same animal. Chosen for short clips and
+# low vertex counts -- eight of these load in the time one of the big ones would.
+GALLERY = [
+    ("wombat",   "Common_Wombat_Juvenile__common_wombat_d75c42453139.glb", "Common Wombat", 0),
+    ("quokka",   "Quokka_Juvenile__quokka_juvenile__ani_ed4a5523cfee.glb", "Quokka", 0),
+    ("wilddog",  "African_Wild_Dog_Female__african_wild_2d6e9829b182.glb", "African Wild Dog", 0),
+    ("addax",    "Addax_Female__addax_female__animation_3c84f53e637e.glb", "Addax", 0),
+    ("badger",   "Honey_Badger_Female__honey_badger_mal_9b84ff3fdd83.glb", "Honey Badger", 0),
+    ("arcticwolf", "Arctic_Wolf_Male__arctic_wolf_male__a_fdaf083438c8.glb", "Arctic Wolf", 0),
+    ("platypus", "Platypus_Male__platypus_male__animati_abc6c6f4afb4.glb", "Platypus", 0),
+    ("bonobo",   "Bonobo_Female__bonobo_female__animati_c8a00d05ea65.glb", "Bonobo", 0),
 ]
 
 # Stage-1 rigging comparison, textured: the point of the row is that the mesh we
@@ -49,12 +65,10 @@ PINNED_BONES = [4, 55, 76, 77]
 # screen axes, on top of the automatic orientation.
 INPAINT_SKIP = set()
 INPAINT_ROTX = {}
-# Negative = clockwise on screen. These two are laid down automatically but land
-# a quarter-turn off; a 45 degree roll settles them.
-INPAINT_ROTZ = {
-    "The_juvenile_giant_panda_treads_water_a6e7e7b03aaf": -45,
-    "The_male_asian_small_clawed_otter_swi_27a9b42ca295": -45,
-}
+# Extra degrees of roll in screen axes, on top of the automatic orientation.
+# Empty on purpose: once the bones are registered onto the mesh in the viewer,
+# the automatic rule gets every clip right, the belly-up panda included.
+INPAINT_ROTZ = {}
 
 # Left front leg, from references/repos/scene_1/main.js.
 LEG_BONES = [44, 45, 46, 47, 48, 49, 50, 51, 26, 110, 111, 13]
@@ -88,16 +102,18 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     m = {"pinnedBones": PINNED_BONES, "legBones": LEG_BONES}
 
-    print("teaser (split viewer + correspondence)")
-    m["teaser"] = []
-    for key, fn, label in TEASER:
-        m["teaser"].append({
-            "id": key, "label": label,
-            "mesh": emit(f"{DATA}/teaser/mesh/{fn}", f"teaser/{key}.mesh.glb"),
-            # Blobs carry no texture and quantizing 120 tiny ellipsoids buys
-            # nothing, so they go through untouched.
-            "blob": emit(f"{DATA}/teaser/blob/{fn}", f"teaser/{key}.blob.glb", do_jpeg=False, do_quant=False),
-        })
+    for group, table in (("teaser", TEASER), ("gallery", GALLERY)):
+        print(f"{group} (split viewers)")
+        m[group] = []
+        for key, fn, label, rot in table:
+            m[group].append({
+                "id": key, "label": label, "rotateY": rot,
+                "mesh": emit(f"{DATA}/teaser/mesh/{fn}", f"{group}/{key}.mesh.glb"),
+                # Blobs carry no texture and quantizing 120 tiny ellipsoids buys
+                # nothing, so they go through untouched.
+                "blob": emit(f"{DATA}/teaser/blob/{fn}", f"{group}/{key}.blob.glb",
+                             do_jpeg=False, do_quant=False),
+            })
 
     print("stage1 (rigging comparison)")
     m["stage1"] = []

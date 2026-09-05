@@ -20,8 +20,8 @@
 <nav class="nav">
   <div class="wrap">
     <span class="brand">AniMuse</span>
-    <a href="#what">What it does</a>
-    <a href="#how">How it works</a>
+    <a href="#overview">Overview</a>
+    <a href="#video">Video</a>
     <a href="#stage1">The rig</a>
     <a href="#stage2">Generation</a>
     <a href="#control">Control</a>
@@ -35,8 +35,15 @@
   <p class="subtitle">Animate any raw animal mesh from a text prompt — no skeleton, no joint names, no manual rigging.</p>
 
   <p class="authors">
-    Chenyang Xu<sup>1</sup> &nbsp;·&nbsp; Zeyu Jiang<sup>1</sup> &nbsp;·&nbsp; Guangzhao He<sup>2</sup> &nbsp;·&nbsp; Haoran Li<sup>1</sup> &nbsp;·&nbsp; Shichen Zhang<sup>1</sup><br>
-    Juexiao Zhang<sup>1</sup> &nbsp;·&nbsp; Sihang Li<sup>1</sup> &nbsp;·&nbsp; Chen Feng<sup>1</sup> &nbsp;·&nbsp; Jing Zhang<sup>1</sup>
+    <a href="https://chenyang-joe.github.io/" target="_blank" rel="noopener">Chenyang Xu</a><sup>1</sup> &nbsp;·&nbsp;
+    <a href="https://jdscript.net/" target="_blank" rel="noopener">Zeyu Jiang</a><sup>1</sup> &nbsp;·&nbsp;
+    <a href="https://www.guangzhaohe.com/" target="_blank" rel="noopener">Guangzhao He</a><sup>2</sup> &nbsp;·&nbsp;
+    <a href="https://www.linkedin.com/in/haoran-li-589763355/" target="_blank" rel="noopener">Haoran Li</a><sup>1</sup> &nbsp;·&nbsp;
+    <a href="https://shichenzhang.me/" target="_blank" rel="noopener">Shichen Zhang</a><sup>1</sup><br>
+    <a href="https://juexzz.github.io/" target="_blank" rel="noopener">Juexiao Zhang</a><sup>1</sup> &nbsp;·&nbsp;
+    <a href="https://louis-leee.github.io/" target="_blank" rel="noopener">Sihang Li</a><sup>1</sup> &nbsp;·&nbsp;
+    <a href="https://simbaforrest.github.io/" target="_blank" rel="noopener">Chen Feng</a><sup>1</sup> &nbsp;·&nbsp;
+    <a href="https://jingz6676.github.io/" target="_blank" rel="noopener">Jing Zhang</a><sup>1</sup>
   </p>
   <p class="affil"><sup>1</sup>New York University &nbsp;&nbsp; <sup>2</sup>Cornell University &nbsp;·&nbsp; author list tentative</p>
 
@@ -64,10 +71,10 @@
   </div>
 </section>
 
-<!-- ================= WHAT IT DOES ================= -->
-<section id="what">
+<!-- ================= OVERVIEW ================= -->
+<section id="overview">
   <div class="wrap narrow">
-    <h2>What AniMuse does</h2>
+    <h2>Overview</h2>
     <p class="lead">
       Give AniMuse a static 3D animal — any mesh, any species, straight out of a scan or a generator —
       and a sentence describing what it should do. It returns an animated mesh sequence.
@@ -75,12 +82,10 @@
     <p>
       There is no rigging step. No skeleton is fitted, no joints are named, no artist marks up the model.
       AniMuse builds its own deformation handles: <b>120 oriented "Gaussian bones"</b> that it places
-      inside the mesh, and it generates motion by moving those.
-    </p>
-    <p>
-      The handles are the interesting part. Because bone <em>k</em> lands on the same body part for every
-      animal, the index itself becomes a control you can grab — pin it, drag it, or hand it a trajectory
-      and let the model write the rest of the body around it.
+      inside the mesh, and it generates motion by moving those. One model covers every topology, the
+      motion state is 120 handles rather than tens of thousands of vertices, and bone <em>k</em> lands on
+      the same body part for a fox as for an elephant — which is what turns an index into something you
+      can grab.
     </p>
   </div>
 
@@ -95,6 +100,29 @@
       <div class="viewer-chips"></div>
       <p class="viewer-note">Drag the divider: bones on the left, the surface they drive on the right. Drag anywhere else to orbit — both halves share one camera, so they can never fall out of step.</p>
     </div>
+  </div>
+
+  <div class="wrap">
+    <figure>
+      <img src="assets/img/pipeline.jpg" alt="AniMuse two-stage pipeline: a rigging stage that predicts Semantic Gaussian Bones, and a generation stage that diffuses their trajectory from text." loading="lazy">
+    </figure>
+  </div>
+
+  <div class="wrap narrow">
+    <p>
+      It runs in two stages. <b>Stage 1 — Rigging</b> reads the static mesh and predicts the 120 bones:
+      soft, oriented ellipsoids that sit inside the body, together with how strongly each one pulls on
+      each vertex. They are learned end-to-end from mesh sequences alone — no rigged ground truth is ever
+      used, because the training signal is simply whether deforming one frame with them reproduces
+      another.
+    </p>
+    <p>
+      <b>Stage 2 — Generation</b> generates the trajectory of those bones over time with a diffusion
+      model, conditioned on the text prompt and on what Stage 1 learned about each bone's local geometry.
+      Linear blend skinning turns the bone trajectory back into an animated mesh. Because the motion
+      state never grows with mesh resolution, long sequences on dense meshes stay tractable — and the
+      handles stay small enough in number to be a usable control surface.
+    </p>
   </div>
 </section>
 
@@ -113,43 +141,6 @@
   </div>
 </section>
 
-<!-- ================= HOW IT WORKS ================= -->
-<section id="how">
-  <div class="wrap">
-    <h2>How it works</h2>
-    <figure>
-      <img src="assets/img/pipeline.jpg" alt="AniMuse two-stage pipeline: a rigging stage that predicts Semantic Gaussian Bones, and a generation stage that diffuses their trajectory from text." loading="lazy">
-    </figure>
-  </div>
-
-  <div class="wrap narrow">
-    <p>AniMuse runs in two stages.</p>
-    <p>
-      <b>Stage 1 — Rigging.</b> A point-cloud encoder reads the static mesh and predicts 120 Semantic
-      Gaussian Bones: soft, oriented ellipsoids that sit inside the body, together with how strongly each
-      one pulls on each vertex. They are learned end-to-end from mesh sequences alone — no rigged ground
-      truth is ever used, because the training signal is simply whether deforming one frame with them
-      reproduces another.
-    </p>
-    <p>
-      <b>Stage 2 — Generation.</b> A diffusion model generates the trajectory of those 120 bones over
-      time, conditioned on the text prompt and on what Stage 1 learned about each bone's local geometry.
-      Standard linear blend skinning turns the bone trajectory back into an animated mesh.
-    </p>
-    <p>
-      The whole motion state is 120 bones per frame, not one entry per vertex — which is what keeps long
-      sequences on high-resolution meshes tractable, and what makes the control interface below possible
-      in the first place.
-    </p>
-
-    <div class="cards">
-      <div class="card"><h5>Skeleton-free</h5><p>One model, every topology. Nothing is fitted per species, and nothing has to be named.</p></div>
-      <div class="card"><h5>Compact</h5><p>120 handles instead of tens of thousands of vertices, so the motion state does not grow with mesh resolution.</p></div>
-      <div class="card"><h5>Semantic</h5><p>Bone <em>k</em> is the same body part on a fox and on an elephant — which is what turns an index into a control.</p></div>
-    </div>
-  </div>
-</section>
-
 <!-- ================= STAGE 1 ================= -->
 <section id="stage1" class="stage-section">
   <div class="stage-mark"><span class="tag">Stage 1</span><span class="name">The rig</span><span class="rule"></span></div>
@@ -160,27 +151,11 @@
       is, and which parts of the surface each one moves.
     </p>
 
-    <h3>The same slot is the same body part</h3>
-    <p>
-      Bone colour below is a fixed ramp over the bone index, and it is the <em>same</em> ramp on every
-      animal. Hover any bone to see its counterpart light up on the others — nothing is matched at run
-      time. The correspondence falls out of how the bones are learned.
-    </p>
-  </div>
-
-  <div class="wrap">
-    <div class="viewer is-loading" id="v-corr">
-      <div class="viewer-frame"><div class="viewer-canvas h-sm"></div></div>
-      <p class="corr-readout">Hover any bone — its counterpart lights up on every species.</p>
-    </div>
-  </div>
-
-  <div class="wrap narrow">
     <h3>How good is the rig?</h3>
     <p>
       We measure it the way you would judge a rigger: extract the rig from a rest-pose mesh, use it to
-      deform that mesh onto a posed target, and see how far off you are. Below, ground truth, the bones
-      AniMuse predicts, and the mesh those bones deform — same instant, same camera, each free to turn
+      deform that mesh onto a posed target, and see how far off you are. Below — ground truth, the bones
+      AniMuse predicts, and the mesh those bones deform. Same instant, same camera, each free to turn
       about its own centre.
     </p>
   </div>
@@ -215,6 +190,21 @@
       <strong>network-only</strong> row — a single forward pass, no test-time fitting at all — still takes
       the lowest CD-L2 in both settings: the rig is good before you optimise anything.
     </p>
+
+    <h3>Semantic consistency: the same slot is the same body part</h3>
+    <p>
+      Bone colour below is a fixed ramp over the bone index, and it is the <em>same</em> ramp on every
+      animal. Hover any bone to see its counterpart light up on the others — nothing is matched at run
+      time. The correspondence falls out of how the bones are learned, and it is what every control on
+      this page is built on.
+    </p>
+  </div>
+
+  <div class="wrap">
+    <div class="viewer is-loading" id="v-corr">
+      <div class="viewer-frame"><div class="viewer-canvas h-sm"></div></div>
+      <p class="corr-readout">Hover any bone — its counterpart lights up on every species.</p>
+    </div>
   </div>
 </section>
 
@@ -230,13 +220,16 @@
   </div>
 
   <div class="wrap">
-    <figure>
-      <img src="assets/img/gallery.jpg" alt="Gallery: for each row, the text prompt, the input static mesh, the predicted bones, and five frames of generated motion." loading="lazy">
-      <figcaption>
-        Each row: the prompt, the input static mesh, the bones AniMuse places in it, and the motion it
-        generates.
-      </figcaption>
-    </figure>
+    <div class="viewer is-loading" id="v-wall">
+      <div class="viewer-frame">
+        <div class="viewer-canvas h-lg"></div>
+        <div class="grid-labels"></div>
+        <span class="split-label-left"></span>
+        <span class="split-label-right"></span>
+        <button class="split-divider" tabindex="0" aria-label="Drag to move the split between bones and mesh"></button>
+      </div>
+      <p class="viewer-note">Eight species, one divider. Every animal here is driven by the same 120 handles — drag the cut to pull the whole wall from the bones to the surface they deform.</p>
+    </div>
   </div>
 
   <div class="wrap narrow">
@@ -255,13 +248,6 @@
       <div class="stat"><b>84.0%</b><span>preference on text–motion match</span></div>
       <div class="stat"><b>50</b><span>participants, 30 samples, two-alternative forced choice</span></div>
     </div>
-  </div>
-
-  <div class="wrap">
-    <figure>
-      <img src="assets/img/figure2.jpg" alt="Further generated results across species." loading="lazy">
-      <figcaption>Further generated results across species and actions.</figcaption>
-    </figure>
   </div>
 </section>
 
@@ -300,15 +286,6 @@
   </div>
 
   <div class="wrap narrow">
-    <figure>
-      <img src="assets/img/inpaint.jpg" alt="Cross-species motion inpainting: the four foot-tip bones of a fox, panda and otter pinned to one synchronised cadence." loading="lazy">
-      <figcaption>
-        The four foot-tip bones (magenta) of a fox, a panda and an otter, pinned to one synchronised
-        vertical motion. All three share the same periodic foot pace while their bodies adapt to each
-        morphology.
-      </figcaption>
-    </figure>
-
     <h3>Part-level editing</h3>
     <p>
       The same index space gives direct manual control. Below, one slider drags the twelve bones that make
@@ -319,7 +296,7 @@
 
   <div class="wrap">
     <div class="viewer is-loading" id="v-edit">
-      <div class="viewer-frame"><div class="viewer-canvas h-lg"></div></div>
+      <div class="viewer-frame"><div class="viewer-canvas h-md"></div></div>
       <div class="viewer-controls">
         <label for="edit-slider">Shift left front leg</label>
         <input class="edit-slider" id="edit-slider" type="range" min="-100" max="100" value="0" step="1">
@@ -383,13 +360,10 @@
 <!-- ================= STATUS ================= -->
 <section id="status">
   <div class="wrap narrow">
-    <h2>Status &amp; contact</h2>
+    <h2>Status</h2>
     <p>
       AniMuse is under active development and a paper is in preparation. This page shows results, not
       implementation — happy to go deeper in person.
-    </p>
-    <p>
-      <b>Contact.</b> Chenyang Xu — <a href="mailto:cx2219@nyu.edu">cx2219@nyu.edu</a>
     </p>
   </div>
 </section>

@@ -50,6 +50,11 @@ whenNear('v-split', async (el) => {
   });
 });
 
+whenNear('v-wall', async (el) => {
+  const [{ initSplitGrid }, m] = await Promise.all([import('./viewers/splitgrid.js'), manifest()]);
+  initSplitGrid(el, withBase(m.gallery, ['mesh', 'blob']));
+});
+
 whenNear('v-corr', async (el) => {
   const [{ initCorrespondence }, m] = await Promise.all([import('./viewers/correspond.js'), manifest()]);
   initCorrespondence(el, withBase(m.teaser, ['blob']));

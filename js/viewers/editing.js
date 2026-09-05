@@ -90,8 +90,8 @@ export function initEditing(host, samples, legBones) {
       });
 
       const pairs = s.scene.children.filter((o) => !o.isLight);
-      fitCamera(s, pairs, { padding: 1.1 });
-      s.onResize = () => fitCamera(s, pairs, { padding: 1.1 });
+      fitCamera(s, pairs, { padding: 1.3 });
+      s.onResize = () => fitCamera(s, pairs, { padding: 1.3 });
       host.classList.remove('is-loading');
       apply(+slider.value);
     },

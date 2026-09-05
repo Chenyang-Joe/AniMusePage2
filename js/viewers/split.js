@@ -90,7 +90,7 @@ export function initSplit(host, samples, opts = {}) {
     // tracks -- so the clip has to be applied before anything measures them.
     playClip(stage, blobGltf, blobRoot);
     playClip(stage, meshGltf, meshRoot);
-    const { pair } = pairModels(meshRoot, blobRoot, { align: s.align });
+    const { pair } = pairModels(meshRoot, blobRoot, { align: s.align, rotateY: s.rotateY || 0 });
     stage.scene.add(pair);
     fitCamera(stage, [pair]);
     stage.onResize = () => fitCamera(stage, [pair]);

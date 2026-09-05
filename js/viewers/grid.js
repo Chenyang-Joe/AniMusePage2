@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, fitCamera, restBox, styleBlob, styleMesh, forceLinearInterp, observeResize } from './stage.js';
+import { createStage, loadGLB, alignBlobToMesh, fitCamera, restBox, styleBlob, styleMesh, forceLinearInterp, observeResize } from './stage.js';
 
 /**
  * Every species at once, on one clock — the inpainting viewer.
@@ -79,18 +79,23 @@ export function initGrid(host, samples, pinned, opts = {}) {
         blobMixer.setTime(0);
         meshMixer.setTime(0);
 
-        // Centre each in its own frame, then hang both off one pivot, so the
-        // state switch can never nudge a cell sideways.
-        for (const model of [blobRoot, meshRoot]) {
-          model.updateMatrixWorld(true);
-          model.position.sub(restBox(model).getCenter(new THREE.Vector3()));
-        }
+        // Register the bones onto the surface first. The two exports are not in
+        // one frame, so without this they sit at different sizes *and* different
+        // orientations -- and then the automatic orientation below, which reads
+        // the bones, would not describe what the mesh view actually shows.
+        // Three nested groups, because centring and rotating must not share one:
+        // `centre` carries the offset that puts the pair's middle on the origin,
+        // `inner` the automatic orientation (which then turns about that middle),
+        // `pivot` the cell's position, its scale, and any manual roll -- expressed
+        // in screen axes, where it is easy to reason about.
+        const centre = new THREE.Group();
+        centre.add(meshRoot, blobRoot);
+        alignBlobToMesh(blobRoot, meshRoot);
+        centre.updateMatrixWorld(true);
+        centre.position.sub(restBox(centre).getCenter(new THREE.Vector3()));
 
-        // Two nested groups: `inner` takes the automatic orientation, `pivot`
-        // takes the cell's position, its scale, and any manual roll -- which is
-        // then expressed in screen axes, where it is easy to reason about.
         const inner = new THREE.Group();
-        inner.add(blobRoot, meshRoot);
+        inner.add(centre);
         const pivot = new THREE.Group();
         pivot.position.set(
           (col - (inRow - 1) / 2) * SPACING_X,

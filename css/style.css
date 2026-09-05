@@ -85,6 +85,7 @@ a:hover { text-decoration: underline; }
 
 section { padding: 44px 0; }
 section + section { border-top: 1px solid var(--line); }
+.stage-section { padding-top: 40px; }
 
 h2 {
   font: 700 27px/1.3 var(--serif);
@@ -102,17 +103,17 @@ p { margin: 0 0 16px; }
 }
 .eq .where { display: block; font-family: var(--sans); font-size: 13px; color: var(--muted); margin-top: 8px; white-space: normal; }
 
-/* Stage banner */
+/* Stage banner — this is the page's main divider, so it has to carry weight */
 .stage-mark {
-  display: flex; align-items: center; gap: 14px;
-  max-width: var(--col); margin: 0 auto 6px; padding: 0 24px;
+  display: flex; align-items: baseline; gap: 16px;
+  max-width: var(--col); margin: 0 auto 30px; padding: 0 24px;
 }
 .stage-mark .tag {
   font: 700 12px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase;
-  color: #fff; padding: 7px 12px; border-radius: 5px;
+  color: #fff; padding: 8px 13px; border-radius: 5px; align-self: center;
 }
-.stage-mark .rule { flex: 1; height: 1px; background: var(--line); }
-.stage-mark .name { font: 650 17px/1 var(--sans); }
+.stage-mark .rule { flex: 1; height: 1px; background: var(--line); align-self: center; }
+.stage-mark .name { font: 700 30px/1.15 var(--serif); letter-spacing: -.015em; }
 #stage1 .tag { background: var(--stage1); }
 #stage2 .tag { background: var(--stage2); }
 #control .tag { background: var(--control); }

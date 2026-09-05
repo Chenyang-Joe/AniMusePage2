@@ -20,7 +20,8 @@ legacy/index.html     the first version, kept as a reference for the viewers.
 css/style.css         one stylesheet
 js/main.js            lazy-boots each viewer when it nears the viewport
 js/viewers/stage.js   shared renderer, GLB cache, grounding, row layout, camera fit
-js/viewers/split.js   bones | mesh split slider
+js/viewers/split.js   bones | mesh split slider, one animal
+js/viewers/splitgrid.js  the same split across a wall of eight
 js/viewers/correspond.js  cross-species bone-slot correspondence
 js/viewers/row.js     synchronised row (Stage-1 comparison, inpainting)
 js/viewers/editing.js leg-group slider
@@ -61,5 +62,9 @@ if an animal ends up facing the wrong way down the row.
 - three.js inflates a morph-target mesh's bounding box to cover its whole animation, so
   anything that measures geometry uses `restBox()` in `js/viewers/stage.js` instead of
   `Box3.setFromObject` — see the comment there.
-- The generated giant-panda inpainting clip has the animal on its back; it is tilted into
-  place by hand (`INPAINT_ROTZ` in `tools/build_assets.py`) rather than fixed.
+- Bones and mesh come out of the exporter at different scales *and* different orientations,
+  so anything showing both has to call `alignBlobToMesh()` first. Skipping it was what made
+  the panda look belly-up: the automatic orientation read the bones while the viewer drew
+  the mesh, and the two disagreed.
+- Centring and rotating must live on separate groups. Rotating the group that also carries
+  the centring offset swings a cell off its slot in the grid.
