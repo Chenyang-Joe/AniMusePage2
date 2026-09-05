@@ -13,6 +13,10 @@ An ES-module importmap in `index.html` maps `three` and `three/addons/` to
 
 ```
 index.html            the page
+legacy/index.html     the first version, kept as a reference for the viewers.
+                      Shares css/, js/, assets/ and vendor/ with the live page;
+                      its own links are ../-prefixed, and js/main.js resolves
+                      asset paths against itself so both depths work.
 css/style.css         one stylesheet
 js/main.js            lazy-boots each viewer when it nears the viewport
 js/viewers/stage.js   shared renderer, GLB cache, grounding, row layout, camera fit
@@ -23,6 +27,9 @@ js/viewers/editing.js leg-group slider
 tools/glb_opt.py      GLB shrinker (prune, JPEG, int16 quantize, frame decimate)
 tools/build_assets.py picks the ~30 GLBs the page shows, shrinks them, writes the manifest
 tools/glbinfo.py      prints a GLB's structure
+tools/figures.py      renders the paper figures to web JPEGs
+draft_2.md            the page's copy and section plan
+caption_fix.md        the eval-figure caption rewrite, for Overleaf
 assets/models/        shipped GLBs + manifest.json
 data/                 raw exports, ~6 GB, gitignored
 references/repos/     read-only: CANOR_GAUSS (the method) and scene_1 (prior prototype)
@@ -51,3 +58,8 @@ if an animal ends up facing the wrong way down the row.
 - In `data/inpainting/`, slots **4, 55, 76, 77** are grey — those are the pinned foot
   bones (matching `inpaint_color` in the method repo's `configs/eval_inpaint/`).
 - The left front leg is slots **44–51, 26, 110, 111, 13**, from the `scene_1` prototype.
+- three.js inflates a morph-target mesh's bounding box to cover its whole animation, so
+  anything that measures geometry uses `restBox()` in `js/viewers/stage.js` instead of
+  `Box3.setFromObject` — see the comment there.
+- The generated giant-panda inpainting clip has the animal on its back; it is tilted into
+  place by hand (`INPAINT_ROTZ` in `tools/build_assets.py`) rather than fixed.

@@ -3,7 +3,9 @@
 // within a screen or so of the reader. A visitor who reads the abstract and
 // leaves downloads about 40 KB.
 
-const BASE = 'assets/models/';
+// Resolved against this module rather than the document, so the page can live
+// at any depth -- the v1 page kept under legacy/ loads the same assets.
+const BASE = new URL('../assets/models/', import.meta.url).href;
 
 let manifestPromise = null;
 const manifest = () => (manifestPromise ??= fetch(BASE + 'manifest.json').then((r) => r.json()));

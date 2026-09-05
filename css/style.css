@@ -79,6 +79,7 @@ a:hover { text-decoration: underline; }
 .btn:hover { background: #33373f; text-decoration: none; }
 .btn[aria-disabled="true"] { background: #fff; color: var(--faint); border-color: var(--line); cursor: default; }
 .btn[aria-disabled="true"]:hover { background: #fff; }
+.btn-note { color: var(--faint); font-size: 13px; margin: 0; }
 
 /* ---------- sections ---------- */
 
@@ -155,7 +156,9 @@ td.best, th.best { font-weight: 700; }
 tr.ref td { color: var(--muted); font-style: italic; }
 
 .compare { width: 100%; font-size: 14.5px; }
-.compare td:first-child { color: var(--muted); width: 22%; }
+/* Prose tables need to wrap; the nowrap above is for numeric result tables. */
+.compare th, .compare td { white-space: normal; }
+.compare td:first-child { color: var(--muted); width: 24%; white-space: nowrap; }
 
 figure { margin: 26px 0; }
 figure img { width: 100%; height: auto; border-radius: 6px; display: block; }

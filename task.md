@@ -72,6 +72,15 @@
 - [x] 0. Git 连接
 - [x] 1. 参考页面 → 定了 Nerfies 排版 + 3DGS 式 slider
 - [x] 2. draft.md
-- [x] 3. 建站（本地跑通，见 PLAN.md 第七节；等 review）
+- [x] 3. 建站 v1（本地跑通，见 PLAN.md 第七节）
+- [x] 4. 定稿 `draft_2.md`：不挂 arXiv、不公开方法细节，但比普通 demo 页讲得多
+- [x] 5. 按 draft_2 重做页面，v1 挪到 `legacy/`
 
-计划和踩坑记录在 `PLAN.md`，本地启动方式在 `README.md`。
+计划和踩坑记录在 `PLAN.md`，文案和章节规划在 `draft_2.md`，本地启动方式在 `README.md`。
+
+## 还没做的
+
+- teaser gallery 挑哪几只（先随便挑了四只）
+- inpainting 的熊猫片段是仰面划水的，现在靠手动 −45° 摆成斜姿；要么接受，要么重生成
+- `captions.txt` 第 7 条 alaskan moose 没有对应 GLB，补上能凑满六宫格
+- 部署 GitHub Pages
