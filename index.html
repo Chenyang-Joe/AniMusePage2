@@ -62,10 +62,9 @@
     <figure>
       <img src="assets/img/teaser.jpg" alt="Static animal meshes, the Semantic Gaussian Bones AniMuse predicts for them, and the motion it generates." loading="lazy" width="1920" height="1080">
       <figcaption>
-        <b>AniMuse brings static animal meshes to life from text.</b> From a single raw mesh and a
-        prompt, it predicts a set of <em>Semantic Gaussian Bones</em> (SGBs) and generates their motion.
-        Because an SGB means the same body part on every species, the same handles also work as a
-        control interface — here, clamping the wallabies' ears.
+        <b>AniMuse brings static animal meshes to life from text.</b> Because the handles it predicts
+        mean the same body part on every species, they also work as a control interface — here,
+        clamping the wallabies' ears.
       </figcaption>
     </figure>
   </div>
@@ -149,11 +148,11 @@
   <div class="wrap narrow">
     <h3 class="step"><span class="n">1</span>Semantic Gaussian Bones</h3>
     <p>
-      Stage 1 turns a raw mesh into a rig in one forward pass: a set of <em>Semantic Gaussian Bones</em>
-      — soft, oriented ellipsoids inside the mesh, each carrying a part of the surface as it moves. They
-      are <em>semantic</em> because a given slot lands on the same body part in every animal, so slot 37
-      is the same place on a fox as on an elephant. Training is <b>self-supervised</b>: the only signal
-      is whether deforming one frame with the bones reproduces another. Abbreviated <b>SGBs</b> below.
+      A <em>Semantic Gaussian Bone</em> is a soft, oriented ellipsoid inside the mesh, carrying a part
+      of the surface with it as it moves. They are <em>semantic</em> because a given slot lands on the
+      same body part in every animal — slot 37 is the same place on a fox as on an elephant. Training is
+      <b>self-supervised</b>: the only signal is whether deforming one frame with the bones reproduces
+      another. Abbreviated <b>SGBs</b> below.
     </p>
   </div>
 
@@ -173,10 +172,8 @@
   <div class="wrap narrow">
     <h3 class="step"><span class="n">2</span>The same slot is the same body part</h3>
     <p>
-      SGB colour below is a fixed ramp over the SGB index, and it is the <em>same</em> ramp on every
-      animal. Hover any SGB to see its counterpart light up on the others — nothing is matched at run
-      time. The correspondence falls out of how the SGBs are learned, and it is what every control on
-      this page is built on.
+      Every control further down this page rests on one property, and the model gets it for free: a
+      given SGB slot is the same body part on every animal.
     </p>
   </div>
 
@@ -188,7 +185,7 @@
       <p class="viewer-note"><b>An ellipsoid's colour is decided by its slot number, and all four animals
         use the same colour ramp.</b> Two ellipsoids of the same colour are therefore the same body part
         on different species, and nothing is being matched while you watch — the correspondence is
-        already in the model. <span class="on-hover">Hover</span><span class="on-tap">Tap</span> any ellipsoid to isolate it and its counterparts.</p>
+        already in the model.</p>
     </div>
   </div>
 
@@ -225,9 +222,8 @@
   <div class="stage-mark"><span class="tag">Stage 2</span><span class="name">Text to motion</span><span class="rule"></span></div>
   <div class="wrap narrow">
     <p class="lead">
-      Stage 2 generates the SGBs' trajectory from a sentence. It is trained on roughly 75,000 animal
-      motion clips and evaluated on a benchmark it has never seen — different meshes, a different species
-      distribution, a different capture pipeline.
+      Stage 2 is trained on roughly 75,000 animal motion clips and evaluated on a benchmark it has
+      never seen — different meshes, a different species distribution, a different capture pipeline.
     </p>
   </div>
 
@@ -279,10 +275,7 @@
     <h3 class="step"><span class="n">1</span>Motion inpainting</h3>
     <p>
       Pin some SGBs to a trajectory you want, and the model generates a coherent whole-body motion
-      around them. Below, the <b>pink</b> SGBs are the pinned ones — the same four indices on every
-      species, driven by one shared cadence. Start with <b>Constraint only</b> to see what the user
-      actually supplies, then bring in the SGBs the model wrote around it, then the surface those SGBs
-      drive.
+      around them.
     </p>
   </div>
 
@@ -307,11 +300,9 @@
   <div class="wrap narrow">
     <h3 class="step"><span class="n">2</span>Part-level editing</h3>
     <p>
-      The same index space gives direct manual control. Below, one slider drags the twelve SGBs that make
-      up the left front leg — and because those twelve mean the same leg on every animal, one slider
-      drives all three species at once, with no per-animal setup. Hand over a whole trajectory instead of
-      a few slots and the same mechanism becomes <b>motion transfer</b>: a motion authored on one animal
-      is, by construction, already addressed to the right body parts on any other.
+      The same index space gives direct manual control. Hand over a whole trajectory instead of a few
+      slots and the same mechanism becomes <b>motion transfer</b>: a motion authored on one animal is, by
+      construction, already addressed to the right body parts on any other.
     </p>
   </div>
 
