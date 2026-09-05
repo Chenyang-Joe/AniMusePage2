@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, groundModel, layoutRow, fitCamera, facingTurn, playClip, styleBlob, observeResize } from './stage.js';
+import { createStage, loadGLB, groundModel, layoutRow, fitCamera, facingTurn, restBox, playClip, styleBlob, observeResize } from './stage.js';
 
 /**
  * Cross-species bone correspondence.
@@ -13,8 +13,21 @@ import { createStage, loadGLB, groundModel, layoutRow, fitCamera, facingTurn, pl
 export function initCorrespondence(host, samples) {
   const canvasHost = host.querySelector('.viewer-canvas');
   const readout = host.querySelector('.corr-readout');
+  const labelGrid = host.querySelector('.grid-labels');
   const models = [];   // one entry per animal: { meshes: Mesh[] }
   let hovered = -1;
+
+  // Named, because "the same slot on all four" is a claim about four particular
+  // species and the reader should be able to see which. Placed by projection
+  // like the grids: `layoutRow` spaces the animals by their own widths, so no
+  // CSS grid would line up with them.
+  if (labelGrid) {
+    labelGrid.classList.add('projected');
+    labelGrid.innerHTML = samples.map((x) => `<span>${x.label}</span>`).join('');
+    // Hidden until they have somewhere to be: unplaced, they all sit in the
+    // corner, and the models take a moment to arrive.
+    labelGrid.style.opacity = '0';
+  }
 
   const stage = createStage(canvasHost, {
     fov: 26,
@@ -38,12 +51,40 @@ export function initCorrespondence(host, samples) {
         return root;
       });
       layoutRow(roots, { gap: 0.34 });
-      fitCamera(s, roots, { padding: 1.22 });
+      // Where each animal sits once, measured now. Not `root.position`, which
+      // grounding has already offset, and not the live box, which one of these
+      // clips carries off into a burrow -- a name that follows its animal across
+      // the frame is worse than no name at all.
+      const anchors = roots.map((r) => restBox(r).getCenter(new THREE.Vector3()));
       s.onResize = () => fitCamera(s, roots, { padding: 1.22 });
+      s.onResize();
+      // Placed every frame, not once after the fit: the controls damp into
+      // position, so the camera a moment after `fitCamera` is not the camera it
+      // settles at, and a label placed against the first one lands a whole
+      // animal to the left. It also keeps the names under their animals while
+      // the reader orbits, which placing once never could.
+      s.onFrame = () => {
+        s.renderer.clear();
+        s.renderer.render(s.scene, s.camera);
+        placeLabels(anchors);
+        if (labelGrid) labelGrid.style.opacity = '1';
+      };
       host.classList.remove('is-loading');
     },
   });
   observeResize(canvasHost);
+
+  /** Put each name under the animal it belongs to, in projected coordinates. */
+  function placeLabels(anchors) {
+    if (!labelGrid || !stage.camera) return;
+    const v = new THREE.Vector3();
+    [...labelGrid.children].forEach((el, i) => {
+      if (!anchors[i]) return;
+      v.copy(anchors[i]).project(stage.camera);
+      el.style.left = `${(v.x * 0.5 + 0.5) * 100}%`;
+      el.style.top = '0';
+    });
+  }
 
   const ray = new THREE.Raycaster();
   const ndc = new THREE.Vector2();

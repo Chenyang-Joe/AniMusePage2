@@ -312,6 +312,10 @@ pre code { background: none; padding: 0; }
   padding: 0; line-height: 1.35;
 }
 .grid-labels.projected em { display: block; font-style: normal; color: var(--faint); font-size: 11.5px; }
+/* Under the frame rather than inside it. A row of animals standing on one floor
+   puts every name at the same height, and that height is the floor -- which the
+   frame clips. Only the horizontal position needs the projection. */
+.grid-labels.below { position: relative; inset: auto; height: 18px; margin-top: 8px; }
 
 .video-embed { position: relative; padding-top: 56.25%; border-radius: 10px; overflow: hidden;
                border: 1px solid var(--line); background: var(--soft); }

@@ -488,10 +488,17 @@ export function layoutRow(roots, { gap = 0.18 } = {}) {
   const pad = gap * Math.max(...widths);
   const total = widths.reduce((a, b) => a + b, 0) + pad * (roots.length - 1);
   let x = -total / 2;
-  roots.forEach((r, i) => {
-    r.position.x += x + widths[i] / 2;
+  // The slot centres, returned: each root is *offset* into its slot rather than
+  // moved to it, because grounding already put its own centre on the origin, so
+  // afterwards `position.x` is not the slot and a caller placing a label over it
+  // has nothing else to go on.
+  const centres = roots.map((r, i) => {
+    const cx = x + widths[i] / 2;
+    r.position.x += cx;
     x += widths[i] + pad;
+    return cx;
   });
+  return centres;
 }
 
 /**
