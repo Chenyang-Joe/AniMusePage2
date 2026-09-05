@@ -37,7 +37,7 @@ export function initCorrespondence(host, samples) {
         models.push({ meshes, label: samples[i].label });
         return root;
       });
-      layoutRow(roots, { gap: 0.1 });
+      layoutRow(roots, { gap: 0.34 });
       fitCamera(s, roots, { padding: 1.22 });
       s.onResize = () => fitCamera(s, roots, { padding: 1.22 });
       host.classList.remove('is-loading');
@@ -63,7 +63,7 @@ export function initCorrespondence(host, samples) {
       });
     }
     readout.textContent = bone < 0
-      ? 'Hover any bone — its counterpart lights up on every species.'
+      ? 'Hover any SGB — its counterpart lights up on every species.'
       : `SGB slot ${bone} — the same slot on all ${models.length} animals.`;
     readout.classList.toggle('on', bone >= 0);
   }

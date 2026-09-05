@@ -63,8 +63,8 @@
       <img src="assets/img/teaser.jpg" alt="Static animal meshes, the Semantic Gaussian Bones AniMuse predicts for them, and the motion it generates." loading="lazy" width="1600" height="700">
       <figcaption>
         <b>AniMuse brings static animal meshes to life from text.</b> From a single raw mesh and a
-        prompt, it predicts a set of <em>Semantic Gaussian Bones</em> and generates their motion.
-        Because those bones mean the same body part on every species, the same handles also work as a
+        prompt, it predicts a set of <em>Semantic Gaussian Bones</em> (SGBs) and generates their motion.
+        Because an SGB means the same body part on every species, the same handles also work as a
         control interface — here, clamping the wallabies' ears.
       </figcaption>
     </figure>
@@ -81,11 +81,11 @@
     </p>
     <p>
       There is no rigging step. No skeleton is fitted, no joints are named, no artist marks up the model.
-      AniMuse builds its own deformation handles: <b>120 oriented "Gaussian bones"</b> that it places
-      inside the mesh, and it generates motion by moving those. One model covers every topology, the
-      motion state is 120 handles rather than tens of thousands of vertices, and bone <em>k</em> lands on
-      the same body part for a fox as for an elephant — which is what turns an index into something you
-      can grab.
+      AniMuse builds its own deformation handles: a set of oriented <em>Semantic Gaussian Bones</em>
+      (SGBs) that it places inside the mesh, and it generates motion by moving those. One model covers
+      every topology, the motion state is a small set of SGBs rather than tens of thousands of vertices,
+      and SGB <em>k</em> lands on the same body part for a fox as for an elephant — which is the
+      <em>semantic</em> in the name, and what turns an index into something you can grab.
     </p>
   </div>
 
@@ -95,10 +95,10 @@
         <div class="viewer-canvas"></div>
         <span class="split-label-left"></span>
         <span class="split-label-right"></span>
-        <button class="split-divider" tabindex="0" aria-label="Drag to move the split between bones and mesh"></button>
+        <button class="split-divider" tabindex="0" aria-label="Drag to move the split between the SGBs and the mesh"></button>
       </div>
       <div class="viewer-chips"></div>
-      <p class="viewer-note">Drag the divider: bones on the left, the surface they drive on the right. Drag anywhere else to orbit — both halves share one camera, so they can never fall out of step.</p>
+      <p class="viewer-note">Drag the divider: SGBs on the left, the surface they drive on the right. Drag anywhere else to orbit — both halves share one camera, so they can never fall out of step.</p>
     </div>
   </div>
 
@@ -110,16 +110,16 @@
 
   <div class="wrap narrow">
     <p>
-      It runs in two stages. <b>Stage 1 — Rigging</b> reads the static mesh and predicts the 120 bones:
+      It runs in two stages. <b>Stage 1 — Rigging</b> reads the static mesh and predicts its SGBs:
       soft, oriented ellipsoids that sit inside the body, together with how strongly each one pulls on
       each vertex. They are learned end-to-end from mesh sequences alone — no rigged ground truth is ever
       used, because the training signal is simply whether deforming one frame with them reproduces
       another.
     </p>
     <p>
-      <b>Stage 2 — Generation</b> generates the trajectory of those bones over time with a diffusion
-      model, conditioned on the text prompt and on what Stage 1 learned about each bone's local geometry.
-      Linear blend skinning turns the bone trajectory back into an animated mesh. Because the motion
+      <b>Stage 2 — Generation</b> generates the trajectory of those SGBs over time with a diffusion
+      model, conditioned on the text prompt and on what Stage 1 learned about each SGB's local geometry.
+      Linear blend skinning turns the SGB trajectory back into an animated mesh. Because the motion
       state never grows with mesh resolution, long sequences on dense meshes stay tractable — and the
       handles stay small enough in number to be a usable control surface.
     </p>
@@ -154,8 +154,8 @@
     <h3>How good is the rig?</h3>
     <p>
       We measure it the way you would judge a rigger: extract the rig from a rest-pose mesh, use it to
-      deform that mesh onto a posed target, and see how far off you are. Below — ground truth, the bones
-      AniMuse predicts, and the mesh those bones deform. Same instant, same camera, each free to turn
+      deform that mesh onto a posed target, and see how far off you are. Below — ground truth, the SGBs
+      AniMuse predicts, and the mesh those SGBs deform. Same instant, same camera, each free to turn
       about its own centre.
     </p>
   </div>
@@ -193,9 +193,9 @@
 
     <h3>Semantic consistency: the same slot is the same body part</h3>
     <p>
-      Bone colour below is a fixed ramp over the bone index, and it is the <em>same</em> ramp on every
-      animal. Hover any bone to see its counterpart light up on the others — nothing is matched at run
-      time. The correspondence falls out of how the bones are learned, and it is what every control on
+      SGB colour below is a fixed ramp over the SGB index, and it is the <em>same</em> ramp on every
+      animal. Hover any SGB to see its counterpart light up on the others — nothing is matched at run
+      time. The correspondence falls out of how the SGBs are learned, and it is what every control on
       this page is built on.
     </p>
   </div>
@@ -203,7 +203,7 @@
   <div class="wrap">
     <div class="viewer is-loading" id="v-corr">
       <div class="viewer-frame"><div class="viewer-canvas h-sm"></div></div>
-      <p class="corr-readout">Hover any bone — its counterpart lights up on every species.</p>
+      <p class="corr-readout">Hover any SGB — its counterpart lights up on every species.</p>
     </div>
   </div>
 </section>
@@ -213,7 +213,7 @@
   <div class="stage-mark"><span class="tag">Stage 2</span><span class="name">Text to motion</span><span class="rule"></span></div>
   <div class="wrap narrow">
     <p class="lead">
-      Stage 2 generates the bones' trajectory from a sentence. It is trained on roughly 75,000 animal
+      Stage 2 generates the SGBs' trajectory from a sentence. It is trained on roughly 75,000 animal
       motion clips and evaluated on a benchmark it has never seen — different meshes, a different species
       distribution, a different capture pipeline.
     </p>
@@ -226,9 +226,9 @@
         <div class="grid-labels"></div>
         <span class="split-label-left"></span>
         <span class="split-label-right"></span>
-        <button class="split-divider" tabindex="0" aria-label="Drag to move the split between bones and mesh"></button>
+        <button class="split-divider" tabindex="0" aria-label="Drag to move the split between the SGBs and the mesh"></button>
       </div>
-      <p class="viewer-note">Eight species, one divider. Every animal here is driven by the same 120 handles — drag the cut to pull the whole wall from the bones to the surface they deform.</p>
+      <p class="viewer-note">Eight species, one divider. Every animal here is driven by the same SGB slots — drag the cut to pull the whole wall from the SGBs to the surface they deform.</p>
     </div>
   </div>
 
@@ -256,17 +256,17 @@
   <div class="stage-mark"><span class="tag">Control</span><span class="name">Beyond prompting</span><span class="rule"></span></div>
   <div class="wrap narrow">
     <p class="lead">
-      A generator you can only prompt is a slot machine. Because AniMuse's 120 handles carry a stable
+      A generator you can only prompt is a slot machine. Because AniMuse's SGBs carry a stable
       meaning, they double as a control surface — and because that meaning is shared across species, a
       control authored once applies to every animal.
     </p>
 
     <h3>Motion inpainting</h3>
     <p>
-      Pin some bones to a trajectory you want, and the model generates a coherent whole-body motion
-      around them. Below, the <b>pink</b> bones are the pinned ones — the same four indices on every
+      Pin some SGBs to a trajectory you want, and the model generates a coherent whole-body motion
+      around them. Below, the <b>pink</b> SGBs are the pinned ones — the same four indices on every
       species, driven by one shared cadence. Start with <b>Constraint only</b> to see what the user
-      actually supplies, then bring in the bones the model wrote around it, then the surface those bones
+      actually supplies, then bring in the SGBs the model wrote around it, then the surface those SGBs
       drive.
     </p>
   </div>
@@ -277,18 +277,18 @@
       <div class="viewer-controls">
         <span class="seg">
           <button data-mode="feet">Constraint only</button>
-          <button data-mode="bones" class="on">Bones</button>
+          <button data-mode="bones" class="on">SGBs</button>
           <button data-mode="mesh">Mesh</button>
         </span>
       </div>
-      <p class="viewer-note">The same four bone slots are pinned on every species, to the same cadence. Everything else is what the model generated around them.</p>
+      <p class="viewer-note">The same four SGB slots are pinned on every species, to the same cadence. Everything else is what the model generated around them.</p>
     </div>
   </div>
 
   <div class="wrap narrow">
     <h3>Part-level editing</h3>
     <p>
-      The same index space gives direct manual control. Below, one slider drags the twelve bones that make
+      The same index space gives direct manual control. Below, one slider drags the twelve SGBs that make
       up the left front leg — and because those twelve mean the same leg on every animal, one slider
       drives all three species at once, with no per-animal setup.
     </p>
@@ -301,7 +301,7 @@
         <label for="edit-slider">Shift left front leg</label>
         <input class="edit-slider" id="edit-slider" type="range" min="-100" max="100" value="0" step="1">
       </div>
-      <p class="viewer-note">Top row: the surface. Bottom row: the bones driving it. The highlighted slots are the leg group — one slider, three species, no per-animal setup.</p>
+      <p class="viewer-note">Top row: the surface. Bottom row: the SGBs driving it. The highlighted slots are the leg group — one slider, three species, no per-animal setup.</p>
     </div>
   </div>
 
@@ -347,7 +347,7 @@
           <tr><td>Input</td><td style="text-align:left">one static mesh (any topology, any species) and one sentence</td></tr>
           <tr><td>Output</td><td style="text-align:left">an animated mesh sequence, up to 300 frames per pass</td></tr>
           <tr><td>Setup required</td><td style="text-align:left">none — no skeleton, no joint names, no skinning weights, no artist pass</td></tr>
-          <tr><td>Control</td><td style="text-align:left">pin any subset of the 120 handles, or drag a named part; both transfer across species unchanged</td></tr>
+          <tr><td>Control</td><td style="text-align:left">pin any subset of the SGBs, or drag a named part; both transfer across species unchanged</td></tr>
           <tr><td>Trained on</td><td style="text-align:left">~75k animal motion clips, plus our web-video corpus</td></tr>
           <tr><td>Evaluated on</td><td style="text-align:left">a 25-species rigging benchmark, and an out-of-domain text-to-motion benchmark</td></tr>
           <tr><td>Known limits</td><td style="text-align:left">300 frames per pass; the topology gate can still bridge two surfaces that touch but are not connected</td></tr>

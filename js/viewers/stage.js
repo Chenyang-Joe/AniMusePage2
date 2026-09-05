@@ -235,7 +235,7 @@ export function restBox(root) {
  * `center` describe what is left once that drift is gone. Height is deliberately
  * left in -- a meerkat rearing up is the motion, not travel.
  */
-export function poseFrames(root, clip = null, { samples = 24 } = {}) {
+function clipBoxes(root, clip, samples) {
   const meshes = [];
   root.traverse((o) => { if (o.isMesh && o.geometry?.attributes?.position) meshes.push(o); });
 
@@ -244,6 +244,8 @@ export function poseFrames(root, clip = null, { samples = 24 } = {}) {
     const pos = o.geometry.attributes.position;
     const targets = o.geometry.morphAttributes?.position || [];
     const infl = o.morphTargetInfluences || [];
+    // Only the handful of influences that are actually non-zero -- the tracks
+    // are one-hot per frame, so between two frames there are at most two.
     const active = [];
     for (let k = 0; k < infl.length; k++) {
       if (targets[k] && Math.abs(infl[k]) > 1e-4) active.push([targets[k], infl[k]]);
@@ -280,6 +282,18 @@ export function poseFrames(root, clip = null, { samples = 24 } = {}) {
     root.updateMatrixWorld(true);
   }
   if (!boxes.length) boxes.push(restBox(root));
+  return boxes;
+}
+
+/** Sample an array of per-frame values at normalised clip position `u`. */
+function sampleAt(list, u) {
+  const x = Math.min(list.length - 1, Math.max(0, u * (list.length - 1)));
+  const i = Math.floor(x);
+  return { a: list[i], b: list[Math.min(i + 1, list.length - 1)], f: x - i };
+}
+
+export function poseFrames(root, clip = null, { samples = 24 } = {}) {
+  const boxes = clipBoxes(root, clip, samples);
 
   const centers = boxes.map((b) => b.getCenter(new THREE.Vector3()));
   const anchor = centers.reduce((a, c) => a.add(c), new THREE.Vector3())
@@ -294,10 +308,37 @@ export function poseFrames(root, clip = null, { samples = 24 } = {}) {
     center: treadmill.getCenter(new THREE.Vector3()),
     /** Horizontal drift at normalised clip position `u`, to be subtracted. */
     travelAt(u) {
-      const x = Math.min(travel.length - 1, Math.max(0, u * (travel.length - 1)));
-      const i = Math.floor(x);
-      return travel[i].clone().lerp(travel[Math.min(i + 1, travel.length - 1)], x - i);
+      const { a, b, f } = sampleAt(travel, u);
+      return a.clone().lerp(b, f);
     },
+  };
+}
+
+/**
+ * The vertical correction that keeps the bones standing on the ground the
+ * surface stands on.
+ *
+ * The two exports disagree about gravity. Every frame of the mesh is grounded --
+ * its lowest vertex sits on y=0 the whole way through -- while the bones keep
+ * the body's real vertical motion. Registered once at frame 0, as
+ * `alignBlobToMesh` does, they then drift apart by up to a tenth of the body's
+ * height, which reads as bones bobbing inside a mesh that stands still.
+ *
+ * This walks both clips once and returns the offset to add to the bones. It is
+ * measured relative to frame 0, so the registration that was already made there
+ * is left exactly as it was and only the drift is taken out.
+ */
+export function verticalLock(meshRoot, meshClip, blobRoot, blobClip, { samples = 24 } = {}) {
+  const mesh = clipBoxes(meshRoot, meshClip, samples).map((b) => b.min.y);
+  const bones = clipBoxes(blobRoot, blobClip, samples).map((b) => b.min.y);
+  const n = Math.min(mesh.length, bones.length);
+  const offset = [];
+  for (let j = 0; j < n; j++) {
+    offset.push((mesh[j] - mesh[0]) - (bones[j] - bones[0]));
+  }
+  return (u) => {
+    const { a, b, f } = sampleAt(offset, u);
+    return a + (b - a) * f;
   };
 }
 

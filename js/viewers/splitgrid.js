@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { createStage, loadGLB, alignBlobToMesh, restBox, fitCamera, facingTurn,
-         poseFrames, styleBlob, styleMesh, forceLinearInterp, observeResize } from './stage.js';
+         poseFrames, verticalLock, styleBlob, styleMesh, forceLinearInterp, observeResize } from './stage.js';
 
 /**
  * A wall of animals under one divider.
@@ -118,9 +118,15 @@ export function initSplitGrid(host, samples, opts = {}) {
         // Clips here run from one to twenty-five seconds. Truncating them all to
         // the shortest would freeze most of the wall, so each loops on its own
         // length instead, sped up enough that no loop outstays its welcome.
+        // The mesh export is grounded frame by frame and the bone export is not,
+        // so the two drift apart vertically after the frame-0 registration.
+        const lock = verticalLock(meshRoot, meshGltf.animations?.[0],
+                                  blobRoot, blobGltf.animations?.[0]);
+        const blobY = blobRoot.position.y;
+
         const dur = meshGltf.animations?.[0]?.duration || blobGltf.animations?.[0]?.duration || 1;
         cells.push({ sample, blobRoot, meshRoot, blobMixer, meshMixer, pivot, drift, inner, pose, home,
-                     dur, speed: Math.max(1, dur / MAX_LOOP) });
+                     lock, blobY, dur, speed: Math.max(1, dur / MAX_LOOP) });
       });
 
       // The picker drives these from outside: it needs to turn one cell without
@@ -167,8 +173,10 @@ export function initSplitGrid(host, samples, opts = {}) {
       const local = (t * c.speed) % c.dur;
       c.blobMixer.setTime(local);
       c.meshMixer.setTime(local);
-      // Subtract this frame's travel, so the animal runs where it is standing.
+      // Subtract this frame's travel, so the animal runs where it is standing,
+      // and keep the bones on the ground the surface is standing on.
       c.drift.position.copy(c.home).sub(c.pose.travelAt(local / c.dur));
+      c.blobRoot.position.y = c.blobY + c.lock(local / c.dur);
     }
 
     const x = Math.round(w * fraction);

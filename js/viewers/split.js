@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, pairModels, fitCamera, facingTurn, poseFrames, playClip, styleBlob, styleMesh, observeResize } from './stage.js';
+import { createStage, loadGLB, pairModels, fitCamera, facingTurn, poseFrames, verticalLock, playClip, styleBlob, styleMesh, observeResize } from './stage.js';
 
 /**
  * Blob | mesh split viewer.
@@ -45,6 +45,7 @@ export function initSplit(host, samples, opts = {}) {
     if (current.dur && current.meshMixer) {
       const u = (current.meshMixer.time % current.dur) / current.dur;
       current.drift.position.copy(current.pose.travelAt(u)).negate();
+      current.blobRoot.position.y = current.blobY + current.lock(u);
     }
     const x = Math.round(w * fraction);
 
@@ -121,8 +122,14 @@ export function initSplit(host, samples, opts = {}) {
     fitCamera(stage, [drift], fit);
     stage.onResize = () => fitCamera(stage, [drift], fit);
 
+    // The mesh export is grounded frame by frame and the bone export is not, so
+    // the two drift apart vertically after the frame-0 registration.
+    const lock = verticalLock(meshRoot, meshGltf.animations?.[0],
+                              blobRoot, blobGltf.animations?.[0]);
+    const blobY = blobRoot.position.y;
+
     const dur = meshGltf.animations?.[0]?.duration || 0;
-    current = { drift, blobRoot, meshRoot, pose, dur, meshMixer };
+    current = { drift, blobRoot, meshRoot, pose, dur, meshMixer, lock, blobY };
     host.classList.remove('is-loading');
   }
 
