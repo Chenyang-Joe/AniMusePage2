@@ -78,7 +78,7 @@ STAGE1 = [
 
 # Correspondence needs only the bones, so it costs a few hundred KB and can
 # afford the body plans that share the least: a small mustelid, a long-necked
-# camelid, a primate -- and a bird, which is the one
+# camelid, four tons of elephant -- and a bird, which is the one
 # that makes the point hardest to argue with, since a cassowary has no forelimbs
 # to speak of and the slots find its wings anyway. `blob_nopiles` where Stage-1
 # has it: the three direction spikes on every ellipsoid are noise when the
@@ -92,7 +92,7 @@ CORRESPOND = [
     ("camel",     "stage1/s002_Bactrian_Camel_Juvenile_fighttauntreact/blob_nopiles.glb",      "Bactrian Camel",   0),
     # The rhino read badly here -- the ellipsoids on its horn jitter frame to
     # frame, which is the first thing the eye lands on in a row of still bones.
-    ("monkey",    "stage1/s063_Proboscis_Monkey_Juvenile_standtorun/blob_nopiles.glb",  "Proboscis Monkey", 180),
+    ("elephant",  "stage1/s068_Indian_Elephant_Female_standtorunturnl/blob_nopiles.glb", "Indian Elephant", 180),
 ]
 
 # The four gray bones in every inpainting blob GLB -- matches

@@ -189,10 +189,10 @@
    "blob": "correspond/camel.blob.glb"
   },
   {
-   "id": "monkey",
-   "label": "Proboscis Monkey",
+   "id": "elephant",
+   "label": "Indian Elephant",
    "rotateY": 180,
-   "blob": "correspond/monkey.blob.glb"
+   "blob": "correspond/elephant.blob.glb"
   }
  ],
  "inpainting": [
