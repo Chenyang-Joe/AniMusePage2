@@ -24,14 +24,17 @@ SLIDE = (960.0, 540.0)
 
 
 def widen_page_boxes(src, dst):
-    """Replace tight page boxes with the full slide, in place, byte-for-byte.
+    """Replace a tight *crop* box with the full slide, in place, byte-for-byte.
+
+    Only CropBoxes: a MediaBox smaller than the slide is a deliberate crop (see
+    tools/croppdf.py) and widening it would put the margins back.
 
     The replacement is padded to the original length so every offset the xref
     table records stays valid and we never have to rebuild it.
     """
     data = bytearray(open(src, "rb").read())
     n = 0
-    for m in re.finditer(rb"/(MediaBox|CropBox)\s*\[([^\]]{0,80})\]", bytes(data)):
+    for m in re.finditer(rb"/(CropBox)\s*\[([^\]]{0,80})\]", bytes(data)):
         nums = m.group(2).split()
         if len(nums) != 4:
             continue
@@ -164,13 +167,19 @@ def render(src, dst, size=1800, quality=82, max_dim=1600):
     print(f"  {os.path.basename(dst):16s} {os.path.getsize(dst)/1e3:5.0f} KB")
 
 
+# Per-figure render settings. The default 1800/1600 is fine for a photograph
+# but leaves a diagram soft: the pipeline figure is displayed nearly a thousand
+# CSS pixels wide, which is two thousand real ones on any modern laptop, and its
+# labels are small. It gets rendered and kept larger.
 FIGURES = [
-    ("new_teaser.png", "teaser.jpg"),
-    ("main.pdf",       "pipeline.jpg"),
-    ("eval.pdf",       "eval.jpg"),
-    ("teaser.pdf",     "gallery.jpg"),
-    ("inpaint.pdf",    "inpaint.jpg"),
-    ("figure2.pdf",    "figure2.jpg"),
+    ("new_teaser.png", "teaser.jpg",  {"max_dim": 1920, "quality": 86}),
+    # main.pdf is now the redrawn figure with its page box cropped to the ink
+    # (tools/croppdf.py), so the same file serves the paper and this page.
+    ("main.pdf",       "pipeline.jpg", {"size": 3600, "max_dim": 2400, "quality": 88}),
+    ("eval.pdf",       "eval.jpg",     {}),
+    ("teaser.pdf",     "gallery.jpg",  {}),
+    ("inpaint.pdf",    "inpaint.jpg",  {}),
+    ("figure2.pdf",    "figure2.jpg",  {}),
 ]
 
 if __name__ == "__main__":
@@ -179,5 +188,5 @@ if __name__ == "__main__":
                        "Text_Driven_Motion_Generation_via_Semantic_Gaussian_Bones_V1", "figures")
     out = os.path.join(root, "assets", "img")
     os.makedirs(out, exist_ok=True)
-    for src, dst in FIGURES:
-        render(os.path.join(fig, src), os.path.join(out, dst))
+    for src, dst, opts in FIGURES:
+        render(os.path.join(fig, src), os.path.join(out, dst), **opts)

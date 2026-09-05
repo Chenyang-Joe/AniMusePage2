@@ -166,6 +166,29 @@ figure img { width: 100%; height: auto; border-radius: 6px; display: block; }
 figcaption { font-size: 14px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
 figcaption b { color: var(--fg); }
 
+/* Numbered parts. A section that is mostly demos needs its structure legible at
+   a glance -- the badge says how many pieces there are and which one you are on. */
+.step { display: flex; align-items: center; gap: 12px; font: 650 21px/1.35 var(--sans);
+        margin: 40px 0 10px; letter-spacing: -.01em; }
+.step .n, .metrics summary .n {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--fg);
+  color: #fff; font: 700 13px/26px var(--sans); text-align: center; letter-spacing: 0;
+}
+/* A section that opens on its first part does not need the gap that separates
+   one part from the next. */
+.stage-mark + .wrap > .step:first-child { margin-top: 4px; }
+#stage1 .n { background: var(--stage1); }
+#stage2 .n { background: var(--stage2); }
+#control .n { background: var(--control); }
+
+/* Numbers belong in the results, not in the way of them: the tables fold away so
+   the demos carry the page, and open for anyone who came for them. */
+.metrics { margin: 34px 0 8px; }
+.metrics summary { display: flex; align-items: center; gap: 12px; font: 650 19px/1.4 var(--sans); padding: 16px 0; }
+.metrics summary .sub { font: 400 15px/1.4 var(--sans); color: var(--muted); }
+.metrics summary::before { color: var(--faint); font-size: 15px; }
+.metrics .takeaway:last-child, .metrics .stats:last-child { margin-bottom: 16px; }
+
 details { border: 1px solid var(--line); border-radius: 8px; padding: 0 18px; margin: 18px 0; background: #fff; }
 details[open] { padding-bottom: 8px; }
 summary { cursor: pointer; padding: 13px 0; font-weight: 600; font-size: 15.5px; list-style: none; }
@@ -217,7 +240,11 @@ pre code { background: none; padding: 0; }
 
 .viewer-labels { display: grid; margin-top: 10px; text-align: center; font-size: 13.5px; color: var(--muted); }
 .viewer-caption { text-align: center; font-size: 15px; color: var(--fg); margin-top: 12px; min-height: 1.6em; font-style: italic; }
-.viewer-note { text-align: center; font-size: 13.5px; color: var(--muted); margin-top: 10px; }
+/* Bold says what you are looking at, muted says how to work it -- a caption
+   that only explains the controls never tells you what the thing is. */
+.viewer-note { max-width: 720px; margin: 12px auto 0; text-align: center;
+               font-size: 13.5px; line-height: 1.65; color: var(--muted); }
+.viewer-note b { color: var(--fg); }
 
 /* split divider */
 .split-divider {

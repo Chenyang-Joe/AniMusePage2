@@ -65,8 +65,8 @@ whenNear('v-stage1', async (el) => {
   initRow(el, withBase(m.stage1, ['gt', 'pred', 'blob']).map((s) => ({ ...s, label: `${s.label} — ${s.action}` })), {
     columns: [
       { key: 'gt',   label: 'Ground truth',            kind: 'mesh' },
-      { key: 'blob', label: 'Predicted SGBs',          kind: 'blob' },
-      { key: 'pred', label: 'AniMuse LBS deformation', kind: 'mesh' },
+      { key: 'blob', label: 'SGBs extracted',          kind: 'blob' },
+      { key: 'pred', label: 'Mesh deformed by the SGBs', kind: 'mesh' },
     ],
   });
 });
