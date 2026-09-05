@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { createStage, loadGLB, alignBlobToMesh, restBox, fitCamera, facingTurn,
-         poseFrames, verticalLock, styleBlob, styleMesh, forceLinearInterp, observeResize } from './stage.js';
+         poseFrames, verticalLock, styleBlob, styleMesh, forceLinearInterp, observeResize,
+         PLAYBACK } from './stage.js';
 
 /**
  * A wall of animals under one divider.
@@ -168,7 +169,7 @@ export function initSplitGrid(host, samples, opts = {}) {
     const h = canvasHost.clientHeight;
     if (!w || !h || !cells.length) { r.clear(); return; }
 
-    const t = stage.clock.getElapsedTime();
+    const t = stage.clock.getElapsedTime() * PLAYBACK;
     for (const c of cells) {
       const local = (t * c.speed) % c.dur;
       c.blobMixer.setTime(local);

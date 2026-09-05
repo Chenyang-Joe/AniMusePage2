@@ -543,6 +543,16 @@ export function fitCamera(stage, roots, { padding = 1.25, keepDirection = true, 
  * display. LINEAR interpolates between keyframes -- SLERP for the bones'
  * quaternion tracks, and a free in-between mesh for the morph-weight tracks.
  */
+/**
+ * How fast a generated clip plays, everywhere one plays.
+ *
+ * Most of these are under two seconds -- a wallaby hop is 0.4 -- and at their
+ * authored rate they read as a flicker rather than a motion. Half speed gives
+ * the eye time to follow the pose through. It is one constant, and every viewer
+ * reads it, so no two of them can end up at different tempos.
+ */
+export const PLAYBACK = 0.5;
+
 export function forceLinearInterp(clip) {
   for (const track of clip.tracks) track.setInterpolation(THREE.InterpolateLinear);
   return clip;
@@ -552,6 +562,9 @@ export function forceLinearInterp(clip) {
 export function playClip(stage, gltf, root) {
   if (!gltf.animations || !gltf.animations.length) return null;
   const mixer = new THREE.AnimationMixer(root);
+  // On the mixer rather than the action: `mixer.time` is scaled with it, so
+  // callers that read the clock back off the mixer still get clip time.
+  mixer.timeScale = PLAYBACK;
   mixer.clipAction(forceLinearInterp(gltf.animations[0])).play();
   mixer.update(0);
   stage.mixers.push(mixer);

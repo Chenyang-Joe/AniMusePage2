@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, alignMeshToBox, fitCamera, restBox, styleBlob, styleMesh, forceLinearInterp, observeResize } from './stage.js';
+import { createStage, loadGLB, alignMeshToBox, fitCamera, restBox, styleBlob, styleMesh,
+         forceLinearInterp, observeResize, PLAYBACK } from './stage.js';
 
 /**
  * Every species at once, on one clock — the inpainting viewer.
@@ -191,7 +192,7 @@ export function initGrid(host, samples, pinned, opts = {}) {
   function frame() {
     // Drive by absolute time rather than accumulated deltas: six clips of
     // different native length stay locked to one phase that way.
-    const t = stage.clock.getElapsedTime() % TRUNC_DUR;
+    const t = (stage.clock.getElapsedTime() * PLAYBACK) % TRUNC_DUR;
     for (const c of cells) {
       if (mode === 'mesh' && c.meshMixer) c.meshMixer.setTime(t);
       else c.blobMixer.setTime(t);
