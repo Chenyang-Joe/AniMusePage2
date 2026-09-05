@@ -8,7 +8,15 @@
 const BASE = new URL('../assets/models/', import.meta.url).href;
 
 let manifestPromise = null;
-const manifest = () => (manifestPromise ??= fetch(BASE + 'manifest.json').then((r) => r.json()));
+// Revalidated rather than served from cache. The manifest is the index that
+// names every other file, and GitHub Pages hands it out with ten minutes of
+// freshness -- so for ten minutes after a deploy that renames an asset, a
+// returning reader is told to fetch a file that no longer exists, and the viewer
+// does not fall back to the old one, it just fails. `no-cache` sends a
+// conditional request: a 304 and no body when nothing changed, which for seven
+// kilobytes is a fair price for never serving a stale index.
+const manifest = () => (manifestPromise ??= fetch(BASE + 'manifest.json', { cache: 'no-cache' })
+  .then((r) => r.json()));
 
 function withBase(list, keys) {
   return list.map((s) => {
