@@ -11,3 +11,13 @@ editing/
 # 方法侧代码，独立仓库，只作参考
 references/repos/CANOR_GAUSS/
 assets/preview/
+
+# Working notes: kept on disk, out of a public repo. They record positioning
+# decisions, review status and rebuttal wording that have no business being
+# readable by anyone who follows the project-page link.
+draft.md
+draft_2.md
+PLAN.md
+task.md
+caption_fix.md
+pick_lists.md

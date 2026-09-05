@@ -29,8 +29,9 @@ tools/glb_opt.py      GLB shrinker (prune, JPEG, int16 quantize, frame decimate)
 tools/build_assets.py picks the ~30 GLBs the page shows, shrinks them, writes the manifest
 tools/glbinfo.py      prints a GLB's structure
 tools/figures.py      renders the paper figures to web JPEGs
-draft_2.md            the page's copy and section plan
-caption_fix.md        the eval-figure caption rewrite, for Overleaf
+tools/croppdf.py      crops a PDF's white margins by rewriting its page box
+tools/build_preview.py  shrinks the whole candidate pool for pick.html
+pick.html             local tool: browse every candidate clip and pick by eye
 assets/models/        shipped GLBs + manifest.json
 data/                 raw exports, ~6 GB, gitignored
 references/repos/     read-only: CANOR_GAUSS (the method) and scene_1 (prior prototype)
