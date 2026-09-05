@@ -133,13 +133,13 @@
  ],
  "stage1": [
   {
-   "id": "sheep",
-   "label": "Dall Sheep",
-   "action": "performs a mating display",
-   "rotateY": -30,
-   "gt": "stage1/sheep.gt.glb",
-   "pred": "stage1/sheep.pred.glb",
-   "blob": "stage1/sheep.blob.glb"
+   "id": "saiga",
+   "label": "Saiga",
+   "action": "attacks",
+   "rotateY": 0,
+   "gt": "stage1/saiga.gt.glb",
+   "pred": "stage1/saiga.pred.glb",
+   "blob": "stage1/saiga.blob.glb"
   },
   {
    "id": "wolf",
@@ -151,13 +151,13 @@
    "blob": "stage1/wolf.blob.glb"
   },
   {
-   "id": "saiga",
-   "label": "Saiga",
-   "action": "attacks",
-   "rotateY": 0,
-   "gt": "stage1/saiga.gt.glb",
-   "pred": "stage1/saiga.pred.glb",
-   "blob": "stage1/saiga.blob.glb"
+   "id": "sheep",
+   "label": "Dall Sheep",
+   "action": "performs a mating display",
+   "rotateY": -30,
+   "gt": "stage1/sheep.gt.glb",
+   "pred": "stage1/sheep.pred.glb",
+   "blob": "stage1/sheep.blob.glb"
   },
   {
    "id": "baboon",

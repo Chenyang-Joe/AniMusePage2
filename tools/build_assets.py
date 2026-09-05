@@ -70,9 +70,9 @@ GALLERY = [
 # viewer adds the measured side-on turn, as everywhere else, and -30 is a
 # three-quarter view: these two are side-on at 0 and face the camera at -90.
 STAGE1 = [
-    ("sheep",  "s016_Dall_Sheep_Male_matingritual",                  "Dall Sheep",       "performs a mating display",  -30),
-    ("wolf",   "s047_Arctic_Wolf_Male_fightreact",                   "Arctic Wolf",      "recoils from a blow",        -30),
     ("saiga",  "s035_Saiga_Female_fightattack",                      "Saiga",            "attacks",                      0),
+    ("wolf",   "s047_Arctic_Wolf_Male_fightreact",                   "Arctic Wolf",      "recoils from a blow",        -30),
+    ("sheep",  "s016_Dall_Sheep_Male_matingritual",                  "Dall Sheep",       "performs a mating display",  -30),
     ("baboon", "s091_Hamadryas_Baboon_Juvenile_standtodrinktrough",  "Hamadryas Baboon", "stands up to drink",         180),
 ]
 
