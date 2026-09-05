@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, alignBlobToMesh, fitCamera, restBox, styleBlob, styleMesh, forceLinearInterp, observeResize } from './stage.js';
+import { createStage, loadGLB, alignMeshToBox, fitCamera, restBox, styleBlob, styleMesh, forceLinearInterp, observeResize } from './stage.js';
 
 /**
  * Every species at once, on one clock — the inpainting viewer.
@@ -51,47 +51,47 @@ export function initGrid(host, samples, pinned, opts = {}) {
     fov: 35,
     onReady: async (s) => {
       const rows = Math.ceil(samples.length / COLS);
+      // Bones only, to begin with. The surfaces are the heavy half of this
+      // group -- six exports of per-frame geometry, more than the rest of the
+      // page put together -- and nothing shows them until the reader asks for
+      // the third state. Fetching them here made every reader pay for the third
+      // state, and made the viewer below this one wait its turn.
       const loaded = await Promise.all(samples.map(async (sample) => ({
         sample,
         blobGltf: await loadGLB(sample.blob),
-        meshGltf: await loadGLB(sample.mesh),
       })));
 
-      loaded.forEach(({ sample, blobGltf, meshGltf }, i) => {
+      loaded.forEach(({ sample, blobGltf }, i) => {
         const col = i % COLS;
         const row = Math.floor(i / COLS);
         // Centre a final row that doesn't fill the grid.
         const inRow = Math.min(COLS, samples.length - row * COLS);
 
         const blobRoot = blobGltf.scene.clone(true);
-        const meshRoot = meshGltf.scene.clone(true);
         const bones = styleBlob(blobRoot, {
           highlight: pinned, near: NEAR_FEET, hide: GLITCHY,
         });
-        styleMesh(meshRoot);
 
         const blobMixer = new THREE.AnimationMixer(blobRoot);
-        const meshMixer = new THREE.AnimationMixer(meshRoot);
         if (blobGltf.animations?.length) blobMixer.clipAction(forceLinearInterp(blobGltf.animations[0])).play();
-        if (meshGltf.animations?.length) meshMixer.clipAction(forceLinearInterp(meshGltf.animations[0])).play();
         // Bone nodes carry no default transform, only animation tracks, so
         // nothing below can measure them until the clip has been evaluated once.
         blobMixer.setTime(0);
-        meshMixer.setTime(0);
 
-        // Register the bones onto the surface first. The two exports are not in
-        // one frame, so without this they sit at different sizes *and* different
-        // orientations -- and then the automatic orientation below, which reads
-        // the bones, would not describe what the mesh view actually shows.
         // Three nested groups, because centring and rotating must not share one:
-        // `centre` carries the offset that puts the pair's middle on the origin,
+        // `centre` carries the offset that puts the cell's middle on the origin,
         // `inner` the automatic orientation (which then turns about that middle),
         // `pivot` the cell's position, its scale, and any manual roll -- expressed
-        // in screen axes, where it is easy to reason about.
+        // in screen axes, where it is easy to reason about. The surface, when it
+        // arrives, is registered onto the bones inside `centre`, so none of this
+        // has to be redone and nothing on screen moves.
         const centre = new THREE.Group();
-        centre.add(meshRoot, blobRoot);
-        alignBlobToMesh(blobRoot, meshRoot);
+        centre.add(blobRoot);
         centre.updateMatrixWorld(true);
+        // Measured here, while `centre` is still unparented and sitting at the
+        // origin, so the box is in the frame a late-arriving surface's own
+        // transform will live in.
+        const blobBox = new THREE.Box3().setFromObject(blobRoot);
         centre.position.sub(restBox(centre).getCenter(new THREE.Vector3()));
 
         const inner = new THREE.Group();
@@ -144,8 +144,8 @@ export function initGrid(host, samples, pinned, opts = {}) {
         pivot.scale.setScalar(scale * (CELL_SPAN / span));
 
         cells.push({
-          id: sample.id, label: sample.label, pivot, inner,
-          blobRoot, meshRoot, blobMixer, meshMixer,
+          id: sample.id, label: sample.label, pivot, inner, centre, blobBox,
+          mesh: sample.mesh, blobRoot, blobMixer, meshRoot: null, meshMixer: null,
           feet: bones.filter((_, k) => pinnedSet.has(k)),
           // Hidden slots must stay out of `body`, or the state switch drags
           // them back in the moment it makes the body visible again.
@@ -162,6 +162,8 @@ export function initGrid(host, samples, pinned, opts = {}) {
       s.onFrame = frame;
       setMode('bones');
       host.classList.remove('is-loading');
+      const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 2000));
+      idle(() => loadMeshes(), { timeout: 6000 });
     },
   });
   observeResize(canvasHost);
@@ -171,7 +173,7 @@ export function initGrid(host, samples, pinned, opts = {}) {
     // different native length stay locked to one phase that way.
     const t = stage.clock.getElapsedTime() % TRUNC_DUR;
     for (const c of cells) {
-      if (mode === 'mesh') c.meshMixer.setTime(t);
+      if (mode === 'mesh' && c.meshMixer) c.meshMixer.setTime(t);
       else c.blobMixer.setTime(t);
     }
     stage.renderer.clear();
@@ -180,12 +182,40 @@ export function initGrid(host, samples, pinned, opts = {}) {
 
   function setMode(m) {
     mode = m;
+    if (m === 'mesh') loadMeshes();
     for (const c of cells) {
-      c.blobRoot.visible = m !== 'mesh';
-      c.meshRoot.visible = m === 'mesh';
+      // Until the surfaces arrive, the bones stand in for them -- the reader
+      // sees the cadence they asked for either way, rather than six empty cells.
+      const surfaced = m === 'mesh' && c.meshRoot;
+      c.blobRoot.visible = !surfaced;
+      if (c.meshRoot) c.meshRoot.visible = surfaced;
       for (const b of c.body) b.visible = m === 'bones';
     }
     modeButtons.forEach((b) => b.classList.toggle('on', b.dataset.mode === m));
+  }
+
+  /**
+   * Fetch and register the surfaces. Called once, either when the reader asks
+   * for them or when the page has gone quiet -- whichever comes first, so the
+   * switch is usually instant without anything else having queued behind it.
+   */
+  let meshesStarted = false;
+  function loadMeshes() {
+    if (meshesStarted || !cells.length) return;
+    meshesStarted = true;
+    cells.forEach((c) => loadGLB(c.mesh).then((gltf) => {
+      const root = gltf.scene.clone(true);
+      styleMesh(root);
+      const mixer = new THREE.AnimationMixer(root);
+      if (gltf.animations?.length) mixer.clipAction(forceLinearInterp(gltf.animations[0])).play();
+      mixer.setTime(0);
+      alignMeshToBox(root, c.blobBox);
+      c.centre.add(root);
+      c.meshRoot = root;
+      c.meshMixer = mixer;
+      root.visible = mode === 'mesh';
+      if (mode === 'mesh') c.blobRoot.visible = false;
+    }).catch(() => { /* the bones keep standing in */ }));
   }
 
   modeButtons.forEach((b) => b.addEventListener('click', () => {

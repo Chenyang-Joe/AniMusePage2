@@ -381,6 +381,39 @@ export function facingTurn(meshRoot, clip = null) {
  *
  * `override` ({ scale, offset }) is the escape hatch for a pair the fit misses.
  */
+/**
+ * The same registration the other way round: move the surface onto the bones.
+ *
+ * For a viewer that shows one or the other rather than both at once, the bones
+ * can be laid out first and the surface fetched later -- but only if arriving
+ * late costs nothing on screen, which means the late one is the one that moves.
+ *
+ * It takes a *box* rather than the bones themselves, because by the time the
+ * surface arrives the bones are deep in a scene graph and their world box is no
+ * longer the frame the surface's own transform lives in. The caller measures the
+ * bones once, while that frame and the world still agree, and keeps the box.
+ * `meshRoot` must still be unparented when this runs, for the same reason.
+ */
+export function alignMeshToBox(meshRoot, box) {
+  meshRoot.updateMatrixWorld(true);
+  const mb = restBox(meshRoot);
+  if (box.isEmpty() || mb.isEmpty()) return 1;
+
+  const bs = box.getSize(new THREE.Vector3());
+  const ms = mb.getSize(new THREE.Vector3());
+  const ratios = [bs.x / ms.x, bs.y / ms.y, bs.z / ms.z]
+    .filter((v) => Number.isFinite(v) && v > 0)
+    .sort((a, b) => a - b);
+  const s = ratios.length ? ratios[Math.floor(ratios.length / 2)] : 1;
+
+  meshRoot.scale.multiplyScalar(s);
+  meshRoot.updateMatrixWorld(true);
+  meshRoot.position.add(box.getCenter(new THREE.Vector3()))
+    .sub(restBox(meshRoot).getCenter(new THREE.Vector3()));
+  meshRoot.updateMatrixWorld(true);
+  return s;
+}
+
 export function alignBlobToMesh(blobRoot, meshRoot, override = {}) {
   blobRoot.updateMatrixWorld(true);
   meshRoot.updateMatrixWorld(true);
