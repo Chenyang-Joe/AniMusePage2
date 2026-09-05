@@ -84,9 +84,9 @@
       inpainting. A diffusion model generates per-bone trajectories from text and geometric bone latents,
       while allowing users to clamp selected SGB slots and inpaint the remaining full-body motion. On
       DeformingThings4D, our rig reduces bidirectional CD-L1 by 39% over the best neural skeleton
-      baseline, and a forward-only variant achieves the lowest CD-L2 overall. On the out-of-domain
-      AnimalML3D benchmark, AniMuse improves overall motion quality over skeleton-based and vertex-based
-      baselines.
+      baseline, and a forward-only variant achieves the lowest CD-L2 overall. In a 50-participant user
+      study on the out-of-domain AnimalML3D benchmark, participants preferred AniMuse over the strongest skeleton-free baseline 74.6% of the
+      time overall, and 84.0% on whether the motion matched the prompt.
     </p>
   </div>
 
@@ -148,7 +148,7 @@
   <div class="wrap narrow">
     <h3 class="step"><span class="n">1</span>Semantic Gaussian Bones</h3>
     <p>
-      A <em>Semantic Gaussian Bone</em> is a soft, oriented ellipsoid inside the mesh, carrying a part
+      A <em>Semantic Gaussian Bone</em> is an oriented ellipsoid inside the mesh, carrying a part
       of the surface with it as it moves. They are <em>semantic</em> because a given slot lands on the
       same body part in every animal — slot 37 is the same place on a fox as on an elephant. Training is
       <b>self-supervised</b>: the only signal is whether deforming one frame with the bones reproduces
@@ -165,8 +165,7 @@
       <p class="viewer-note"><b>All three columns are the same animal at the same instant, shown three
         different ways.</b> On the left is the captured ground truth. In the middle are the SGBs AniMuse
         extracted from that animal's rest-pose mesh. On the right is that same rest-pose mesh, deformed
-        by those SGBs onto the frame shown on the left — so the closer the right column is to the left
-        one, the better the rig. The buttons above change clip; drag to orbit.</p>
+        by those SGBs onto the frame shown on the left. The buttons above change clip; drag to orbit.</p>
     </div>
   </div>
 
@@ -355,7 +354,8 @@
   <div class="wrap narrow">
     <h2>Status</h2>
     <p>
-      AniMuse is under active development and a paper is in preparation. Happy to get in touch.
+      AniMuse is finished; what is left is the release. Paper, code, and the WebAnimal3D data are on
+      their way — coming soon, 2026. Happy to get in touch in the meantime.
     </p>
   </div>
 </section>
