@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { createStage, loadGLB, alignBlobToMesh, restBox, fitCamera, facingTurn,
-         poseFrames, verticalLock, styleBlob, styleMesh, forceLinearInterp, observeResize,
-         PLAYBACK } from './stage.js';
+         poseFrames, verticalLock, styleBlob, styleMesh, forceLinearInterp, observeResize } from './stage.js';
 
 /**
  * A wall of animals under one divider.
@@ -17,6 +16,10 @@ const SPACING_X = 1.02;
 const SPACING_Y = 0.92;
 const CELL_SPAN = 0.92;
 const MAX_LOOP = 8.0;    // seconds; longer clips are sped up to fit
+// Half speed, here only. These eight are the shortest clips on the page -- a
+// wallaby hop is four tenths of a second, an addax rush the same -- and at their
+// authored rate they read as a flicker rather than a motion.
+const PLAYBACK = 0.5;
 
 export function initSplitGrid(host, samples, opts = {}) {
   const { startFraction = 0.5, cols = COLS, padding = 1.04 } = opts;

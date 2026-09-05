@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, alignMeshToBox, fitCamera, restBox, styleBlob, styleMesh,
-         forceLinearInterp, observeResize, PLAYBACK } from './stage.js';
+import { createStage, loadGLB, alignMeshToBox, fitCamera, restBox, poseFrames, styleBlob, styleMesh,
+         forceLinearInterp, observeResize } from './stage.js';
 
 /**
  * Every species at once, on one clock — the inpainting viewer.
@@ -86,10 +86,14 @@ export function initGrid(host, samples, pinned, opts = {}) {
         centre.add(blobRoot);
         centre.updateMatrixWorld(true);
         // Measured here, while `centre` is still unparented and sitting at the
-        // origin, so the box is in the frame a late-arriving surface's own
-        // transform will live in.
+        // origin, so both are in the frame a late-arriving surface's own
+        // transform will live in. `blobBox` is frame zero and sets the scale a
+        // surface has to match; `blobPose` is the whole clip, and is what the
+        // cell is centred on -- a body wanders away from its first frame as it
+        // moves, and centring on that frame leaves it visibly off its label.
         const blobBox = new THREE.Box3().setFromObject(blobRoot);
-        centre.position.sub(restBox(centre).getCenter(new THREE.Vector3()));
+        const blobPose = poseFrames(blobRoot, blobGltf.animations?.[0], { samples: 10 });
+        centre.position.sub(blobPose.center);
 
         const inner = new THREE.Group();
         inner.add(centre);
@@ -141,7 +145,7 @@ export function initGrid(host, samples, pinned, opts = {}) {
         pivot.scale.setScalar(scale * (CELL_SPAN / span));
 
         cells.push({
-          id: sample.id, label: sample.label, pivot, inner, centre, blobBox,
+          id: sample.id, label: sample.label, pivot, inner, centre, blobBox, blobPose,
           mesh: sample.mesh, blobRoot, blobMixer, meshRoot: null, meshMixer: null,
           feet: bones.filter((_, k) => pinnedSet.has(k)),
           // Hidden slots must stay out of `body`, or the state switch drags
@@ -154,12 +158,19 @@ export function initGrid(host, samples, pinned, opts = {}) {
       //   const c = __animuse.grid.find(c => /panda/i.test(c.id));
       //   c.pivot.rotation.x = THREE.MathUtils.degToRad(90);
       if (typeof window !== 'undefined') window.__animuse.grid = cells;
-      // Straight on, like the wall: the default three-quarter view projects a
-      // regular grid into an irregular one, and the labels are placed by
-      // projection, so they would drift row by row.
+      // Framed on the grid itself rather than on the models in it. Fitting to
+      // the models means the framing follows whatever they happen to sweep, and
+      // two cells of the last column hold animals rolled upright -- enough to
+      // slide the whole wall to one side of its panel. The grid is symmetric by
+      // construction, so a box built from it puts the cells where the labels
+      // expect them. Straight on for the same reason: the default three-quarter
+      // view projects a regular grid into an irregular one.
+      const halfW = ((COLS - 1) / 2) * SPACING_X + CELL_SPAN * 0.62;
+      const halfH = ((rows - 1) / 2) * SPACING_Y + SPACING_Y * 0.55;
+      const gridBox = new THREE.Box3(new THREE.Vector3(-halfW, -halfH, 0),
+                                     new THREE.Vector3(halfW, halfH, 0));
       const frameAll = () => {
-        fitCamera(s, s.scene.children.filter((o) => !o.isLight),
-                  { padding: 1.12, dir: [0, 0, 1] });
+        fitCamera(s, [], { box: gridBox, padding: 1.02, dir: [0, 0, 1] });
         placeLabels();
       };
       frameAll();
@@ -192,7 +203,7 @@ export function initGrid(host, samples, pinned, opts = {}) {
   function frame() {
     // Drive by absolute time rather than accumulated deltas: six clips of
     // different native length stay locked to one phase that way.
-    const t = (stage.clock.getElapsedTime() * PLAYBACK) % TRUNC_DUR;
+    const t = stage.clock.getElapsedTime() % TRUNC_DUR;
     for (const c of cells) {
       if (mode === 'mesh' && c.meshMixer) c.meshMixer.setTime(t);
       else c.blobMixer.setTime(t);
@@ -230,7 +241,11 @@ export function initGrid(host, samples, pinned, opts = {}) {
       const mixer = new THREE.AnimationMixer(root);
       if (gltf.animations?.length) mixer.clipAction(forceLinearInterp(gltf.animations[0])).play();
       mixer.setTime(0);
+      // Scale from frame zero, then centred on its own clip the way the bones
+      // were, so the two states sit in the same place under the same label.
       alignMeshToBox(root, c.blobBox);
+      const pose = poseFrames(root, gltf.animations?.[0], { samples: 10 });
+      root.position.add(c.blobPose.center).sub(pose.center);
       c.centre.add(root);
       c.meshRoot = root;
       c.meshMixer = mixer;
