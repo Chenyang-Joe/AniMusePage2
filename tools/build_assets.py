@@ -211,7 +211,12 @@ def main():
             "rotateX": INPAINT_ROTX.get(key, 0),
             "rotateZ": INPAINT_ROTZ.get(key, 0),
             "inGrid": key not in INPAINT_SKIP,
-            "mesh": emit(f"{DATA}/inpainting/mesh/{fn}", f"inpainting/{key}.mesh.glb", max_frames=90),
+            # Six cells at a couple of hundred pixels each, on a shared clock:
+            # this is the heaviest group on the page and the one that can least
+            # afford to be. At 90 frames the exports came through untouched --
+            # 25 MB of morph targets loading directly above the editing viewer,
+            # which then waited its turn for bandwidth it did not need to.
+            "mesh": emit(f"{DATA}/inpainting/mesh/{fn}", f"inpainting/{key}.mesh.glb", max_frames=40),
             "blob": emit(f"{DATA}/inpainting/blob/{fn}", f"inpainting/{key}.blob.glb",
                          do_jpeg=False, do_quant=False),
         })
