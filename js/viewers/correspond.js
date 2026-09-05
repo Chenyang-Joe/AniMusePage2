@@ -47,6 +47,14 @@ export function initCorrespondence(host, samples) {
 
   const ray = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
+  // There is no hover on a touch screen, and without one this viewer is four
+  // still animals that do nothing. A tap picks a slot there and it stays picked
+  // until another tap, which is the same demonstration a moment later.
+  const TAP = typeof window !== 'undefined'
+    && window.matchMedia('(pointer: coarse)').matches;
+  const IDLE = TAP
+    ? 'Tap any SGB — its counterpart lights up on every species.'
+    : 'Hover any SGB — its counterpart lights up on every species.';
 
   function setHover(bone) {
     if (bone === hovered) return;
@@ -63,12 +71,12 @@ export function initCorrespondence(host, samples) {
       });
     }
     readout.textContent = bone < 0
-      ? 'Hover any SGB — its counterpart lights up on every species.'
+      ? IDLE
       : `SGB slot ${bone} — the same slot on all ${models.length} animals.`;
     readout.classList.toggle('on', bone >= 0);
   }
 
-  canvasHost.addEventListener('pointermove', (e) => {
+  function pick(e) {
     if (!stage.camera || !models.length) return;
     const r = canvasHost.getBoundingClientRect();
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
@@ -76,8 +84,17 @@ export function initCorrespondence(host, samples) {
     ray.setFromCamera(ndc, stage.camera);
     const hits = ray.intersectObjects(models.flatMap((m) => m.meshes), false);
     setHover(hits.length ? hits[0].object.userData.bone : -1);
-  });
-  canvasHost.addEventListener('pointerleave', () => setHover(-1));
+  }
+
+  // `pointerdown` covers the tap; on a mouse it just re-picks whatever is
+  // already under the cursor, which costs nothing.
+  canvasHost.addEventListener('pointerdown', pick);
+  if (!TAP) {
+    canvasHost.addEventListener('pointermove', pick);
+    canvasHost.addEventListener('pointerleave', () => setHover(-1));
+  }
+
+  if (TAP) readout.textContent = IDLE;
 
   return stage;
 }

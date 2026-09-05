@@ -353,6 +353,9 @@ footer { border-top: 1px solid var(--line); padding: 30px 0 50px; color: var(--m
   .metrics summary .sub { display: none; }
 }
 
+/* Say the verb the reader's device actually has. */
+.on-tap { display: none; }
+
 /* Touch. A viewer that takes the vertical swipe for itself is a trap on a page
    with six of them -- the reader puts a finger on an animal and the page stops
    scrolling. Orbiting keeps the horizontal axis, which is the one that matters
@@ -361,4 +364,6 @@ footer { border-top: 1px solid var(--line); padding: 30px 0 50px; color: var(--m
 @media (pointer: coarse) {
   .viewer-canvas { touch-action: pan-y; }
   .split-divider { touch-action: none; }
+  .on-hover { display: none; }
+  .on-tap { display: inline; }
 }
