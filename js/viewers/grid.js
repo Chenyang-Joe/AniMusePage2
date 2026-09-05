@@ -16,7 +16,7 @@ import { createStage, loadGLB, alignMeshToBox, fitCamera, restBox, styleBlob, st
 const TRUNC_DUR = 6.0;       // the shortest clip; longer ones are truncated, not looped
 const COLS = 3;
 const SPACING_X = 0.95;
-const SPACING_Y = 0.7;
+const SPACING_Y = 1.02;   // row pitch, with room under each cell for its label
 const CELL_SPAN = 0.8;       // every cell normalised to this width
 
 // Foot slots, split left/right. Near-side feet take the lighter tint so the
@@ -34,17 +34,13 @@ export function initGrid(host, samples, pinned, opts = {}) {
   const cells = [];
   let mode = 'bones';
 
+  // Placed from the projected cell centres rather than by a CSS grid: the camera
+  // fit leaves margins the grid knows nothing about, so a matching grid drifts
+  // away from the cells it is naming -- and a short final row, centred in 3D,
+  // has nothing to match at all.
   if (labelGrid) {
-    const rowCount = Math.ceil(samples.length / COLS);
-    labelGrid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
-    labelGrid.style.gridTemplateRows = `repeat(${rowCount}, 1fr)`;
-    labelGrid.innerHTML = samples.map((s, i) => {
-      // A short final row is centred in 3D, so its labels have to shift too.
-      const row = Math.floor(i / COLS);
-      const inRow = Math.min(COLS, samples.length - row * COLS);
-      const offset = i % COLS === 0 && inRow < COLS ? Math.floor((COLS - inRow) / 2) + 1 : 0;
-      return `<span${offset ? ` style="grid-column:${offset + 1}"` : ''}>${s.label}</span>`;
-    }).join('');
+    labelGrid.classList.add('projected');
+    labelGrid.innerHTML = samples.map((s) => `<span>${s.label}</span>`).join('');
   }
 
   const stage = createStage(canvasHost, {
@@ -157,8 +153,16 @@ export function initGrid(host, samples, pinned, opts = {}) {
       //   const c = __animuse.grid.find(c => /panda/i.test(c.id));
       //   c.pivot.rotation.x = THREE.MathUtils.degToRad(90);
       if (typeof window !== 'undefined') window.__animuse.grid = cells;
-      fitCamera(s, s.scene.children.filter((o) => !o.isLight), { padding: 1.12 });
-      s.onResize = () => fitCamera(s, s.scene.children.filter((o) => !o.isLight), { padding: 1.12 });
+      // Straight on, like the wall: the default three-quarter view projects a
+      // regular grid into an irregular one, and the labels are placed by
+      // projection, so they would drift row by row.
+      const frameAll = () => {
+        fitCamera(s, s.scene.children.filter((o) => !o.isLight),
+                  { padding: 1.12, dir: [0, 0, 1] });
+        placeLabels();
+      };
+      frameAll();
+      s.onResize = frameAll;
       s.onFrame = frame;
       setMode('bones');
       host.classList.remove('is-loading');
@@ -167,6 +171,22 @@ export function initGrid(host, samples, pinned, opts = {}) {
     },
   });
   observeResize(canvasHost);
+
+  /** Put each label under the cell it names, in projected screen coordinates. */
+  function placeLabels() {
+    if (!labelGrid || !stage.camera) return;
+    const v = new THREE.Vector3();
+    [...labelGrid.children].forEach((el, i) => {
+      const cell = cells[i];
+      if (!cell) return;
+      cell.pivot.updateMatrixWorld(true);
+      v.setFromMatrixPosition(cell.pivot.matrixWorld);
+      v.y -= SPACING_Y * 0.42;   // just below the cell, clear of the row beneath
+      v.project(stage.camera);
+      el.style.left = `${(v.x * 0.5 + 0.5) * 100}%`;
+      el.style.top = `${(-v.y * 0.5 + 0.5) * 100}%`;
+    });
+  }
 
   function frame() {
     // Drive by absolute time rather than accumulated deltas: six clips of
