@@ -64,20 +64,21 @@ GALLERY = [
     ("hyena",      "Spotted_Hyena_Female__spotted_hyena_f_160db685a46d.glb", "Spotted Hyena", 0),
 ]
 
-# The rigging comparison: four of the eight Stage-1 clips chosen in pick.html,
-# the four longest of them. A short clip barely moves, which is exactly what a
-# "how good is the rig" comparison must not show. Angles as picked; the row
-# viewer adds the measured side-on turn, as everywhere else.
+# The rigging comparison: four of the eight Stage-1 clips chosen in pick.html.
+# The baboon comes up from the correspondence row to keep a primate in here --
+# the red ruffed lemur was the primate and it is out. Angles as picked; the row
+# viewer adds the measured side-on turn, as everywhere else, and -30 is a
+# three-quarter view: these two are side-on at 0 and face the camera at -90.
 STAGE1 = [
-    ("sheep", "s016_Dall_Sheep_Male_matingritual",           "Dall Sheep",        "performs a mating display", -90),
-    ("lemur", "s061_Red_Ruffed_Lemur_Juvenile_standpreen01", "Red Ruffed Lemur",  "stands and preens",         180),
-    ("saiga", "s035_Saiga_Female_fightattack",               "Saiga",             "attacks",                     0),
-    ("wolf",  "s047_Arctic_Wolf_Male_fightreact",            "Arctic Wolf",       "recoils from a blow",       -90),
+    ("wolf",   "s047_Arctic_Wolf_Male_fightreact",                   "Arctic Wolf",      "recoils from a blow",        -30),
+    ("sheep",  "s016_Dall_Sheep_Male_matingritual",                  "Dall Sheep",       "performs a mating display",  -30),
+    ("saiga",  "s035_Saiga_Female_fightattack",                      "Saiga",            "attacks",                      0),
+    ("baboon", "s091_Hamadryas_Baboon_Juvenile_standtodrinktrough",  "Hamadryas Baboon", "stands up to drink",         180),
 ]
 
 # Correspondence needs only the bones, so it costs a few hundred KB and can
 # afford the body plans that share the least: a small mustelid, a long-necked
-# camelid, a primate, two tons of rhinoceros -- and a bird, which is the one
+# camelid, two tons of rhinoceros -- and a bird, which is the one
 # that makes the point hardest to argue with, since a cassowary has no forelimbs
 # to speak of and the slots find its wings anyway. `blob_nopiles` where Stage-1
 # has it: the three direction spikes on every ellipsoid are noise when the
@@ -89,7 +90,6 @@ CORRESPOND = [
     ("skunk",     "stage1/s093_Striped_Skunk_Male_enterburrowunderground/blob_nopiles.glb",    "Striped Skunk",    0),
     ("cassowary", "teaser/blob/Cassowary_Male__cassowary_male__anima_107a3ec7af0b.glb",        "Cassowary",        0),
     ("camel",     "stage1/s002_Bactrian_Camel_Juvenile_fighttauntreact/blob_nopiles.glb",      "Bactrian Camel",   0),
-    ("baboon",    "stage1/s091_Hamadryas_Baboon_Juvenile_standtodrinktrough/blob_nopiles.glb", "Hamadryas Baboon", 180),
     ("rhino",     "stage1/s001_Black_Rhino_Male_fightchaseoff/blob_nopiles.glb",               "Black Rhino",      0),
 ]
 

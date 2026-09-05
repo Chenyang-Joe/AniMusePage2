@@ -133,22 +133,22 @@
  ],
  "stage1": [
   {
+   "id": "wolf",
+   "label": "Arctic Wolf",
+   "action": "recoils from a blow",
+   "rotateY": -30,
+   "gt": "stage1/wolf.gt.glb",
+   "pred": "stage1/wolf.pred.glb",
+   "blob": "stage1/wolf.blob.glb"
+  },
+  {
    "id": "sheep",
    "label": "Dall Sheep",
    "action": "performs a mating display",
-   "rotateY": -90,
+   "rotateY": -30,
    "gt": "stage1/sheep.gt.glb",
    "pred": "stage1/sheep.pred.glb",
    "blob": "stage1/sheep.blob.glb"
-  },
-  {
-   "id": "lemur",
-   "label": "Red Ruffed Lemur",
-   "action": "stands and preens",
-   "rotateY": 180,
-   "gt": "stage1/lemur.gt.glb",
-   "pred": "stage1/lemur.pred.glb",
-   "blob": "stage1/lemur.blob.glb"
   },
   {
    "id": "saiga",
@@ -160,13 +160,13 @@
    "blob": "stage1/saiga.blob.glb"
   },
   {
-   "id": "wolf",
-   "label": "Arctic Wolf",
-   "action": "recoils from a blow",
-   "rotateY": -90,
-   "gt": "stage1/wolf.gt.glb",
-   "pred": "stage1/wolf.pred.glb",
-   "blob": "stage1/wolf.blob.glb"
+   "id": "baboon",
+   "label": "Hamadryas Baboon",
+   "action": "stands up to drink",
+   "rotateY": 180,
+   "gt": "stage1/baboon.gt.glb",
+   "pred": "stage1/baboon.pred.glb",
+   "blob": "stage1/baboon.blob.glb"
   }
  ],
  "correspond": [
@@ -187,12 +187,6 @@
    "label": "Bactrian Camel",
    "rotateY": 0,
    "blob": "correspond/camel.blob.glb"
-  },
-  {
-   "id": "baboon",
-   "label": "Hamadryas Baboon",
-   "rotateY": 180,
-   "blob": "correspond/baboon.blob.glb"
   },
   {
    "id": "rhino",
