@@ -21,15 +21,6 @@
  ],
  "teaser": [
   {
-   "id": "tortoise",
-   "label": "Galapagos Giant Tortoise",
-   "rotateY": 0,
-   "profile": false,
-   "action": "walks and turns left",
-   "mesh": "teaser/tortoise.mesh.glb",
-   "blob": "teaser/tortoise.blob.glb"
-  },
-  {
    "id": "polarbear",
    "label": "Polar Bear",
    "rotateY": 0,
@@ -55,6 +46,15 @@
    "action": "walks, then lowers its head to drink",
    "mesh": "teaser/camel.mesh.glb",
    "blob": "teaser/camel.blob.glb"
+  },
+  {
+   "id": "capybara",
+   "label": "Capybara",
+   "rotateY": 0,
+   "profile": false,
+   "action": "sniffs the ground",
+   "mesh": "teaser/capybara.mesh.glb",
+   "blob": "teaser/capybara.blob.glb"
   }
  ],
  "gallery": [
@@ -79,7 +79,7 @@
   {
    "id": "bonobo",
    "label": "Bonobo",
-   "rotateY": -90,
+   "rotateY": 0,
    "profile": false,
    "action": "jumps excitedly",
    "mesh": "gallery/bonobo.mesh.glb",
@@ -113,13 +113,13 @@
    "blob": "gallery/lemur.blob.glb"
   },
   {
-   "id": "capybara",
-   "label": "Capybara",
+   "id": "tortoise",
+   "label": "Galapagos Giant Tortoise",
    "rotateY": 0,
    "profile": false,
-   "action": "sniffs the ground",
-   "mesh": "gallery/capybara.mesh.glb",
-   "blob": "gallery/capybara.blob.glb"
+   "action": "walks and turns left",
+   "mesh": "gallery/tortoise.mesh.glb",
+   "blob": "gallery/tortoise.blob.glb"
   },
   {
    "id": "hyena",

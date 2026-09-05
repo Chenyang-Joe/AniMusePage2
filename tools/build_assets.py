@@ -27,13 +27,12 @@ MAX_TEX = 1024
 # the picker did, so what was chosen is what renders. `groundModel`'s automatic
 # lay-down stays switched off for these two groups so it cannot argue with it.
 #
-# The hero shows one animal at a time and can afford the long clips, so it takes
-# the four longest -- which are also the four least alike.
+# The hero shows one animal at a time and can afford the long clips.
 TEASER = [
-    ("tortoise",  "Galapagos_Giant_Tortoise_Male__galapa_9ddb7e38ada8.glb", "Galapagos Giant Tortoise", 0),
     ("polarbear", "Polar_Bear_Male__polar_bear_male__ani_19265aad3435.glb", "Polar Bear", 0),
     ("macaque",   "Japanese_Macaque_Female__japanese_mac_86b28b03fc31.glb", "Japanese Macaque", 90),
     ("camel",     "Bactrian_Camel_Female__bactrian_camel_db6831436c54.glb", "Bactrian Camel", 180),
+    ("capybara",  "Capybara_Male__capybara_male__animati_9f3c80b87e69.glb", "Capybara", 0),
 ]
 
 # What each clip is doing. Not recoverable from the teaser filenames, which
@@ -57,11 +56,11 @@ ACTIONS = {
 GALLERY = [
     ("arcticwolf", "Arctic_Wolf_Female__arctic_wolf_femal_9c0c125b1b50.glb", "Arctic Wolf", 180),
     ("elephant",   "Indian_Elephant_Female__indian_elepha_64be1af510c4.glb", "Indian Elephant", 0),
-    ("bonobo",     "Bonobo_Female__bonobo_female__animati_c8a00d05ea65.glb", "Bonobo", -90),
+    ("bonobo",     "Bonobo_Female__bonobo_female__animati_c8a00d05ea65.glb", "Bonobo", 0),
     ("wallaby",    "Rednecked_Wallaby_Male__rednecked_wal_36a87e28b6c0.glb", "Red-necked Wallaby", 90),
     ("addax",      "Addax_Female__addax_female__animation_3c84f53e637e.glb", "Addax", 0),
     ("lemur",      "B_W_Ruffed_Lemur_Male__b_w_ruffed_lem_2aabc3fd7a19.glb", "Black-and-white Ruffed Lemur", 0),
-    ("capybara",   "Capybara_Male__capybara_male__animati_9f3c80b87e69.glb", "Capybara", 0),
+    ("tortoise",   "Galapagos_Giant_Tortoise_Male__galapa_9ddb7e38ada8.glb", "Galapagos Giant Tortoise", 0),
     ("hyena",      "Spotted_Hyena_Female__spotted_hyena_f_160db685a46d.glb", "Spotted Hyena", 0),
 ]
 
