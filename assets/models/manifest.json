@@ -236,9 +236,10 @@
    "id": "tiger",
    "label": "Bengal Tiger",
    "rotateY": 180,
-   "nudgeX": 0.08,
+   "nudgeX": 0.16,
    "mesh": "editing/tiger.mesh.glb",
-   "blob": "editing/tiger.blob.glb"
+   "blob": "editing/tiger.blob.glb",
+   "nudgeY": 0.15
   },
   {
    "id": "elephant",
@@ -246,7 +247,8 @@
    "rotateY": 0,
    "nudgeX": 0.0,
    "mesh": "editing/elephant.mesh.glb",
-   "blob": "editing/elephant.blob.glb"
+   "blob": "editing/elephant.blob.glb",
+   "nudgeY": 0.15
   },
   {
    "id": "bear",
@@ -254,7 +256,8 @@
    "rotateY": 90,
    "nudgeX": 0.0,
    "mesh": "editing/bear.mesh.glb",
-   "blob": "editing/bear.blob.glb"
+   "blob": "editing/bear.blob.glb",
+   "nudgeY": 0.0
   }
  ]
 }

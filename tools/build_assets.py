@@ -94,10 +94,12 @@ LEG_BONES = [44, 45, 46, 47, 48, 49, 50, 51, 26, 110, 111, 13]
 # Framing straight from references/repos/scene_1/main.js -- these were tuned by
 # eye against these three exports, so the viewer reuses them rather than
 # re-deriving an orientation from bounding boxes.
+# rotateY, then nudgeX / nudgeY: the rearing bear sits higher than the two
+# quadrupeds once each pair is grounded, so the others are lifted to match it.
 EDITING = [
-    ("tiger",    "Bengal_Tiger_Female__bengal_tiger_fem_85a98badff8b.glb", "Bengal Tiger",     180, 0.08),
-    ("elephant", "African_Elephant_Female__african_elep_cc89c098eb78.glb", "African Elephant", 0,   0.0),
-    ("bear",     "Grizzly_Bear_Female__grizzly_bear_fem_11bc3ce97aa2.glb", "Grizzly Bear",     90,  0.0),
+    ("tiger",    "Bengal_Tiger_Female__bengal_tiger_fem_85a98badff8b.glb", "Bengal Tiger",     180, 0.16, 0.15),
+    ("elephant", "African_Elephant_Female__african_elep_cc89c098eb78.glb", "African Elephant", 0,   0.0,  0.15),
+    ("bear",     "Grizzly_Bear_Female__grizzly_bear_fem_11bc3ce97aa2.glb", "Grizzly Bear",     90,  0.0,  0.0),
 ]
 
 stats = [0, 0]
@@ -181,9 +183,10 @@ def main():
 
     print("editing (leg slider)")
     m["editing"] = []
-    for key, fn, label, rot, nudge in EDITING:
+    for key, fn, label, rot, nudge_x, nudge_y in EDITING:
         m["editing"].append({
-            "id": key, "label": label, "rotateY": rot, "nudgeX": nudge,
+            "id": key, "label": label, "rotateY": rot,
+            "nudgeX": nudge_x, "nudgeY": nudge_y,
             "mesh": emit(f"{DATA}/editing/mesh/{fn}", f"editing/{key}.mesh.glb"),
             "blob": emit(f"{DATA}/editing/blob/{fn}", f"editing/{key}.blob.glb",
                          do_jpeg=False, do_quant=False),

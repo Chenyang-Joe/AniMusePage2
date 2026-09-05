@@ -66,7 +66,7 @@ export function initEditing(host, samples, legBones) {
         const { pair } = pairModels(meshRoot, blobRoot,
           { rotateY: rot, profile: false, scaleTo: TARGET_SPAN, stack: 0.18 });
         pair.position.x += x;
-        pair.position.y += LIFT;
+        pair.position.y += LIFT + (sample.nudgeY || 0);
         s.scene.add(pair);
       
         // The shift is authored in world space so all three animals sweep the
