@@ -479,13 +479,26 @@ export function pairModels(meshRoot, blobRoot, { align, scaleTo, stack = 0, ...g
  * Species differ enormously in footprint -- an elephant next to a fennec fox --
  * so a fixed spacing either overlaps the big ones or strands the small ones.
  */
-export function layoutRow(roots, { gap = 0.18 } = {}) {
+export function layoutRow(roots, { gap = 0.18, even = false } = {}) {
   const widths = roots.map((r) => {
     r.updateMatrixWorld(true);
     const b = restBox(r);
     return Math.max(b.max.x - b.min.x, 1e-3);
   });
   const pad = gap * Math.max(...widths);
+
+  // `even` spaces the *centres* rather than the gaps. Packing by each animal's
+  // own width leaves equal air between them and unequal pitch, which on a row
+  // of four labelled species reads as a mistake rather than as economy.
+  if (even) {
+    const pitch = Math.max(...widths) + pad;
+    return roots.map((r, i) => {
+      const cx = (i - (roots.length - 1) / 2) * pitch;
+      r.position.x += cx;
+      return cx;
+    });
+  }
+
   const total = widths.reduce((a, b) => a + b, 0) + pad * (roots.length - 1);
   let x = -total / 2;
   // The slot centres, returned: each root is *offset* into its slot rather than

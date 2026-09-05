@@ -50,13 +50,16 @@ export function initCorrespondence(host, samples) {
         models.push({ meshes, label: samples[i].label });
         return root;
       });
-      layoutRow(roots, { gap: 0.34 });
+      layoutRow(roots, { gap: 0.5, even: true });
       // Where each animal sits once, measured now. Not `root.position`, which
       // grounding has already offset, and not the live box, which one of these
       // clips carries off into a burrow -- a name that follows its animal across
       // the frame is worse than no name at all.
       const anchors = roots.map((r) => restBox(r).getCenter(new THREE.Vector3()));
-      s.onResize = () => fitCamera(s, roots, { padding: 1.22 });
+      // Straight on. Evenly spaced in world coordinates is not evenly spaced on
+      // screen when the camera is off-axis: across a row this wide the far end
+      // spreads out, and a row of four labelled species reads as uneven.
+      s.onResize = () => fitCamera(s, roots, { padding: 1.06, dir: [0, 0, 1] });
       s.onResize();
       // Placed every frame, not once after the fit: the controls damp into
       // position, so the camera a moment after `fitCamera` is not the camera it
