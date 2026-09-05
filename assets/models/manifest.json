@@ -173,7 +173,7 @@
   {
    "id": "skunk",
    "label": "Striped Skunk",
-   "rotateY": 0,
+   "rotateY": -10,
    "blob": "correspond/skunk.blob.glb"
   },
   {

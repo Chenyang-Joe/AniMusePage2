@@ -87,7 +87,7 @@ STAGE1 = [
 # same 120 ellipsoids and nothing else, so it sits in the row unremarked.
 # Paths are relative to data/ because these two pools are laid out differently.
 CORRESPOND = [
-    ("skunk",     "stage1/s093_Striped_Skunk_Male_enterburrowunderground/blob_nopiles.glb",    "Striped Skunk",    0),
+    ("skunk",     "stage1/s093_Striped_Skunk_Male_enterburrowunderground/blob_nopiles.glb",    "Striped Skunk",    -10),
     ("cassowary", "teaser/blob/Cassowary_Male__cassowary_male__anima_107a3ec7af0b.glb",        "Cassowary",        120),
     ("camel",     "stage1/s002_Bactrian_Camel_Juvenile_fighttauntreact/blob_nopiles.glb",      "Bactrian Camel",   -15),
     # Two before this one read badly here -- a rhino whose horn ellipsoids jitter
