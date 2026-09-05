@@ -16,6 +16,7 @@ export function initSplit(host, samples, opts = {}) {
   const canvasHost = host.querySelector('.viewer-canvas');
   const chipRow = host.querySelector('.viewer-chips');
   const divider = host.querySelector('.split-divider');
+  const captionEl = host.querySelector('.viewer-caption');
   const labelL = host.querySelector('.split-label-left');
   const labelR = host.querySelector('.split-label-right');
   labelL.textContent = leftLabel;
@@ -127,6 +128,14 @@ export function initSplit(host, samples, opts = {}) {
     const lock = verticalLock(meshRoot, meshGltf.animations?.[0],
                               blobRoot, blobGltf.animations?.[0]);
     const blobY = blobRoot.position.y;
+
+    // The species is on the button; what it is doing is not, and that is the
+    // half of it the reader came to see.
+    if (captionEl) {
+      captionEl.textContent = s.action
+        ? `${s.label} ${s.action}.`
+        : (s.label || '');
+    }
 
     const dur = meshGltf.animations?.[0]?.duration || 0;
     current = { drift, blobRoot, meshRoot, pose, dur, meshMixer, lock, blobY };
