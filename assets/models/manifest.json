@@ -24,6 +24,7 @@
    "id": "fox",
    "label": "Fennec Fox",
    "rotateY": 0,
+   "action": "",
    "mesh": "teaser/fox.mesh.glb",
    "blob": "teaser/fox.blob.glb"
   },
@@ -31,6 +32,7 @@
    "id": "elephant",
    "label": "Indian Elephant",
    "rotateY": 0,
+   "action": "",
    "mesh": "teaser/elephant.mesh.glb",
    "blob": "teaser/elephant.blob.glb"
   },
@@ -38,6 +40,7 @@
    "id": "wallaby",
    "label": "Red-necked Wallaby",
    "rotateY": 180,
+   "action": "",
    "mesh": "teaser/wallaby.mesh.glb",
    "blob": "teaser/wallaby.blob.glb"
   },
@@ -45,6 +48,7 @@
    "id": "warthog",
    "label": "Common Warthog",
    "rotateY": 0,
+   "action": "",
    "mesh": "teaser/warthog.mesh.glb",
    "blob": "teaser/warthog.blob.glb"
   }
@@ -54,6 +58,7 @@
    "id": "wombat",
    "label": "Common Wombat",
    "rotateY": 0,
+   "action": "",
    "mesh": "gallery/wombat.mesh.glb",
    "blob": "gallery/wombat.blob.glb"
   },
@@ -61,6 +66,7 @@
    "id": "quokka",
    "label": "Quokka",
    "rotateY": 0,
+   "action": "",
    "mesh": "gallery/quokka.mesh.glb",
    "blob": "gallery/quokka.blob.glb"
   },
@@ -68,6 +74,7 @@
    "id": "wilddog",
    "label": "African Wild Dog",
    "rotateY": 0,
+   "action": "",
    "mesh": "gallery/wilddog.mesh.glb",
    "blob": "gallery/wilddog.blob.glb"
   },
@@ -75,6 +82,7 @@
    "id": "addax",
    "label": "Addax",
    "rotateY": 0,
+   "action": "",
    "mesh": "gallery/addax.mesh.glb",
    "blob": "gallery/addax.blob.glb"
   },
@@ -82,6 +90,7 @@
    "id": "badger",
    "label": "Honey Badger",
    "rotateY": 0,
+   "action": "",
    "mesh": "gallery/badger.mesh.glb",
    "blob": "gallery/badger.blob.glb"
   },
@@ -89,6 +98,7 @@
    "id": "arcticwolf",
    "label": "Arctic Wolf",
    "rotateY": 0,
+   "action": "",
    "mesh": "gallery/arcticwolf.mesh.glb",
    "blob": "gallery/arcticwolf.blob.glb"
   },
@@ -96,6 +106,7 @@
    "id": "platypus",
    "label": "Platypus",
    "rotateY": 0,
+   "action": "",
    "mesh": "gallery/platypus.mesh.glb",
    "blob": "gallery/platypus.blob.glb"
   },
@@ -103,42 +114,65 @@
    "id": "bonobo",
    "label": "Bonobo",
    "rotateY": 0,
+   "action": "",
    "mesh": "gallery/bonobo.mesh.glb",
    "blob": "gallery/bonobo.blob.glb"
   }
  ],
  "stage1": [
   {
-   "id": "lynx",
-   "label": "Eurasian Lynx",
-   "action": "run",
-   "gt": "stage1/lynx.gt.glb",
-   "pred": "stage1/lynx.pred.glb",
-   "blob": "stage1/lynx.blob.glb"
+   "id": "dingo",
+   "label": "Dingo",
+   "action": "interact",
+   "gt": "stage1/dingo.gt.glb",
+   "pred": "stage1/dingo.pred.glb",
+   "blob": "stage1/dingo.blob.glb"
   },
   {
-   "id": "arcticfox",
-   "label": "Arctic Fox",
-   "action": "walk, turn left",
-   "gt": "stage1/arcticfox.gt.glb",
-   "pred": "stage1/arcticfox.pred.glb",
-   "blob": "stage1/arcticfox.blob.glb"
+   "id": "llama",
+   "label": "Llama",
+   "action": "drink",
+   "gt": "stage1/llama.gt.glb",
+   "pred": "stage1/llama.pred.glb",
+   "blob": "stage1/llama.blob.glb"
   },
   {
-   "id": "caracal",
-   "label": "Caracal",
-   "action": "stand to run",
-   "gt": "stage1/caracal.gt.glb",
-   "pred": "stage1/caracal.pred.glb",
-   "blob": "stage1/caracal.blob.glb"
+   "id": "lemur",
+   "label": "Red Ruffed Lemur",
+   "action": "preen",
+   "gt": "stage1/lemur.gt.glb",
+   "pred": "stage1/lemur.pred.glb",
+   "blob": "stage1/lemur.blob.glb"
   },
   {
-   "id": "leopard",
-   "label": "Clouded Leopard",
-   "action": "walk to run",
-   "gt": "stage1/leopard.gt.glb",
-   "pred": "stage1/leopard.pred.glb",
-   "blob": "stage1/leopard.blob.glb"
+   "id": "saiga",
+   "label": "Saiga",
+   "action": "fight",
+   "gt": "stage1/saiga.gt.glb",
+   "pred": "stage1/saiga.pred.glb",
+   "blob": "stage1/saiga.blob.glb"
+  }
+ ],
+ "correspond": [
+  {
+   "id": "tortoise",
+   "label": "Galapagos Tortoise",
+   "blob": "correspond/tortoise.blob.glb"
+  },
+  {
+   "id": "cassowary",
+   "label": "Cassowary",
+   "blob": "correspond/cassowary.blob.glb"
+  },
+  {
+   "id": "armadillo",
+   "label": "Nine-banded Armadillo",
+   "blob": "correspond/armadillo.blob.glb"
+  },
+  {
+   "id": "capybara",
+   "label": "Capybara",
+   "blob": "correspond/capybara.blob.glb"
   }
  ],
  "inpainting": [
@@ -164,7 +198,7 @@
    "id": "The_juvenile_giant_panda_treads_water_a6e7e7b03aaf",
    "prompt": "The juvenile giant panda treads water and then swims forward with gentle paddles.",
    "rotateX": 0,
-   "rotateZ": 0,
+   "rotateZ": 90,
    "inGrid": true,
    "mesh": "inpainting/The_juvenile_giant_panda_treads_water_a6e7e7b03aaf.mesh.glb",
    "blob": "inpainting/The_juvenile_giant_panda_treads_water_a6e7e7b03aaf.blob.glb"
@@ -191,7 +225,7 @@
    "id": "The_male_asian_small_clawed_otter_swi_27a9b42ca295",
    "prompt": "The male asian small clawed otter swims and then treads water.",
    "rotateX": 0,
-   "rotateZ": 0,
+   "rotateZ": 90,
    "inGrid": true,
    "mesh": "inpainting/The_male_asian_small_clawed_otter_swi_27a9b42ca295.mesh.glb",
    "blob": "inpainting/The_male_asian_small_clawed_otter_swi_27a9b42ca295.blob.glb"

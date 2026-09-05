@@ -12,9 +12,9 @@ import { createStage, loadGLB, alignBlobToMesh, restBox, fitCamera,
  * moment -- which reads as scale in a way that one animal cannot.
  */
 const COLS = 4;
-const SPACING_X = 0.95;
-const SPACING_Y = 0.78;
-const CELL_SPAN = 0.7;
+const SPACING_X = 1.02;
+const SPACING_Y = 0.92;
+const CELL_SPAN = 0.92;
 const TRUNC_DUR = 4.0;   // one shared clock so the wall moves together
 
 export function initSplitGrid(host, samples, opts = {}) {
@@ -32,10 +32,13 @@ export function initSplitGrid(host, samples, opts = {}) {
   const cells = [];
   let fraction = startFraction;
 
+  // Labels are placed from the projected cell centres rather than by a CSS grid:
+  // the camera fit leaves margins the grid knows nothing about, so a matching
+  // CSS grid drifts away from the cells it is naming.
   if (labelGrid) {
-    labelGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-    labelGrid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-    labelGrid.innerHTML = samples.map((s) => `<span>${s.label}</span>`).join('');
+    labelGrid.classList.add('projected');
+    labelGrid.innerHTML = samples.map((s) =>
+      `<span>${s.label}${s.action ? `<em>${s.action}</em>` : ''}</span>`).join('');
   }
 
   const stage = createStage(canvasHost, {
@@ -93,25 +96,51 @@ export function initSplitGrid(host, samples, opts = {}) {
         // Lay the animal across the screen, centre it in its cell, and put every
         // species at the same on-screen size.
         pivot.updateMatrixWorld(true);
-        let size = restBox(inner).getSize(new THREE.Vector3());
+        let size = restBox(meshRoot).getSize(new THREE.Vector3());
         if (size.z > size.x) {
           inner.rotation.y += Math.PI / 2;
           pivot.updateMatrixWorld(true);
-          size = restBox(inner).getSize(new THREE.Vector3());
+          size = restBox(meshRoot).getSize(new THREE.Vector3());
         }
-        pivot.scale.setScalar(CELL_SPAN / Math.max(size.x, size.y, 1e-4));
+        // Size on the box the mesh sweeps over the *whole clip*, not its rest
+        // pose -- three.js already keeps that envelope on a morph-target
+        // geometry. A sprawling animal like a bonobo is compact at rest and
+        // enormous mid-stride, and normalising the rest pose leaves it towering
+        // over the others once everything is moving. Diagonal rather than
+        // longest side, for the same reason.
+        const swept = new THREE.Box3().setFromObject(meshRoot).getSize(new THREE.Vector3());
+        pivot.scale.setScalar(CELL_SPAN / Math.max(Math.hypot(swept.x, swept.y), 1e-4));
 
-        cells.push({ blobRoot, meshRoot, blobMixer, meshMixer });
+        cells.push({ blobRoot, meshRoot, blobMixer, meshMixer, pivot });
       });
 
       const pivots = s.scene.children.filter((o) => !o.isLight);
-      fitCamera(s, pivots, { padding: 1.26 });
-      s.onResize = () => fitCamera(s, pivots, { padding: 1.26 });
+      // Straight on: an angled view skews the rows, and the labels are placed by
+      // projection, so they would drift row by row.
+      const frame = () => { fitCamera(s, pivots, { padding: 1.04, dir: [0, 0, 1] }); placeLabels(); };
+      frame();
+      s.onResize = frame;
       s.onFrame = render;
       host.classList.remove('is-loading');
     },
   });
   observeResize(canvasHost);
+
+  /** Put each label under the cell it names, in projected screen coordinates. */
+  function placeLabels() {
+    if (!labelGrid || !stage.camera) return;
+    const v = new THREE.Vector3();
+    [...labelGrid.children].forEach((el, i) => {
+      const cell = cells[i];
+      if (!cell) return;
+      cell.pivot.updateMatrixWorld(true);
+      v.setFromMatrixPosition(cell.pivot.matrixWorld);
+      v.y -= CELL_SPAN * 0.42;
+      v.project(stage.camera);
+      el.style.left = `${(v.x * 0.5 + 0.5) * 100}%`;
+      el.style.top = `${(-v.y * 0.5 + 0.5) * 100}%`;
+    });
+  }
 
   function render() {
     const r = stage.renderer;

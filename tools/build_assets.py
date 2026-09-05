@@ -29,6 +29,10 @@ TEASER = [
     ("warthog",  "Common_Warthog_Juvenile__common_warth_f072c9b5ba93.glb", "Common Warthog", 0),
 ]
 
+# What each clip is doing, keyed by the ids above. Not recoverable from the
+# teaser filenames, which truncate the source name before the action.
+ACTIONS = {}
+
 # A second, larger draw for the Stage-2 wall. Deliberately disjoint from TEASER
 # so the two split viewers never show the same animal. Chosen for short clips and
 # low vertex counts -- eight of these load in the time one of the big ones would.
@@ -45,11 +49,22 @@ GALLERY = [
 
 # Stage-1 rigging comparison, textured: the point of the row is that the mesh we
 # deform still looks like the animal, which an untextured clay render hides.
+# The longest clips in the set: a short one barely moves, which is exactly what
+# this comparison must not show.
 STAGE1 = [
-    ("lynx",      "s042_Eurasian_Lynx_Juvenile_runbase",                  "Eurasian Lynx",   "run"),
-    ("arcticfox", "s058_Arctic_Fox_Juvenile_walkbaseturnl",               "Arctic Fox",      "walk, turn left"),
-    ("caracal",   "s011_Caracal_Juvenile_standtorunturnl",                "Caracal",         "stand to run"),
-    ("leopard",   "s083_Clouded_Leopard_Juvenile_walktorunturnl",         "Clouded Leopard", "walk to run"),
+    ("dingo",  "s089_Dingo_Juvenile_interactjuvenilea",        "Dingo",           "interact"),
+    ("llama",  "s031_Llama_Juvenile_drinkloop01",              "Llama",           "drink"),
+    ("lemur",  "s061_Red_Ruffed_Lemur_Juvenile_standpreen01",  "Red Ruffed Lemur", "preen"),
+    ("saiga",  "s035_Saiga_Female_fightattack",                "Saiga",           "fight"),
+]
+
+# Correspondence only needs the bones, so this group costs a few hundred KB and
+# can afford body plans that share almost nothing with each other.
+CORRESPOND = [
+    ("tortoise",  "Galapagos_Giant_Tortoise_Male__galapa_9ddb7e38ada8.glb", "Galapagos Tortoise"),
+    ("cassowary", "Cassowary_Male__cassowary_male__anima_107a3ec7af0b.glb", "Cassowary"),
+    ("armadillo", "Nine_Banded_Armadillo_Male__nine_band_8e9a3d7e9bac.glb", "Nine-banded Armadillo"),
+    ("capybara",  "Capybara_Male__capybara_male__animati_9f3c80b87e69.glb", "Capybara"),
 ]
 
 # The four gray bones in every inpainting blob GLB -- matches
@@ -68,7 +83,10 @@ INPAINT_ROTX = {}
 # Extra degrees of roll in screen axes, on top of the automatic orientation.
 # Empty on purpose: once the bones are registered onto the mesh in the viewer,
 # the automatic rule gets every clip right, the belly-up panda included.
-INPAINT_ROTZ = {}
+INPAINT_ROTZ = {
+    "The_juvenile_giant_panda_treads_water_a6e7e7b03aaf": 90,
+    "The_male_asian_small_clawed_otter_swi_27a9b42ca295": 90,
+}
 
 # Left front leg, from references/repos/scene_1/main.js.
 LEG_BONES = [44, 45, 46, 47, 48, 49, 50, 51, 26, 110, 111, 13]
@@ -108,6 +126,9 @@ def main():
         for key, fn, label, rot in table:
             m[group].append({
                 "id": key, "label": label, "rotateY": rot,
+                # The teaser exports truncate the source name, so the action is
+                # not recoverable from the filename. Fill in by hand.
+                "action": ACTIONS.get(key, ""),
                 "mesh": emit(f"{DATA}/teaser/mesh/{fn}", f"{group}/{key}.mesh.glb"),
                 # Blobs carry no texture and quantizing 120 tiny ellipsoids buys
                 # nothing, so they go through untouched.
@@ -120,9 +141,18 @@ def main():
     for key, d, label, action in STAGE1:
         m["stage1"].append({
             "id": key, "label": label, "action": action,
-            "gt":   emit(f"{DATA}/stage1/{d}/gt_textured.glb",   f"stage1/{key}.gt.glb"),
-            "pred": emit(f"{DATA}/stage1/{d}/pred_textured.glb", f"stage1/{key}.pred.glb"),
+            "gt":   emit(f"{DATA}/stage1/{d}/gt_textured.glb",   f"stage1/{key}.gt.glb", max_frames=100),
+            "pred": emit(f"{DATA}/stage1/{d}/pred_textured.glb", f"stage1/{key}.pred.glb", max_frames=100),
             "blob": emit(f"{DATA}/stage1/{d}/blob_nopiles.glb", f"stage1/{key}.blob.glb",
+                         do_jpeg=False, do_quant=False),
+        })
+
+    print("correspondence (bones only)")
+    m["correspond"] = []
+    for key, fn, label in CORRESPOND:
+        m["correspond"].append({
+            "id": key, "label": label,
+            "blob": emit(f"{DATA}/teaser/blob/{fn}", f"correspond/{key}.blob.glb",
                          do_jpeg=False, do_quant=False),
         })
 

@@ -6,7 +6,7 @@ import { createStage, loadGLB, pairModels, fitCamera, styleBlob, styleMesh, obse
 // spacing and the shift axis come from there rather than from a bounding box.
 const SHIFT_DIR_WORLD = new THREE.Vector3(1, 0, -1).normalize();
 const MAX_SHIFT = 0.05;   // must match MAX_LEG_SHIFT in the morph bake
-const SPACING = 0.9;
+const SPACING = 1.2;
 const LIFT = 0.25;
 const LEG_COLOR = 0xff2e93;
 const TARGET_SPAN = 0.6;     // every species drawn at the same on-screen size

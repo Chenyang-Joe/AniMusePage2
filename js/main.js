@@ -57,7 +57,7 @@ whenNear('v-wall', async (el) => {
 
 whenNear('v-corr', async (el) => {
   const [{ initCorrespondence }, m] = await Promise.all([import('./viewers/correspond.js'), manifest()]);
-  initCorrespondence(el, withBase(m.teaser, ['blob']));
+  initCorrespondence(el, withBase(m.correspond, ['blob']));
 });
 
 whenNear('v-stage1', async (el) => {

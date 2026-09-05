@@ -32,8 +32,8 @@ export function initCorrespondence(host, samples) {
         return root;
       });
       layoutRow(roots, { gap: 0.1 });
-      fitCamera(s, roots, { padding: 1.1 });
-      s.onResize = () => fitCamera(s, roots, { padding: 1.1 });
+      fitCamera(s, roots, { padding: 1.22 });
+      s.onResize = () => fitCamera(s, roots, { padding: 1.22 });
       host.classList.remove('is-loading');
     },
   });

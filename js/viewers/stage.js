@@ -292,7 +292,7 @@ export function layoutRow(roots, { gap = 0.18 } = {}) {
  * Keeps the current view direction so this can be re-run when the reader picks a
  * different sample without yanking the camera back to a default angle.
  */
-export function fitCamera(stage, roots, { padding = 1.25, keepDirection = true } = {}) {
+export function fitCamera(stage, roots, { padding = 1.25, keepDirection = true, dir: initialDir } = {}) {
   const { camera, controls } = stage;
   if (!camera || !roots.length) return;
   const box = new THREE.Box3();
@@ -314,7 +314,7 @@ export function fitCamera(stage, roots, { padding = 1.25, keepDirection = true }
 
   const dir = keepDirection && stage.fitted
     ? camera.position.clone().sub(controls.target).normalize()
-    : new THREE.Vector3(0.22, 0.14, 1).normalize();
+    : new THREE.Vector3(...(initialDir || [0.22, 0.14, 1])).normalize();
   camera.position.copy(centre).addScaledVector(dir, dist);
   controls.target.copy(centre);
   controls.minDistance = dist * 0.35;
