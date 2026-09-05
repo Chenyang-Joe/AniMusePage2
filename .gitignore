@@ -4,9 +4,10 @@ dist/
 *.log
 .vite/
 
-# 原始素材（几个 GB），不入库；建站时只把挑选并压缩过的资源放进 public/
+# 原始素材（几个 GB），不入库；建站时只把挑选并压缩过的资源放进 assets/。
+# 注意 data/ 已经覆盖了 data/editing/：早先那条裸 `editing/` 会匹配任意层级的同名
+# 目录，把构建产物 assets/models/editing/ 也一起吞掉，线上因此 404。
 data/
-editing/
 
 # 方法侧代码，独立仓库，只作参考
 references/repos/CANOR_GAUSS/
