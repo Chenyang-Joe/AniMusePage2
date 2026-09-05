@@ -440,17 +440,22 @@ export function fitCamera(stage, roots, { padding = 1.25, keepDirection = true, 
   const centre = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3());
 
-  const vFov = camera.fov * Math.PI / 180;
-  const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
-  const dist = Math.max(
-    (size.y / 2) / Math.tan(vFov / 2),
-    (size.x / 2) / Math.tan(hFov / 2),
-    (size.z / 2) / Math.tan(hFov / 2),
-  ) * padding;
-
   const dir = keepDirection && stage.fitted
     ? camera.position.clone().sub(controls.target).normalize()
     : new THREE.Vector3(...(initialDir || [0.22, 0.14, 1])).normalize();
+
+  const vFov = camera.fov * Math.PI / 180;
+  const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+  // Measured to the box's *near* face, not its centre. A chunky animal -- a
+  // giant tortoise is nearly as deep as it is wide -- viewed from not much more
+  // than its own depth away throws its near end forward hard enough to break
+  // out of a frame that only fitted its middle.
+  const near = (Math.abs(dir.x) * size.x + Math.abs(dir.y) * size.y
+                + Math.abs(dir.z) * size.z) / 2;
+  const dist = near + padding * Math.max(
+    (size.y / 2) / Math.tan(vFov / 2),
+    (size.x / 2) / Math.tan(hFov / 2),
+  );
   camera.position.copy(centre).addScaledVector(dir, dist);
   controls.target.copy(centre);
   controls.minDistance = dist * 0.35;

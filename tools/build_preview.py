@@ -14,7 +14,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from glb_opt import optimize
+from glb_opt import optimize, read_glb
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
@@ -35,6 +35,17 @@ def title(words):
     return " ".join(words)
 
 
+def frames(path):
+    """Frames in the source clip, before the preview throws most of them away."""
+    if not os.path.exists(path):
+        return 0
+    j, _ = read_glb(path)
+    an = j.get("animations") or []
+    if not an:
+        return 0
+    return max(j["accessors"][s["input"]]["count"] for s in an[0]["samplers"])
+
+
 def teaser():
     src = f"{DATA}/teaser/mesh"
     out = []
@@ -46,7 +57,8 @@ def teaser():
         # is everything before the doubled underscore; the action is not in there.
         label = title(fn.split("__")[0].split("_"))
         print(f"{key} {label}")
-        e = {"id": key, "label": label, "file": fn, "rotateY": 0}
+        e = {"id": key, "label": label, "file": fn, "rotateY": 0,
+             "frames": frames(f"{src}/{fn}")}
         e["mesh"] = emit(f"{src}/{fn}", f"teaser/{key}.mesh.glb",
                          max_frames=FRAMES, quality=QUALITY, max_tex=TEX)
         e["blob"] = emit(f"{DATA}/teaser/blob/{fn}", f"teaser/{key}.blob.glb",
@@ -67,7 +79,8 @@ def stage1():
         label = title(parts[1:cut + 1])
         action = "_".join(parts[cut + 1:])
         print(f"{key} {label} / {action}")
-        e = {"id": key, "label": label, "action": action, "file": d, "rotateY": 0}
+        e = {"id": key, "label": label, "action": action, "file": d, "rotateY": 0,
+             "frames": frames(f"{src}/{d}/pred_textured.glb")}
         e["mesh"] = emit(f"{src}/{d}/pred_textured.glb", f"stage1/{key}.pred.glb",
                          max_frames=FRAMES, quality=QUALITY, max_tex=TEX)
         e["gt"] = emit(f"{src}/{d}/gt_textured.glb", f"stage1/{key}.gt.glb",
@@ -75,6 +88,9 @@ def stage1():
         e["blob"] = emit(f"{src}/{d}/blob_nopiles.glb", f"stage1/{key}.blob.glb",
                          do_jpeg=False, do_quant=False)
         out.append(e)
+    # Longest first: a two-frame clip cannot show a rig doing anything, and the
+    # picking runs from the top down.
+    out.sort(key=lambda e: -e["frames"])
     return out
 
 
@@ -84,7 +100,9 @@ def emit(src, rel, **kw):
         return None
     dst = os.path.join(OUT, rel)
     os.makedirs(os.path.dirname(dst), exist_ok=True)
-    optimize(src, dst, **kw)
+    # Idempotent, so the index can be rebuilt without re-shrinking 190 files.
+    if not os.path.exists(dst):
+        optimize(src, dst, **kw)
     return rel
 
 

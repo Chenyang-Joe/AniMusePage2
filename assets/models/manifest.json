@@ -21,114 +21,114 @@
  ],
  "teaser": [
   {
+   "id": "tortoise",
+   "label": "Galapagos Giant Tortoise",
+   "rotateY": 0,
+   "profile": false,
+   "action": "walks and turns left",
+   "mesh": "teaser/tortoise.mesh.glb",
+   "blob": "teaser/tortoise.blob.glb"
+  },
+  {
+   "id": "polarbear",
+   "label": "Polar Bear",
+   "rotateY": 0,
+   "profile": false,
+   "action": "swims",
+   "mesh": "teaser/polarbear.mesh.glb",
+   "blob": "teaser/polarbear.blob.glb"
+  },
+  {
+   "id": "macaque",
+   "label": "Japanese Macaque",
+   "rotateY": 90,
+   "profile": false,
+   "action": "stands up, then drops back down",
+   "mesh": "teaser/macaque.mesh.glb",
+   "blob": "teaser/macaque.blob.glb"
+  },
+  {
    "id": "camel",
    "label": "Bactrian Camel",
-   "rotateY": 90,
+   "rotateY": 180,
    "profile": false,
-   "action": "",
+   "action": "walks, then lowers its head to drink",
    "mesh": "teaser/camel.mesh.glb",
    "blob": "teaser/camel.blob.glb"
-  },
-  {
-   "id": "meerkat",
-   "label": "Meerkat",
-   "rotateY": 90,
-   "profile": false,
-   "action": "",
-   "mesh": "teaser/meerkat.mesh.glb",
-   "blob": "teaser/meerkat.blob.glb"
-  },
-  {
-   "id": "penguin",
-   "label": "King Penguin",
-   "rotateY": 180,
-   "profile": false,
-   "action": "",
-   "mesh": "teaser/penguin.mesh.glb",
-   "blob": "teaser/penguin.blob.glb"
-  },
-  {
-   "id": "pallascat",
-   "label": "Pallas's Cat",
-   "rotateY": 180,
-   "profile": false,
-   "action": "",
-   "mesh": "teaser/pallascat.mesh.glb",
-   "blob": "teaser/pallascat.blob.glb"
   }
  ],
  "gallery": [
   {
    "id": "arcticwolf",
    "label": "Arctic Wolf",
-   "rotateY": 0,
+   "rotateY": 180,
    "profile": false,
-   "action": "",
+   "action": "breaks into a run",
    "mesh": "gallery/arcticwolf.mesh.glb",
    "blob": "gallery/arcticwolf.blob.glb"
+  },
+  {
+   "id": "elephant",
+   "label": "Indian Elephant",
+   "rotateY": 0,
+   "profile": false,
+   "action": "turns left at a brisk walk",
+   "mesh": "gallery/elephant.mesh.glb",
+   "blob": "gallery/elephant.blob.glb"
+  },
+  {
+   "id": "bonobo",
+   "label": "Bonobo",
+   "rotateY": -90,
+   "profile": false,
+   "action": "jumps excitedly",
+   "mesh": "gallery/bonobo.mesh.glb",
+   "blob": "gallery/bonobo.blob.glb"
+  },
+  {
+   "id": "wallaby",
+   "label": "Red-necked Wallaby",
+   "rotateY": 90,
+   "profile": false,
+   "action": "hops forward",
+   "mesh": "gallery/wallaby.mesh.glb",
+   "blob": "gallery/wallaby.blob.glb"
   },
   {
    "id": "addax",
    "label": "Addax",
    "rotateY": 0,
    "profile": false,
-   "action": "",
+   "action": "rushes forward",
    "mesh": "gallery/addax.mesh.glb",
    "blob": "gallery/addax.blob.glb"
   },
   {
-   "id": "kangaroo",
-   "label": "Red Kangaroo",
-   "rotateY": -90,
-   "profile": false,
-   "action": "",
-   "mesh": "gallery/kangaroo.mesh.glb",
-   "blob": "gallery/kangaroo.blob.glb"
-  },
-  {
-   "id": "badger",
-   "label": "Honey Badger",
-   "rotateY": 180,
-   "profile": false,
-   "action": "",
-   "mesh": "gallery/badger.mesh.glb",
-   "blob": "gallery/badger.blob.glb"
-  },
-  {
-   "id": "tiger",
-   "label": "Bengal Tiger",
+   "id": "lemur",
+   "label": "Black-and-white Ruffed Lemur",
    "rotateY": 0,
    "profile": false,
-   "action": "",
-   "mesh": "gallery/tiger.mesh.glb",
-   "blob": "gallery/tiger.blob.glb"
+   "action": "walks on all fours",
+   "mesh": "gallery/lemur.mesh.glb",
+   "blob": "gallery/lemur.blob.glb"
   },
   {
-   "id": "otter",
-   "label": "Asian Small-clawed Otter",
+   "id": "capybara",
+   "label": "Capybara",
    "rotateY": 0,
    "profile": false,
-   "action": "",
-   "mesh": "gallery/otter.mesh.glb",
-   "blob": "gallery/otter.blob.glb"
+   "action": "sniffs the ground",
+   "mesh": "gallery/capybara.mesh.glb",
+   "blob": "gallery/capybara.blob.glb"
   },
   {
-   "id": "brownbear",
-   "label": "Himalayan Brown Bear",
+   "id": "hyena",
+   "label": "Spotted Hyena",
    "rotateY": 0,
    "profile": false,
-   "action": "",
-   "mesh": "gallery/brownbear.mesh.glb",
-   "blob": "gallery/brownbear.blob.glb"
-  },
-  {
-   "id": "chimpanzee",
-   "label": "Western Chimpanzee",
-   "rotateY": 90,
-   "profile": false,
-   "action": "",
-   "mesh": "gallery/chimpanzee.mesh.glb",
-   "blob": "gallery/chimpanzee.blob.glb"
+   "action": "gives a small hop",
+   "mesh": "gallery/hyena.mesh.glb",
+   "blob": "gallery/hyena.blob.glb"
   }
  ],
  "stage1": [

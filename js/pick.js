@@ -57,7 +57,7 @@ function render() {
   stage = initSplitGrid(host, items.map((e) => ({
     id: e.id,
     label: `${e.id} · ${e.label}`,
-    action: picks[e.id]?.action || e.action || '',
+    action: [picks[e.id]?.action || e.action, e.frames ? `${e.frames}f` : ''].filter(Boolean).join(' · '),
     rotateY: rotOf(e),
     mesh: BASE + (which === 'gt' && e.gt ? e.gt : e.mesh),
     blob: BASE + e.blob,
@@ -75,7 +75,7 @@ const rotOf = (e) => (picks[e.id]?.rotateY ?? e.rotateY ?? 0);
 function cellUI(e) {
   const el = document.createElement('div');
   el.className = 'cell' + (picks[e.id] ? ' picked' : '');
-  el.innerHTML = `<b>${e.id}</b> ${e.label}<br><span class="hint" style="font-size:11.5px">${e.action || ''} · rotY=${rotOf(e)}</span>`;
+  el.innerHTML = `<b>${e.id}</b> ${e.label}<br><span class="hint" style="font-size:11.5px">${e.frames}f · rotY=${rotOf(e)}${e.action ? ' · ' + e.action : ''}</span>`;
 
   const row = document.createElement('div');
   row.className = 'row';

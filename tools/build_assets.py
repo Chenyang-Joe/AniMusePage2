@@ -20,40 +20,49 @@ MAX_TEX = 1024
 
 # Four species with obviously different body plans -- the point of the split
 # viewer is that one shared bone book covers all of them.
-# Picks and orientations from references/repos/scene_5, which curated both by
-# hand against a camera looking down -Z -- exactly the axis both split viewers
-# use. So `groundModel`'s automatic lay-down is switched off for these two
-# groups, and rotateY carries scene_5's flip. The viewers add a measured side-on
-# turn on top (`facingTurn`), because these meshes are not authored on a common
-# axis; where that measurement is wrong -- a near-square animal has no long axis
-# to find -- the correction is folded into rotateY here, since the two are added.
+#
+# Picks, angles and captions all come from pick.html, where they were made
+# against the live clips. rotateY is whatever angle the clip was left at there;
+# the viewers add the measured side-on turn (`facingTurn`) on top, exactly as
+# the picker did, so what was chosen is what renders. `groundModel`'s automatic
+# lay-down stays switched off for these two groups so it cannot argue with it.
+#
+# The hero shows one animal at a time and can afford the long clips, so it takes
+# the four longest -- which are also the four least alike.
 TEASER = [
-    # The camel and the meerkat are round enough that no rotation makes one axis
-    # clearly longer -- 1.07 at best -- so `facingTurn` has nothing to find and
-    # these two carry the whole angle by hand, turned to face left like the rest.
-    ("camel",   "Bactrian_Camel_Female__bactrian_camel_db6831436c54.glb", "Bactrian Camel", 90),
-    ("meerkat", "Meerkat_Juvenile__meerkat_juvenile__a_1c0f2ac8c214.glb", "Meerkat", 90),
-    ("penguin", "King_Penguin_Male__king_penguin_male__51afc65ae2d9.glb", "King Penguin", 180),
-    ("pallascat", "Pallas_Cat_Male__pallas_cat_male__ani_d6e9a20566ca.glb", "Pallas's Cat", 180),
+    ("tortoise",  "Galapagos_Giant_Tortoise_Male__galapa_9ddb7e38ada8.glb", "Galapagos Giant Tortoise", 0),
+    ("polarbear", "Polar_Bear_Male__polar_bear_male__ani_19265aad3435.glb", "Polar Bear", 0),
+    ("macaque",   "Japanese_Macaque_Female__japanese_mac_86b28b03fc31.glb", "Japanese Macaque", 90),
+    ("camel",     "Bactrian_Camel_Female__bactrian_camel_db6831436c54.glb", "Bactrian Camel", 180),
 ]
 
-# What each clip is doing, keyed by the ids above. Not recoverable from the
-# teaser filenames, which truncate the source name before the action.
-ACTIONS = {}
+# What each clip is doing. Not recoverable from the teaser filenames, which
+# truncate the source name before the action -- these were read off the clips.
+ACTIONS = {
+    "tortoise":   "walks and turns left",
+    "polarbear":  "swims",
+    "macaque":    "stands up, then drops back down",
+    "camel":      "walks, then lowers its head to drink",
+    "addax":      "rushes forward",
+    "lemur":      "walks on all fours",
+    "bonobo":     "jumps excitedly",
+    "elephant":   "turns left at a brisk walk",
+    "wallaby":    "hops forward",
+    "arcticwolf": "breaks into a run",
+    "capybara":   "sniffs the ground",
+    "hyena":      "gives a small hop",
+}
 
-# The Stage-2 wall: the remaining six of scene_5's ten, plus two of the longest
-# clips in the pool so the wall is not all short loops.
+# The Stage-2 wall: the other eight.
 GALLERY = [
-    ("arcticwolf", "Arctic_Wolf_Female__arctic_wolf_femal_9c0c125b1b50.glb", "Arctic Wolf", 0),
+    ("arcticwolf", "Arctic_Wolf_Female__arctic_wolf_femal_9c0c125b1b50.glb", "Arctic Wolf", 180),
+    ("elephant",   "Indian_Elephant_Female__indian_elepha_64be1af510c4.glb", "Indian Elephant", 0),
+    ("bonobo",     "Bonobo_Female__bonobo_female__animati_c8a00d05ea65.glb", "Bonobo", -90),
+    ("wallaby",    "Rednecked_Wallaby_Male__rednecked_wal_36a87e28b6c0.glb", "Red-necked Wallaby", 90),
     ("addax",      "Addax_Female__addax_female__animation_3c84f53e637e.glb", "Addax", 0),
-    # -90 / +90 cancel or supply the measured turn: the kangaroo is already
-    # side-on and the crouching chimpanzee is too square to call.
-    ("kangaroo",   "Red_Kangaroo_Juvenile__red_kangaroo_j_4feb086e6b5b.glb", "Red Kangaroo", -90),
-    ("badger",     "Honey_Badger_Juvenile__honey_badger_j_df49ab261a6b.glb", "Honey Badger", 180),
-    ("tiger",      "Bengal_Tiger_Male__bengal_tiger_male__134f4edbedf7.glb", "Bengal Tiger", 0),
-    ("otter",      "Asian_Small_Clawed_Otter_Male__asian__c0909d86f1be.glb", "Asian Small-clawed Otter", 0),
-    ("brownbear",  "Himalayan_Brown_Bear_Female__himalaya_219094cd7b0b.glb", "Himalayan Brown Bear", 0),
-    ("chimpanzee", "Western_Chimpanzee_Juvenile__western__08a30ba11351.glb", "Western Chimpanzee", 90),
+    ("lemur",      "B_W_Ruffed_Lemur_Male__b_w_ruffed_lem_2aabc3fd7a19.glb", "Black-and-white Ruffed Lemur", 0),
+    ("capybara",   "Capybara_Male__capybara_male__animati_9f3c80b87e69.glb", "Capybara", 0),
+    ("hyena",      "Spotted_Hyena_Female__spotted_hyena_f_160db685a46d.glb", "Spotted Hyena", 0),
 ]
 
 # The longest clips in the set: a short one barely moves, which is exactly what
@@ -140,10 +149,14 @@ def main():
                 # The teaser exports truncate the source name, so the action is
                 # not recoverable from the filename. Fill in by hand.
                 "action": ACTIONS.get(key, ""),
-                # The wall shows all eight at once, so its meshes get thinned;
-                # the hero viewer shows one at a time and keeps every frame.
+                # Both groups get thinned, the wall harder: it loads eight files
+                # at once where the hero loads one. Untrimmed, the hero's clips
+                # run to 250 frames and 14 MB apiece, which is the old site's
+                # loading problem all over again. These animals move slowly
+                # enough, and the tracks interpolate linearly, that a third of
+                # the frames is not visible as steppiness.
                 "mesh": emit(f"{DATA}/teaser/mesh/{fn}", f"{group}/{key}.mesh.glb",
-                             max_frames=70 if group == "gallery" else None),
+                             max_frames=70 if group == "gallery" else 110),
                 # Blobs carry no texture and quantizing 120 tiny ellipsoids buys
                 # nothing, so they go through untouched.
                 "blob": emit(f"{DATA}/teaser/blob/{fn}", f"{group}/{key}.blob.glb",

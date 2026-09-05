@@ -114,8 +114,12 @@ export function initSplit(host, samples, opts = {}) {
     drift.updateMatrixWorld(true);
     const pose = poseFrames(meshRoot, meshGltf.animations?.[0]);
     const box = new THREE.Box3().setFromCenterAndSize(pose.center, pose.size);
-    fitCamera(stage, [drift], { box });
-    stage.onResize = () => fitCamera(stage, [drift], { box });
+    // Tighter than the default: the box already covers the whole clip, so an
+    // animal that rears is only ever this tall for a moment and spends the rest
+    // of the loop looking small in a panel this wide.
+    const fit = { box, padding: 1.08 };
+    fitCamera(stage, [drift], fit);
+    stage.onResize = () => fitCamera(stage, [drift], fit);
 
     const dur = meshGltf.animations?.[0]?.duration || 0;
     current = { drift, blobRoot, meshRoot, pose, dur, meshMixer };
