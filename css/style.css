@@ -164,6 +164,10 @@ tr.ref td { color: var(--muted); font-style: italic; }
 .compare th, .compare td { white-space: normal; }
 .compare td:first-child { color: var(--muted); width: 24%; white-space: nowrap; }
 
+/* A rule between two things that belong to one section but are not the same
+   thought -- the film, and then the diagram the rest of the page follows. */
+.sep { border: 0; border-top: 1px solid var(--line); margin: 40px 0 34px; }
+
 figure { margin: 26px 0; }
 figure img { width: 100%; height: auto; border-radius: 6px; display: block; }
 figcaption { font-size: 14px; color: var(--muted); margin-top: 10px; line-height: 1.6; }

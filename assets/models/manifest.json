@@ -189,10 +189,10 @@
    "blob": "correspond/camel.blob.glb"
   },
   {
-   "id": "rhino",
-   "label": "Black Rhino",
-   "rotateY": 0,
-   "blob": "correspond/rhino.blob.glb"
+   "id": "monkey",
+   "label": "Proboscis Monkey",
+   "rotateY": 180,
+   "blob": "correspond/monkey.blob.glb"
   }
  ],
  "inpainting": [
