@@ -316,6 +316,10 @@ pre code { background: none; padding: 0; }
    puts every name at the same height, and that height is the floor -- which the
    frame clips. Only the horizontal position needs the projection. */
 .grid-labels.below { position: relative; inset: auto; height: 18px; margin-top: 8px; }
+/* Four names across a phone is ninety pixels each: let them wrap rather than
+   run into one another, and cap each at its own quarter of the row so a long
+   one cannot reach its neighbour. Nothing wraps at desktop width. */
+.grid-labels.below span { white-space: normal; max-width: 23%; }
 
 .video-embed { position: relative; padding-top: 56.25%; border-radius: 10px; overflow: hidden;
                border: 1px solid var(--line); background: var(--soft); }
@@ -342,7 +346,9 @@ footer { border-top: 1px solid var(--line); padding: 30px 0 50px; color: var(--m
   .viewer-canvas, .viewer-canvas.h-sm, .viewer-canvas.h-md { height: 280px; }
   /* Two columns here, so the grids are tall rather than wide. */
   .viewer-canvas.h-lg { height: 520px; }
-  .grid-labels.projected span { white-space: normal; width: 44%; transform: translate(-50%, 0); }
+  .grid-labels.projected:not(.below) span { white-space: normal; width: 44%; transform: translate(-50%, 0); }
+  .grid-labels.below { height: 34px; }
+  .grid-labels.below span { font-size: 11.5px; line-height: 1.3; }
   /* The caption below says which half is which; the in-frame labels only
      collide with each other at this width. */
   .split-label-left, .split-label-right { display: none; }
