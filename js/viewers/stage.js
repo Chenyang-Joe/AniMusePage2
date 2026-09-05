@@ -11,6 +11,13 @@ export function loadGLB(url) {
   return cache.get(url);
 }
 
+/**
+ * Drop every parsed GLB. The site never needs this -- it ships two dozen files
+ * and keeps them -- but the picker pages through nearly two hundred, and a
+ * parsed clip is several times the size of the file it came from.
+ */
+export function clearGLBCache() { cache.clear(); }
+
 /** Every renderer we hand out, so `resize` can be driven from one listener. */
 const stages = new Set();
 
@@ -98,6 +105,22 @@ export function createStage(host, opts = {}) {
   vis.observe(host);
 
   stage.mountNow = mount;
+  // Chrome keeps only a handful of WebGL contexts alive and silently kills the
+  // oldest beyond that, so anything that swaps viewers in and out -- the picker
+  // pages through nearly two hundred clips -- has to give them back explicitly.
+  stage.dispose = () => {
+    io.disconnect();
+    vis.disconnect();
+    stages.delete(stage);
+    ro.unobserve(host);
+    if (!stage.renderer) return;
+    stage.controls.dispose();
+    stage.renderer.dispose();
+    stage.renderer.forceContextLoss();
+    stage.renderer.domElement.remove();
+    stage.renderer = null;
+    stage.onFrame = null;
+  };
   if (typeof window !== 'undefined') window.__animuse.all.push(stage);
   return stage;
 }

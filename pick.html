@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AniMuse — sample picker</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎛️</text></svg>">
+<script type="importmap">
+{ "imports": {
+    "three": "./vendor/three/three.module.js",
+    "three/addons/": "./vendor/three/addons/"
+} }
+</script>
+<style>
+  body { padding: 0 0 60px; }
+  .bar { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.94);
+         backdrop-filter: blur(8px); border-bottom: 1px solid var(--rule);
+         display: flex; gap: 14px; align-items: center; padding: 10px 24px; flex-wrap: wrap; }
+  .bar h1 { font-size: 15px; margin: 0 8px 0 0; font-weight: 600; }
+  .bar .spacer { flex: 1; }
+  .bar button, .bar select { font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 999px;
+         border: 1px solid var(--rule); background: #fff; cursor: pointer; }
+  .bar button.on { background: #111; color: #fff; border-color: #111; }
+  .bar button:disabled { opacity: .35; cursor: default; }
+  .page { max-width: 1500px; margin: 0 auto; padding: 0 24px; }
+  .cellbar { display: grid; gap: 10px 14px; margin-top: 14px; }
+  .cell { border: 1px solid var(--rule); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; }
+  .cell.picked { border-color: #111; box-shadow: inset 0 0 0 1px #111; }
+  .cell b { font-weight: 600; }
+  .cell .row { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+  .cell input[type=text] { flex: 1; min-width: 0; font: inherit; font-size: 12px; padding: 3px 6px;
+         border: 1px solid var(--rule); border-radius: 6px; }
+  .cell button { font: inherit; font-size: 12px; padding: 3px 8px; border-radius: 6px;
+         border: 1px solid var(--rule); background: #fff; cursor: pointer; }
+  .cell button.pick.on { background: #111; color: #fff; border-color: #111; }
+  .out { margin-top: 26px; }
+  .out textarea { width: 100%; height: 190px; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+         border: 1px solid var(--rule); border-radius: 10px; padding: 12px; resize: vertical; }
+  .hint { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <h1>Sample picker</h1>
+  <button id="tab-teaser" class="on">Teaser</button>
+  <button id="tab-stage1">Stage-1</button>
+  <button id="which" hidden>Showing: Pred</button>
+  <span class="spacer"></span>
+  <span id="count" class="hint"></span>
+  <button id="prev">‹ Prev</button>
+  <span id="pageno" class="hint"></span>
+  <button id="next">Next ›</button>
+</div>
+
+<div class="page">
+  <div class="viewer is-loading" id="v-pick">
+    <div class="viewer-frame">
+      <div class="viewer-canvas" style="height:720px"></div>
+      <div class="grid-labels"></div>
+      <span class="split-label-left"></span>
+      <span class="split-label-right"></span>
+      <button class="split-divider" tabindex="0" aria-label="Drag to move the split between bones and mesh"></button>
+    </div>
+  </div>
+
+  <div class="cellbar" id="cells"></div>
+
+  <p class="hint">Drag the divider for bones. <b>Turn</b> rotates that clip 90° and rebuilds the page —
+     whatever angle you leave it at is the angle I will use. Type what the animal is doing in the box;
+     tick <b>Pick</b> to keep it. Everything below updates as you go — paste it back to me when you're done.</p>
+
+  <div class="out">
+    <textarea id="out" readonly></textarea>
+    <p class="hint"><button id="copy" style="font:inherit;font-size:13px;padding:5px 12px;border-radius:999px;border:1px solid var(--rule);background:#fff;cursor:pointer">Copy</button>
+       <button id="clear" style="font:inherit;font-size:13px;padding:5px 12px;border-radius:999px;border:1px solid var(--rule);background:#fff;cursor:pointer">Clear all picks</button></p>
+  </div>
+</div>
+
+<script type="module" src="js/pick.js"></script>
+</body>
+</html>

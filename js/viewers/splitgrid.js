@@ -18,7 +18,7 @@ const CELL_SPAN = 0.92;
 const MAX_LOOP = 8.0;    // seconds; longer clips are sped up to fit
 
 export function initSplitGrid(host, samples, opts = {}) {
-  const { startFraction = 0.5, cols = COLS } = opts;
+  const { startFraction = 0.5, cols = COLS, padding = 1.04 } = opts;
 
   const canvasHost = host.querySelector('.viewer-canvas');
   const divider = host.querySelector('.split-divider');
@@ -119,14 +119,19 @@ export function initSplitGrid(host, samples, opts = {}) {
         // the shortest would freeze most of the wall, so each loops on its own
         // length instead, sped up enough that no loop outstays its welcome.
         const dur = meshGltf.animations?.[0]?.duration || blobGltf.animations?.[0]?.duration || 1;
-        cells.push({ blobRoot, meshRoot, blobMixer, meshMixer, pivot, drift, pose, home,
+        cells.push({ sample, blobRoot, meshRoot, blobMixer, meshMixer, pivot, drift, inner, pose, home,
                      dur, speed: Math.max(1, dur / MAX_LOOP) });
       });
+
+      // The picker drives these from outside: it needs to turn one cell without
+      // rebuilding the page, and to read back what each clip turned out to be.
+      stage.cells = cells;
+      opts.onCells?.(cells);
 
       const pivots = s.scene.children.filter((o) => !o.isLight);
       // Straight on: an angled view skews the rows, and the labels are placed by
       // projection, so they would drift row by row.
-      const frame = () => { fitCamera(s, pivots, { padding: 1.04, dir: [0, 0, 1] }); placeLabels(); };
+      const frame = () => { fitCamera(s, pivots, { padding, dir: [0, 0, 1] }); placeLabels(); };
       frame();
       s.onResize = frame;
       s.onFrame = render;
