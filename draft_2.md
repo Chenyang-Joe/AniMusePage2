@@ -117,7 +117,7 @@
 
 ## ④ Overview video
 
-`[[VIDEO]]` → https://youtu.be/UVx4sUNARUM ✅ 已接（点击才加载 iframe）
+`[[VIDEO]]` → https://youtu.be/J6a1tpsXST4 ✅ 已接（点击才加载 iframe）
 
 **Caption** ✅ 已定
 > Five minutes of AniMuse in motion — the same material as this page, but moving.
