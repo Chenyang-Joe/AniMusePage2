@@ -50,7 +50,7 @@
   {
    "id": "capybara",
    "label": "Capybara",
-   "rotateY": 0,
+   "rotateY": 30,
    "profile": false,
    "action": "sniffs the ground",
    "mesh": "teaser/capybara.mesh.glb",
@@ -133,25 +133,19 @@
  ],
  "stage1": [
   {
-   "id": "dingo",
-   "label": "Dingo",
-   "action": "interact",
-   "gt": "stage1/dingo.gt.glb",
-   "pred": "stage1/dingo.pred.glb",
-   "blob": "stage1/dingo.blob.glb"
-  },
-  {
-   "id": "llama",
-   "label": "Llama",
-   "action": "drink",
-   "gt": "stage1/llama.gt.glb",
-   "pred": "stage1/llama.pred.glb",
-   "blob": "stage1/llama.blob.glb"
+   "id": "sheep",
+   "label": "Dall Sheep",
+   "action": "performs a mating display",
+   "rotateY": -90,
+   "gt": "stage1/sheep.gt.glb",
+   "pred": "stage1/sheep.pred.glb",
+   "blob": "stage1/sheep.blob.glb"
   },
   {
    "id": "lemur",
    "label": "Red Ruffed Lemur",
-   "action": "preen",
+   "action": "stands and preens",
+   "rotateY": 180,
    "gt": "stage1/lemur.gt.glb",
    "pred": "stage1/lemur.pred.glb",
    "blob": "stage1/lemur.blob.glb"
@@ -159,32 +153,46 @@
   {
    "id": "saiga",
    "label": "Saiga",
-   "action": "fight",
+   "action": "attacks",
+   "rotateY": 0,
    "gt": "stage1/saiga.gt.glb",
    "pred": "stage1/saiga.pred.glb",
    "blob": "stage1/saiga.blob.glb"
+  },
+  {
+   "id": "wolf",
+   "label": "Arctic Wolf",
+   "action": "recoils from a blow",
+   "rotateY": -90,
+   "gt": "stage1/wolf.gt.glb",
+   "pred": "stage1/wolf.pred.glb",
+   "blob": "stage1/wolf.blob.glb"
   }
  ],
  "correspond": [
   {
-   "id": "tortoise",
-   "label": "Galapagos Tortoise",
-   "blob": "correspond/tortoise.blob.glb"
+   "id": "skunk",
+   "label": "Striped Skunk",
+   "rotateY": 0,
+   "blob": "correspond/skunk.blob.glb"
   },
   {
-   "id": "cassowary",
-   "label": "Cassowary",
-   "blob": "correspond/cassowary.blob.glb"
+   "id": "camel",
+   "label": "Bactrian Camel",
+   "rotateY": 0,
+   "blob": "correspond/camel.blob.glb"
   },
   {
-   "id": "armadillo",
-   "label": "Nine-banded Armadillo",
-   "blob": "correspond/armadillo.blob.glb"
+   "id": "baboon",
+   "label": "Hamadryas Baboon",
+   "rotateY": 180,
+   "blob": "correspond/baboon.blob.glb"
   },
   {
-   "id": "capybara",
-   "label": "Capybara",
-   "blob": "correspond/capybara.blob.glb"
+   "id": "rhino",
+   "label": "Black Rhino",
+   "rotateY": 0,
+   "blob": "correspond/rhino.blob.glb"
   }
  ],
  "inpainting": [

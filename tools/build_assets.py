@@ -32,7 +32,7 @@ TEASER = [
     ("polarbear", "Polar_Bear_Male__polar_bear_male__ani_19265aad3435.glb", "Polar Bear", 0),
     ("macaque",   "Japanese_Macaque_Female__japanese_mac_86b28b03fc31.glb", "Japanese Macaque", 90),
     ("camel",     "Bactrian_Camel_Female__bactrian_camel_db6831436c54.glb", "Bactrian Camel", 180),
-    ("capybara",  "Capybara_Male__capybara_male__animati_9f3c80b87e69.glb", "Capybara", 0),
+    ("capybara",  "Capybara_Male__capybara_male__animati_9f3c80b87e69.glb", "Capybara", 30),
 ]
 
 # What each clip is doing. Not recoverable from the teaser filenames, which
@@ -64,22 +64,27 @@ GALLERY = [
     ("hyena",      "Spotted_Hyena_Female__spotted_hyena_f_160db685a46d.glb", "Spotted Hyena", 0),
 ]
 
-# The longest clips in the set: a short one barely moves, which is exactly what
-# this comparison must not show.
+# The rigging comparison: four of the eight Stage-1 clips chosen in pick.html,
+# the four longest of them. A short clip barely moves, which is exactly what a
+# "how good is the rig" comparison must not show. Angles as picked; the row
+# viewer adds the measured side-on turn, as everywhere else.
 STAGE1 = [
-    ("dingo",  "s089_Dingo_Juvenile_interactjuvenilea",        "Dingo",           "interact"),
-    ("llama",  "s031_Llama_Juvenile_drinkloop01",              "Llama",           "drink"),
-    ("lemur",  "s061_Red_Ruffed_Lemur_Juvenile_standpreen01",  "Red Ruffed Lemur", "preen"),
-    ("saiga",  "s035_Saiga_Female_fightattack",                "Saiga",           "fight"),
+    ("sheep", "s016_Dall_Sheep_Male_matingritual",           "Dall Sheep",        "performs a mating display", -90),
+    ("lemur", "s061_Red_Ruffed_Lemur_Juvenile_standpreen01", "Red Ruffed Lemur",  "stands and preens",         180),
+    ("saiga", "s035_Saiga_Female_fightattack",               "Saiga",             "attacks",                     0),
+    ("wolf",  "s047_Arctic_Wolf_Male_fightreact",            "Arctic Wolf",       "recoils from a blow",       -90),
 ]
 
-# Correspondence only needs the bones, so this group costs a few hundred KB and
-# can afford body plans that share almost nothing with each other.
+# Correspondence needs only the bones, so it costs a few hundred KB and can
+# afford the four body plans that share the least: a small mustelid, a
+# long-necked camelid, a primate and two tons of rhinoceros. `blob_nopiles`
+# rather than `blob` -- the three direction spikes on each ellipsoid are noise
+# when the point is which ellipsoid, not which way it points.
 CORRESPOND = [
-    ("tortoise",  "Galapagos_Giant_Tortoise_Male__galapa_9ddb7e38ada8.glb", "Galapagos Tortoise"),
-    ("cassowary", "Cassowary_Male__cassowary_male__anima_107a3ec7af0b.glb", "Cassowary"),
-    ("armadillo", "Nine_Banded_Armadillo_Male__nine_band_8e9a3d7e9bac.glb", "Nine-banded Armadillo"),
-    ("capybara",  "Capybara_Male__capybara_male__animati_9f3c80b87e69.glb", "Capybara"),
+    ("skunk",  "s093_Striped_Skunk_Male_enterburrowunderground",     "Striped Skunk",    0),
+    ("camel",  "s002_Bactrian_Camel_Juvenile_fighttauntreact",       "Bactrian Camel",   0),
+    ("baboon", "s091_Hamadryas_Baboon_Juvenile_standtodrinktrough",  "Hamadryas Baboon", 180),
+    ("rhino",  "s001_Black_Rhino_Male_fightchaseoff",                "Black Rhino",      0),
 ]
 
 # The four gray bones in every inpainting blob GLB -- matches
@@ -164,9 +169,9 @@ def main():
 
     print("stage1 (rigging comparison)")
     m["stage1"] = []
-    for key, d, label, action in STAGE1:
+    for key, d, label, action, rot in STAGE1:
         m["stage1"].append({
-            "id": key, "label": label, "action": action,
+            "id": key, "label": label, "action": action, "rotateY": rot,
             "gt":   emit(f"{DATA}/stage1/{d}/gt_textured.glb",   f"stage1/{key}.gt.glb", max_frames=100),
             "pred": emit(f"{DATA}/stage1/{d}/pred_textured.glb", f"stage1/{key}.pred.glb", max_frames=100),
             "blob": emit(f"{DATA}/stage1/{d}/blob_nopiles.glb", f"stage1/{key}.blob.glb",
@@ -175,10 +180,10 @@ def main():
 
     print("correspondence (bones only)")
     m["correspond"] = []
-    for key, fn, label in CORRESPOND:
+    for key, d, label, rot in CORRESPOND:
         m["correspond"].append({
-            "id": key, "label": label,
-            "blob": emit(f"{DATA}/teaser/blob/{fn}", f"correspond/{key}.blob.glb",
+            "id": key, "label": label, "rotateY": rot,
+            "blob": emit(f"{DATA}/stage1/{d}/blob_nopiles.glb", f"correspond/{key}.blob.glb",
                          do_jpeg=False, do_quant=False),
         })
 

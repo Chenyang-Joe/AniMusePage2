@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, groundModel, alignBlobToMesh, restBox, playClip, styleBlob, styleMesh, observeResize } from './stage.js';
+import { createStage, loadGLB, groundModel, alignBlobToMesh, restBox, facingTurn, playClip, styleBlob, styleMesh, observeResize } from './stage.js';
 
 /**
  * Several representations of one animal, side by side, each in its own viewport.
@@ -150,15 +150,13 @@ export function initRow(host, samples, opts = {}) {
       });
     }
 
-    // Every column is the same animal in a different representation, so they
-    // must all take the orientation the first one resolved to.
-    let rowRotation = null;
-    roots.forEach((root) => {
-      const applied = groundModel(root, rowRotation === null
-        ? {}
-        : { rotateY: rowRotation, profile: false });
-      if (rowRotation === null) rowRotation = applied.rotateY;
-    });
+    // Every column is the same animal in a different representation, so they all
+    // take one orientation: the angle picked by hand plus the measured side-on
+    // turn, read off a mesh column rather than the bones -- the bones are the
+    // same shape but the mesh is what the reader is judging.
+    const ref = refIndex >= 0 ? refIndex : 0;
+    const turn = (sample.rotateY || 0) + facingTurn(roots[ref], gltfs[ref].animations?.[0]);
+    roots.forEach((root) => groundModel(root, { rotateY: turn, profile: false }));
 
     frameColumns();
     stage.onResize = frameColumns;

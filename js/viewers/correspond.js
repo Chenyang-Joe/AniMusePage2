@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, groundModel, layoutRow, fitCamera, playClip, styleBlob, observeResize } from './stage.js';
+import { createStage, loadGLB, groundModel, layoutRow, fitCamera, facingTurn, playClip, styleBlob, observeResize } from './stage.js';
 
 /**
  * Cross-species bone correspondence.
@@ -27,7 +27,13 @@ export function initCorrespondence(host, samples) {
         s.scene.add(root);
         // Bone nodes carry no default transform, so measure only after frame 0.
         playClip(s, g, root);
-        groundModel(root);
+        // Same rule as everywhere else: the angle picked by hand plus the
+        // measured side-on turn. There is no mesh here to measure, but the bones
+        // are registered to one, so they answer the same question.
+        groundModel(root, {
+          rotateY: (samples[i].rotateY || 0) + facingTurn(root, g.animations?.[0]),
+          profile: false,
+        });
         models.push({ meshes, label: samples[i].label });
         return root;
       });
