@@ -133,15 +133,6 @@
  ],
  "stage1": [
   {
-   "id": "wolf",
-   "label": "Arctic Wolf",
-   "action": "recoils from a blow",
-   "rotateY": -30,
-   "gt": "stage1/wolf.gt.glb",
-   "pred": "stage1/wolf.pred.glb",
-   "blob": "stage1/wolf.blob.glb"
-  },
-  {
    "id": "sheep",
    "label": "Dall Sheep",
    "action": "performs a mating display",
@@ -149,6 +140,15 @@
    "gt": "stage1/sheep.gt.glb",
    "pred": "stage1/sheep.pred.glb",
    "blob": "stage1/sheep.blob.glb"
+  },
+  {
+   "id": "wolf",
+   "label": "Arctic Wolf",
+   "action": "recoils from a blow",
+   "rotateY": -30,
+   "gt": "stage1/wolf.gt.glb",
+   "pred": "stage1/wolf.pred.glb",
+   "blob": "stage1/wolf.blob.glb"
   },
   {
    "id": "saiga",

@@ -86,7 +86,11 @@ whenNear('v-corr', async (el) => {
 
 whenNear('v-stage1', async (el) => {
   const [{ initRow }, m] = await Promise.all([import('./viewers/row.js'), manifest()]);
-  initRow(el, withBase(m.stage1, ['gt', 'pred', 'blob']).map((s) => ({ ...s, label: `${s.label} — ${s.action}` })), {
+  // Species on the button, action on the line below -- the same split the hero
+  // uses. Actions run to a clause ("walks, then lowers its head to drink") and a
+  // button is the wrong place for one.
+  initRow(el, withBase(m.stage1, ['gt', 'pred', 'blob'])
+    .map((s) => ({ ...s, caption: s.action ? `${s.label} ${s.action}.` : s.label })), {
     columns: [
       { key: 'gt',   label: 'Ground truth',            kind: 'mesh' },
       { key: 'blob', label: 'SGBs extracted',          kind: 'blob' },
