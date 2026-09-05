@@ -191,7 +191,7 @@
   {
    "id": "buffalo",
    "label": "African Buffalo",
-   "rotateY": 25,
+   "rotateY": 10,
    "blob": "correspond/buffalo.blob.glb"
   }
  ],

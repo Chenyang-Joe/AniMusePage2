@@ -93,7 +93,7 @@ CORRESPOND = [
     # Two before this one read badly here -- a rhino whose horn ellipsoids jitter
     # frame to frame, then an elephant -- and a wobble is the first thing the eye
     # lands on in a row of otherwise still bones.
-    ("buffalo",   "teaser/blob/African_Buffalo_Male__african_buffalo_34df70925683.glb",  "African Buffalo",  25),
+    ("buffalo",   "teaser/blob/African_Buffalo_Male__african_buffalo_34df70925683.glb",  "African Buffalo",  10),
 ]
 
 # The four gray bones in every inpainting blob GLB -- matches
