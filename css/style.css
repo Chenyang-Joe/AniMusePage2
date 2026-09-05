@@ -331,7 +331,34 @@ footer { border-top: 1px solid var(--line); padding: 30px 0 50px; color: var(--m
 
 @media (max-width: 720px) {
   .hero h1 { font-size: 31px; }
-  .viewer-canvas, .viewer-canvas.h-sm, .viewer-canvas.h-md, .viewer-canvas.h-lg { height: 280px; }
+  .viewer-canvas, .viewer-canvas.h-sm, .viewer-canvas.h-md { height: 280px; }
+  /* Two columns here, so the grids are tall rather than wide. */
+  .viewer-canvas.h-lg { height: 520px; }
+  .grid-labels.projected span { white-space: normal; width: 44%; transform: translate(-50%, 0); }
+  /* The caption below says which half is which; the in-frame labels only
+     collide with each other at this width. */
+  .split-label-left, .split-label-right { display: none; }
   section { padding: 34px 0; }
   body { font-size: 16px; }
+
+  /* Six links and a wordmark do not fit in 390px, and a nav that does not fit
+     drags the whole page sideways with it. Let the row scroll instead. */
+  .nav .wrap { gap: 16px; overflow-x: auto; scrollbar-width: none; }
+  .nav .wrap::-webkit-scrollbar { display: none; }
+  .nav a { white-space: nowrap; font-size: 14px; }
+
+  .stage-mark .name { font-size: 25px; }
+  .step { font-size: 19px; }
+  .metrics summary { font-size: 17px; }
+  .metrics summary .sub { display: none; }
+}
+
+/* Touch. A viewer that takes the vertical swipe for itself is a trap on a page
+   with six of them -- the reader puts a finger on an animal and the page stops
+   scrolling. Orbiting keeps the horizontal axis, which is the one that matters
+   for turning an animal round; the page keeps the vertical. The divider is a
+   separate element and still takes both, since dragging it is the whole point. */
+@media (pointer: coarse) {
+  .viewer-canvas { touch-action: pan-y; }
+  .split-divider { touch-action: none; }
 }

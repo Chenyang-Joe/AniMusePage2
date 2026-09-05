@@ -25,6 +25,13 @@ function speciesLabel(prompt, id) {
   return raw.replace(/\b\w/g, (c) => c.toUpperCase()).trim();
 }
 
+// Four cells across is 60 pixels each on a phone, with the labels on top of one
+// another. The grids reflow to two columns there. Read once: the only way to
+// change it afterwards is to turn the device over, and a re-flow would have to
+// rebuild every cell.
+const NARROW = typeof window !== 'undefined'
+  && window.matchMedia('(max-width: 720px)').matches;
+
 /** Run `boot` the first time #id gets close to the viewport. */
 function whenNear(id, boot) {
   const el = document.getElementById(id);
@@ -52,7 +59,7 @@ whenNear('v-split', async (el) => {
 
 whenNear('v-wall', async (el) => {
   const [{ initSplitGrid }, m] = await Promise.all([import('./viewers/splitgrid.js'), manifest()]);
-  initSplitGrid(el, withBase(m.gallery, ['mesh', 'blob']));
+  initSplitGrid(el, withBase(m.gallery, ['mesh', 'blob']), { cols: NARROW ? 2 : 4 });
 });
 
 whenNear('v-corr', async (el) => {
@@ -74,7 +81,8 @@ whenNear('v-stage1', async (el) => {
 whenNear('v-inpaint', async (el) => {
   const [{ initGrid }, m] = await Promise.all([import('./viewers/grid.js'), manifest()]);
   initGrid(el, withBase(m.inpainting.filter((s) => s.inGrid !== false), ['mesh', 'blob'])
-    .map((s) => ({ ...s, label: speciesLabel(s.prompt, s.id) })), m.pinnedBones);
+    .map((s) => ({ ...s, label: speciesLabel(s.prompt, s.id) })), m.pinnedBones,
+    { cols: NARROW ? 2 : 3 });
 });
 
 whenNear('v-edit', async (el) => {

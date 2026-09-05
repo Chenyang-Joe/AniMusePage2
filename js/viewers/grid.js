@@ -15,7 +15,7 @@ import { createStage, loadGLB, alignMeshToBox, fitCamera, restBox, poseFrames, s
  * body the model wrote around it, then the surface.
  */
 const TRUNC_DUR = 6.0;       // the shortest clip; longer ones are truncated, not looped
-const COLS = 3;
+const COLUMNS = 3;
 const SPACING_X = 0.95;
 const SPACING_Y = 1.02;   // row pitch, with room under each cell for its label
 const CELL_SPAN = 0.8;       // every cell normalised to this width
@@ -27,7 +27,7 @@ const NEAR_FEET = [76, 4];   // left front, left rear
 const GLITCHY = [87];
 
 export function initGrid(host, samples, pinned, opts = {}) {
-  const { scale = 0.85 } = opts;
+  const { scale = 0.85, cols: COLS = COLUMNS } = opts;
   const canvasHost = host.querySelector('.viewer-canvas');
   const labelGrid = host.querySelector('.grid-labels');
   const modeButtons = host.querySelectorAll('.seg button');

@@ -22,7 +22,7 @@ const MAX_LOOP = 8.0;    // seconds; longer clips are sped up to fit
 const PLAYBACK = 0.5;
 
 export function initSplitGrid(host, samples, opts = {}) {
-  const { startFraction = 0.5, cols = COLS, padding = 1.04 } = opts;
+  const { startFraction = 0.5, cols = COLS } = opts;
 
   const canvasHost = host.querySelector('.viewer-canvas');
   const divider = host.querySelector('.split-divider');
@@ -141,6 +141,9 @@ export function initSplitGrid(host, samples, opts = {}) {
       const pivots = s.scene.children.filter((o) => !o.isLight);
       // Straight on: an angled view skews the rows, and the labels are placed by
       // projection, so they would drift row by row.
+      // A tall stack -- two columns on a phone -- is fitted on its height, and the
+      // bottom row's label then falls outside the frame. Give it the margin.
+      const padding = opts.padding ?? (rows > 2 ? 1.16 : 1.04);
       const frame = () => { fitCamera(s, pivots, { padding, dir: [0, 0, 1] }); placeLabels(); };
       frame();
       s.onResize = frame;
