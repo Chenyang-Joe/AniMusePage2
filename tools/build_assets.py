@@ -76,15 +76,21 @@ STAGE1 = [
 ]
 
 # Correspondence needs only the bones, so it costs a few hundred KB and can
-# afford the four body plans that share the least: a small mustelid, a
-# long-necked camelid, a primate and two tons of rhinoceros. `blob_nopiles`
-# rather than `blob` -- the three direction spikes on each ellipsoid are noise
-# when the point is which ellipsoid, not which way it points.
+# afford the body plans that share the least: a small mustelid, a long-necked
+# camelid, a primate, two tons of rhinoceros -- and a bird, which is the one
+# that makes the point hardest to argue with, since a cassowary has no forelimbs
+# to speak of and the slots find its wings anyway. `blob_nopiles` where Stage-1
+# has it: the three direction spikes on every ellipsoid are noise when the
+# question is *which* ellipsoid, not which way it points. The cassowary is the
+# exception -- it only exists in the teaser pool -- and its export carries the
+# same 120 ellipsoids and nothing else, so it sits in the row unremarked.
+# Paths are relative to data/ because these two pools are laid out differently.
 CORRESPOND = [
-    ("skunk",  "s093_Striped_Skunk_Male_enterburrowunderground",     "Striped Skunk",    0),
-    ("camel",  "s002_Bactrian_Camel_Juvenile_fighttauntreact",       "Bactrian Camel",   0),
-    ("baboon", "s091_Hamadryas_Baboon_Juvenile_standtodrinktrough",  "Hamadryas Baboon", 180),
-    ("rhino",  "s001_Black_Rhino_Male_fightchaseoff",                "Black Rhino",      0),
+    ("skunk",     "stage1/s093_Striped_Skunk_Male_enterburrowunderground/blob_nopiles.glb",    "Striped Skunk",    0),
+    ("cassowary", "teaser/blob/Cassowary_Male__cassowary_male__anima_107a3ec7af0b.glb",        "Cassowary",        0),
+    ("camel",     "stage1/s002_Bactrian_Camel_Juvenile_fighttauntreact/blob_nopiles.glb",      "Bactrian Camel",   0),
+    ("baboon",    "stage1/s091_Hamadryas_Baboon_Juvenile_standtodrinktrough/blob_nopiles.glb", "Hamadryas Baboon", 180),
+    ("rhino",     "stage1/s001_Black_Rhino_Male_fightchaseoff/blob_nopiles.glb",               "Black Rhino",      0),
 ]
 
 # The four gray bones in every inpainting blob GLB -- matches
@@ -180,10 +186,10 @@ def main():
 
     print("correspondence (bones only)")
     m["correspond"] = []
-    for key, d, label, rot in CORRESPOND:
+    for key, src, label, rot in CORRESPOND:
         m["correspond"].append({
             "id": key, "label": label, "rotateY": rot,
-            "blob": emit(f"{DATA}/stage1/{d}/blob_nopiles.glb", f"correspond/{key}.blob.glb",
+            "blob": emit(f"{DATA}/{src}", f"correspond/{key}.blob.glb",
                          do_jpeg=False, do_quant=False),
         })
 

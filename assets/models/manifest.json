@@ -177,6 +177,12 @@
    "blob": "correspond/skunk.blob.glb"
   },
   {
+   "id": "cassowary",
+   "label": "Cassowary",
+   "rotateY": 0,
+   "blob": "correspond/cassowary.blob.glb"
+  },
+  {
    "id": "camel",
    "label": "Bactrian Camel",
    "rotateY": 0,
