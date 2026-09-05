@@ -50,11 +50,14 @@ export function initCorrespondence(host, samples) {
   // There is no hover on a touch screen, and without one this viewer is four
   // still animals that do nothing. A tap picks a slot there and it stays picked
   // until another tap, which is the same demonstration a moment later.
-  const TAP = typeof window !== 'undefined'
-    && window.matchMedia('(pointer: coarse)').matches;
-  const IDLE = TAP
+  //
+  // Which one this is can change after load: the media query is a guess, and the
+  // first real touch is the answer. So it is a variable, not a constant.
+  let tap = typeof window !== 'undefined'
+    && window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  const idle = () => (tap
     ? 'Tap any SGB — its counterpart lights up on every species.'
-    : 'Hover any SGB — its counterpart lights up on every species.';
+    : 'Hover any SGB — its counterpart lights up on every species.');
 
   function setHover(bone) {
     if (bone === hovered) return;
@@ -71,7 +74,7 @@ export function initCorrespondence(host, samples) {
       });
     }
     readout.textContent = bone < 0
-      ? IDLE
+      ? idle()
       : `SGB slot ${bone} — the same slot on all ${models.length} animals.`;
     readout.classList.toggle('on', bone >= 0);
   }
@@ -89,12 +92,21 @@ export function initCorrespondence(host, samples) {
   // `pointerdown` covers the tap; on a mouse it just re-picks whatever is
   // already under the cursor, which costs nothing.
   canvasHost.addEventListener('pointerdown', pick);
-  if (!TAP) {
+  const clear = () => setHover(-1);
+  const useHover = () => {
     canvasHost.addEventListener('pointermove', pick);
-    canvasHost.addEventListener('pointerleave', () => setHover(-1));
-  }
-
-  if (TAP) readout.textContent = IDLE;
+    canvasHost.addEventListener('pointerleave', clear);
+  };
+  const useTap = () => {
+    tap = true;
+    canvasHost.removeEventListener('pointermove', pick);
+    canvasHost.removeEventListener('pointerleave', clear);
+    if (hovered < 0) readout.textContent = idle();
+  };
+  if (tap) useTap(); else useHover();
+  // And if a finger arrives on a device that claimed to have a pointer, believe
+  // the finger.
+  window.addEventListener('touchstart', useTap, { once: true, passive: true });
 
   return stage;
 }

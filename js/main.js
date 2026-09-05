@@ -25,6 +25,15 @@ function speciesLabel(prompt, id) {
   return raw.replace(/\b\w/g, (c) => c.toUpperCase()).trim();
 }
 
+// Media queries can be wrong about this -- a phone asked to request the desktop
+// site reports a fine pointer -- and every viewer on the page behaves
+// differently under a finger. The first touch that actually happens settles it.
+if (typeof window !== 'undefined') {
+  window.addEventListener('touchstart', () => {
+    document.documentElement.dataset.input = 'touch';
+  }, { once: true, passive: true });
+}
+
 // Four cells across is 60 pixels each on a phone, with the labels on top of one
 // another. The grids reflow to two columns there. Read once: the only way to
 // change it afterwards is to turn the device over, and a re-flow would have to

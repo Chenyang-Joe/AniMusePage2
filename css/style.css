@@ -360,10 +360,19 @@ footer { border-top: 1px solid var(--line); padding: 30px 0 50px; color: var(--m
    with six of them -- the reader puts a finger on an animal and the page stops
    scrolling. Orbiting keeps the horizontal axis, which is the one that matters
    for turning an animal round; the page keeps the vertical. The divider is a
-   separate element and still takes both, since dragging it is the whole point. */
-@media (pointer: coarse) {
+   separate element and still takes both, since dragging it is the whole point.
+
+   Two feature queries rather than one, because a device can report either; and
+   `[data-input="touch"]`, which main.js sets from the first real touch, because
+   both of them can still be wrong -- a phone asked for the desktop site says it
+   has a fine pointer. A touch that actually happened cannot be argued with. */
+@media (hover: none), (pointer: coarse) {
   .viewer-canvas { touch-action: pan-y; }
   .split-divider { touch-action: none; }
   .on-hover { display: none; }
   .on-tap { display: inline; }
 }
+:root[data-input="touch"] .viewer-canvas { touch-action: pan-y; }
+:root[data-input="touch"] .split-divider { touch-action: none; }
+:root[data-input="touch"] .on-hover { display: none; }
+:root[data-input="touch"] .on-tap { display: inline; }
