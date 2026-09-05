@@ -343,6 +343,31 @@ export function verticalLock(meshRoot, meshClip, blobRoot, blobClip, { samples =
 }
 
 /**
+ * The vertical correction that pins a clip's lowest point to where it started.
+ *
+ * `verticalLock` needs a grounded mesh to lock to. These are the viewers that
+ * have none: the hover row is bones and nothing else, and the rig row's three
+ * columns are all `gt`/`pred`/`blob` exports, none of which is flattened frame
+ * by frame the way `mesh/*.glb` is. Left alone they keep the capture's real
+ * vertical motion, and with the camera fitted once and never moved again that
+ * reads as the animal sinking through the floor and climbing back out -- a
+ * quarter of a body height on the camel, two fifths on the wolf.
+ *
+ * The cost is honest and worth naming: a frame where the animal genuinely
+ * leaves the ground gets pushed back down onto it.
+ *
+ * Measured relative to frame 0, so whatever registration a caller has already
+ * made survives and only the drift is taken out.
+ */
+export function floorLock(root, clip, { samples = 24 } = {}) {
+  const mins = clipBoxes(root, clip, samples).map((b) => b.min.y);
+  return (u) => {
+    const { a, b, f } = sampleAt(mins, u);
+    return mins[0] - (a + (b - a) * f);
+  };
+}
+
+/**
  * Extra degrees of Y turn that put an animal side-on to the camera.
  *
  * These meshes are not authored on a common axis -- an arctic wolf runs down Z

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, groundModel, layoutRow, fitCamera, facingTurn, restBox, playClip, styleBlob, observeResize } from './stage.js';
+import { createStage, loadGLB, groundModel, layoutRow, fitCamera, facingTurn, floorLock, restBox, playClip, styleBlob, observeResize } from './stage.js';
 
 /**
  * Cross-species bone correspondence.
@@ -15,6 +15,7 @@ export function initCorrespondence(host, samples) {
   const readout = host.querySelector('.corr-readout');
   const labelGrid = host.querySelector('.grid-labels');
   const models = [];   // one entry per animal: { meshes: Mesh[] }
+  const clips = [];    // { root, mixer, dur, baseY, floor } -- see the frame loop
   let hovered = -1;
 
   // Named, because "the same slot on all four" is a claim about four particular
@@ -39,13 +40,26 @@ export function initCorrespondence(host, samples) {
         meshes.forEach((m, k) => { m.userData.bone = k; });
         s.scene.add(root);
         // Bone nodes carry no default transform, so measure only after frame 0.
-        playClip(s, g, root);
+        const mixer = playClip(s, g, root);
         // Same rule as everywhere else: the angle picked by hand plus the
         // measured side-on turn. There is no mesh here to measure, but the bones
         // are registered to one, so they answer the same question.
         groundModel(root, {
           rotateY: (samples[i].rotateY || 0) + facingTurn(root, g.animations?.[0]),
           profile: false,
+        });
+        // Nothing here is grounded frame by frame: these are bone exports, and
+        // they carry the body's real vertical motion. `groundModel` only puts
+        // frame 0 on the floor, so before this the camel spent the middle of its
+        // clip a quarter of a body height below where it started -- four still
+        // animals in a row is exactly the arrangement where one sinking is the
+        // only thing you look at.
+        const clip = g.animations?.[0];
+        clips.push({
+          root, mixer,
+          dur: clip?.duration || 0,
+          baseY: root.position.y,
+          floor: clip ? floorLock(root, clip) : null,
         });
         models.push({ meshes, label: samples[i].label });
         return root;
@@ -67,6 +81,12 @@ export function initCorrespondence(host, samples) {
       // animal to the left. It also keeps the names under their animals while
       // the reader orbits, which placing once never could.
       s.onFrame = () => {
+        // Read the clock off each mixer: the shared tick has already taken this
+        // frame's delta out of `stage.clock`, and every animal loops on its own
+        // length anyway.
+        for (const c of clips) {
+          if (c.floor && c.dur) c.root.position.y = c.baseY + c.floor((c.mixer.time % c.dur) / c.dur);
+        }
         s.renderer.clear();
         s.renderer.render(s.scene, s.camera);
         placeLabels(anchors);

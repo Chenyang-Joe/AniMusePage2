@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, groundModel, alignBlobToMesh, restBox, facingTurn, playClip, styleBlob, styleMesh, observeResize } from './stage.js';
+import { createStage, loadGLB, groundModel, alignBlobToMesh, restBox, facingTurn, floorLock, playClip, styleBlob, styleMesh, observeResize } from './stage.js';
 
 /**
  * Several representations of one animal, side by side, each in its own viewport.
@@ -25,6 +25,10 @@ export function initRow(host, samples, opts = {}) {
   let centres = [];
   let dist = 3;
   let loadToken = 0;
+  // The shared ground line, re-measured on every clip. See `select`.
+  let floor = null;
+  let baseY = [];
+  let refClock = null;   // { mixer, dur } of the column the floor is read from
 
   if (labelRow) {
     labelRow.innerHTML = columns.map((c) => `<span>${c.label}</span>`).join('');
@@ -96,6 +100,14 @@ export function initRow(host, samples, opts = {}) {
     const colW = w / N;
 
     // OrbitControls works on a unit sphere; scale its direction by our distance.
+    // One offset for all three columns, so they rise and fall together or not
+    // at all -- a column that corrects itself would hide the very vertical error
+    // the reader is here to judge.
+    if (floor && refClock?.dur) {
+      const dy = floor((refClock.mixer.time % refClock.dur) / refClock.dur);
+      roots.forEach((rt, k) => { rt.position.y = baseY[k] + dy; });
+    }
+
     const dir = stage.camera.position.clone().sub(stage.controls.target).normalize();
     r.setScissorTest(true);
     for (let i = 0; i < roots.length; i++) {
@@ -126,8 +138,10 @@ export function initRow(host, samples, opts = {}) {
     stage.scene.remove(...roots);
     roots = [];
     cams = [];
+    floor = null;
     stage.mixers.length = 0;
 
+    const mixers = [];
     roots = gltfs.map((g, k) => {
       const col = columns[k];
       const root = g.scene.clone(true);
@@ -135,7 +149,7 @@ export function initRow(host, samples, opts = {}) {
       else styleMesh(root);
       stage.scene.add(root);
       // Bone nodes carry no default transform, so measure only after frame 0.
-      playClip(stage, g, root);
+      mixers.push(playClip(stage, g, root));
       return root;
     });
 
@@ -157,6 +171,19 @@ export function initRow(host, samples, opts = {}) {
     const ref = refIndex >= 0 ? refIndex : 0;
     const turn = (sample.rotateY || 0) + facingTurn(roots[ref], gltfs[ref].animations?.[0]);
     roots.forEach((root) => groundModel(root, { rotateY: turn, profile: false }));
+
+    // None of these three exports is flattened frame by frame -- unlike
+    // `mesh/*.glb`, `gt`/`pred`/`blob` keep the capture's own vertical motion --
+    // and `groundModel` only puts frame 0 on the floor. Over a clip that left
+    // the wolf dropping two fifths of a body height below its own feet.
+    //
+    // The correction is read off the ground-truth column and applied to all
+    // three, so the columns stay comparable: what survives is how far the
+    // deformed mesh sits from the capture, which is the whole comparison.
+    const refClip = gltfs[ref].animations?.[0];
+    floor = refClip ? floorLock(roots[ref], refClip) : null;
+    baseY = roots.map((r) => r.position.y);
+    refClock = { mixer: mixers[ref], dur: refClip?.duration || 0 };
 
     frameColumns();
     stage.onResize = frameColumns;
