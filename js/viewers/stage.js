@@ -191,6 +191,117 @@ export function restBox(root) {
 }
 
 /**
+ * What an animal actually occupies on screen, frame by frame.
+ *
+ * `restBox` answers this for a still pose and `Box3.setFromObject` answers the
+ * whole envelope (and over-answers it -- three.js inflates a morph geometry's
+ * box conservatively), but neither describes a clip that travels: an otter that
+ * swims four body lengths downstream has an envelope four times its body, so
+ * normalising by it leaves the otter half the size of its neighbours, and
+ * centring on its rest pose lets it swim out of frame.
+ *
+ * So the clip is evaluated, a frame at a time, and the poses are measured for
+ * what they are. Two things move: a `morphTargetInfluences` track, one-hot per
+ * frame over (F-1) relative targets, and a `root.position` track carrying the
+ * travel -- which is why this drives a mixer rather than reading the morph
+ * arrays directly. Only the handful of influences that are actually non-zero are
+ * blended, so this stays one pass over the vertices per frame.
+ *
+ * Returns the animal as the viewers show it: on a treadmill. `travelAt` is the
+ * horizontal drift to subtract at a given point in the clip, and `size` and
+ * `center` describe what is left once that drift is gone. Height is deliberately
+ * left in -- a meerkat rearing up is the motion, not travel.
+ */
+export function poseFrames(root, clip = null, { samples = 24 } = {}) {
+  const meshes = [];
+  root.traverse((o) => { if (o.isMesh && o.geometry?.attributes?.position) meshes.push(o); });
+
+  const v = new THREE.Vector3();
+  const poseBox = (o) => {
+    const pos = o.geometry.attributes.position;
+    const targets = o.geometry.morphAttributes?.position || [];
+    const infl = o.morphTargetInfluences || [];
+    const active = [];
+    for (let k = 0; k < infl.length; k++) {
+      if (targets[k] && Math.abs(infl[k]) > 1e-4) active.push([targets[k], infl[k]]);
+    }
+    const box = new THREE.Box3();
+    for (let i = 0; i < pos.count; i++) {
+      v.set(pos.getX(i), pos.getY(i), pos.getZ(i));
+      for (const [d, w] of active) {
+        v.set(v.x + d.getX(i) * w, v.y + d.getY(i) * w, v.z + d.getZ(i) * w);
+      }
+      box.expandByPoint(v);
+    }
+    return box.applyMatrix4(o.matrixWorld);
+  };
+
+  // A mixer of our own, so this can walk the clip without disturbing whatever
+  // mixer the viewer is driving the same objects with.
+  const mixer = clip && meshes.length ? new THREE.AnimationMixer(root) : null;
+  if (mixer) mixer.clipAction(clip).play();
+  const n = mixer ? Math.max(2, samples) : 1;
+
+  const boxes = [];
+  for (let j = 0; j < n; j++) {
+    if (mixer) mixer.setTime((j / (n - 1)) * clip.duration);
+    root.updateMatrixWorld(true);
+    const box = new THREE.Box3();
+    for (const o of meshes) box.union(poseBox(o));
+    boxes.push(box);
+  }
+  if (mixer) {
+    mixer.setTime(0);
+    mixer.stopAllAction();
+    mixer.uncacheRoot(root);
+    root.updateMatrixWorld(true);
+  }
+  if (!boxes.length) boxes.push(restBox(root));
+
+  const centers = boxes.map((b) => b.getCenter(new THREE.Vector3()));
+  const anchor = centers.reduce((a, c) => a.add(c), new THREE.Vector3())
+    .divideScalar(centers.length);
+  const travel = centers.map((c) => new THREE.Vector3(c.x - anchor.x, 0, c.z - anchor.z));
+
+  const treadmill = new THREE.Box3();
+  boxes.forEach((b, j) => treadmill.union(b.clone().translate(travel[j].clone().negate())));
+
+  return {
+    size: treadmill.getSize(new THREE.Vector3()),
+    center: treadmill.getCenter(new THREE.Vector3()),
+    /** Horizontal drift at normalised clip position `u`, to be subtracted. */
+    travelAt(u) {
+      const x = Math.min(travel.length - 1, Math.max(0, u * (travel.length - 1)));
+      const i = Math.floor(x);
+      return travel[i].clone().lerp(travel[Math.min(i + 1, travel.length - 1)], x - i);
+    },
+  };
+}
+
+/**
+ * Extra degrees of Y turn that put an animal side-on to the camera.
+ *
+ * These meshes are not authored on a common axis -- an arctic wolf runs down Z
+ * and a tiger down X -- so something has to notice. Judged on `poseFrames`,
+ * which reports the body with its travel removed: what is left is the animal's
+ * own shape, and whichever horizontal axis it is longer along is the one that
+ * should lie across the screen. (The raw animation envelope would answer "which
+ * way did it walk", which is the same question only when the clip travels.)
+ *
+ * A near-square animal -- a camel head-on is as wide as it is deep, and so is a
+ * crouching chimpanzee -- has no long axis to find, and guessing one throws away
+ * a better answer: `rotateY` in the manifest, which was curated by hand. So the
+ * turn is only applied when the measurement is decisive. Returns 0 or 90; which
+ * *end* faces which way is always the curated decision.
+ */
+const DECISIVE = 1.15;
+
+export function facingTurn(meshRoot, clip = null) {
+  const { size } = poseFrames(meshRoot, clip, { samples: 8 });
+  return size.z > size.x * DECISIVE ? 90 : 0;
+}
+
+/**
  * Register a bone cloud onto the mesh it belongs to, then ground the pair.
  *
  * The two exports are not in one coordinate frame: the surface carries a scale
@@ -292,11 +403,13 @@ export function layoutRow(roots, { gap = 0.18 } = {}) {
  * Keeps the current view direction so this can be re-run when the reader picks a
  * different sample without yanking the camera back to a default angle.
  */
-export function fitCamera(stage, roots, { padding = 1.25, keepDirection = true, dir: initialDir } = {}) {
+export function fitCamera(stage, roots, { padding = 1.25, keepDirection = true, dir: initialDir, box: given } = {}) {
   const { camera, controls } = stage;
-  if (!camera || !roots.length) return;
-  const box = new THREE.Box3();
-  for (const r of roots) {
+  if (!camera || (!given && !roots.length)) return;
+  // `box` lets a caller that has measured the whole clip (see `poseFrames`) frame
+  // that instead of the rest pose the roots happen to be sitting in.
+  const box = given ? given.clone() : new THREE.Box3();
+  if (!given) for (const r of roots) {
     r.updateMatrixWorld(true);
     box.union(restBox(r));
   }

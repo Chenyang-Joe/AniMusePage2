@@ -20,35 +20,42 @@ MAX_TEX = 1024
 
 # Four species with obviously different body plans -- the point of the split
 # viewer is that one shared bone book covers all of them.
-# rotateY is extra degrees on top of the automatic profile turn; 180 turns an
-# animal that ends up facing tail-first.
+# Picks and orientations from references/repos/scene_5, which curated both by
+# hand against a camera looking down -Z -- exactly the axis both split viewers
+# use. So `groundModel`'s automatic lay-down is switched off for these two
+# groups, and rotateY carries scene_5's flip. The viewers add a measured side-on
+# turn on top (`facingTurn`), because these meshes are not authored on a common
+# axis; where that measurement is wrong -- a near-square animal has no long axis
+# to find -- the correction is folded into rotateY here, since the two are added.
 TEASER = [
-    ("fox",      "Fennec_Fox_Female__fennec_fox_female__4558f40ab8dc.glb", "Fennec Fox", 0),
-    ("elephant", "Indian_Elephant_Female__indian_elepha_64be1af510c4.glb", "Indian Elephant", 0),
-    ("wallaby",  "Rednecked_Wallaby_Male__rednecked_wal_36a87e28b6c0.glb", "Red-necked Wallaby", 180),
-    ("warthog",  "Common_Warthog_Juvenile__common_warth_f072c9b5ba93.glb", "Common Warthog", 0),
+    # The camel and the meerkat are round enough that no rotation makes one axis
+    # clearly longer -- 1.07 at best -- so `facingTurn` has nothing to find and
+    # these two carry the whole angle by hand, turned to face left like the rest.
+    ("camel",   "Bactrian_Camel_Female__bactrian_camel_db6831436c54.glb", "Bactrian Camel", 90),
+    ("meerkat", "Meerkat_Juvenile__meerkat_juvenile__a_1c0f2ac8c214.glb", "Meerkat", 90),
+    ("penguin", "King_Penguin_Male__king_penguin_male__51afc65ae2d9.glb", "King Penguin", 180),
+    ("pallascat", "Pallas_Cat_Male__pallas_cat_male__ani_d6e9a20566ca.glb", "Pallas's Cat", 180),
 ]
 
 # What each clip is doing, keyed by the ids above. Not recoverable from the
 # teaser filenames, which truncate the source name before the action.
 ACTIONS = {}
 
-# A second, larger draw for the Stage-2 wall. Deliberately disjoint from TEASER
-# so the two split viewers never show the same animal. Chosen for short clips and
-# low vertex counts -- eight of these load in the time one of the big ones would.
+# The Stage-2 wall: the remaining six of scene_5's ten, plus two of the longest
+# clips in the pool so the wall is not all short loops.
 GALLERY = [
-    ("wombat",   "Common_Wombat_Juvenile__common_wombat_d75c42453139.glb", "Common Wombat", 0),
-    ("quokka",   "Quokka_Juvenile__quokka_juvenile__ani_ed4a5523cfee.glb", "Quokka", 0),
-    ("wilddog",  "African_Wild_Dog_Female__african_wild_2d6e9829b182.glb", "African Wild Dog", 0),
-    ("addax",    "Addax_Female__addax_female__animation_3c84f53e637e.glb", "Addax", 0),
-    ("badger",   "Honey_Badger_Female__honey_badger_mal_9b84ff3fdd83.glb", "Honey Badger", 0),
-    ("arcticwolf", "Arctic_Wolf_Male__arctic_wolf_male__a_fdaf083438c8.glb", "Arctic Wolf", 0),
-    ("platypus", "Platypus_Male__platypus_male__animati_abc6c6f4afb4.glb", "Platypus", 0),
-    ("bonobo",   "Bonobo_Female__bonobo_female__animati_c8a00d05ea65.glb", "Bonobo", 0),
+    ("arcticwolf", "Arctic_Wolf_Female__arctic_wolf_femal_9c0c125b1b50.glb", "Arctic Wolf", 0),
+    ("addax",      "Addax_Female__addax_female__animation_3c84f53e637e.glb", "Addax", 0),
+    # -90 / +90 cancel or supply the measured turn: the kangaroo is already
+    # side-on and the crouching chimpanzee is too square to call.
+    ("kangaroo",   "Red_Kangaroo_Juvenile__red_kangaroo_j_4feb086e6b5b.glb", "Red Kangaroo", -90),
+    ("badger",     "Honey_Badger_Juvenile__honey_badger_j_df49ab261a6b.glb", "Honey Badger", 180),
+    ("tiger",      "Bengal_Tiger_Male__bengal_tiger_male__134f4edbedf7.glb", "Bengal Tiger", 0),
+    ("otter",      "Asian_Small_Clawed_Otter_Male__asian__c0909d86f1be.glb", "Asian Small-clawed Otter", 0),
+    ("brownbear",  "Himalayan_Brown_Bear_Female__himalaya_219094cd7b0b.glb", "Himalayan Brown Bear", 0),
+    ("chimpanzee", "Western_Chimpanzee_Juvenile__western__08a30ba11351.glb", "Western Chimpanzee", 90),
 ]
 
-# Stage-1 rigging comparison, textured: the point of the row is that the mesh we
-# deform still looks like the animal, which an untextured clay render hides.
 # The longest clips in the set: a short one barely moves, which is exactly what
 # this comparison must not show.
 STAGE1 = [
@@ -128,10 +135,15 @@ def main():
         for key, fn, label, rot in table:
             m[group].append({
                 "id": key, "label": label, "rotateY": rot,
+                # scene_5's orientation is complete on its own.
+                "profile": False,
                 # The teaser exports truncate the source name, so the action is
                 # not recoverable from the filename. Fill in by hand.
                 "action": ACTIONS.get(key, ""),
-                "mesh": emit(f"{DATA}/teaser/mesh/{fn}", f"{group}/{key}.mesh.glb"),
+                # The wall shows all eight at once, so its meshes get thinned;
+                # the hero viewer shows one at a time and keeps every frame.
+                "mesh": emit(f"{DATA}/teaser/mesh/{fn}", f"{group}/{key}.mesh.glb",
+                             max_frames=70 if group == "gallery" else None),
                 # Blobs carry no texture and quantizing 120 tiny ellipsoids buys
                 # nothing, so they go through untouched.
                 "blob": emit(f"{DATA}/teaser/blob/{fn}", f"{group}/{key}.blob.glb",

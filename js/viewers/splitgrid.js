@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, alignBlobToMesh, restBox, fitCamera,
-         styleBlob, styleMesh, forceLinearInterp, observeResize } from './stage.js';
+import { createStage, loadGLB, alignBlobToMesh, restBox, fitCamera, facingTurn,
+         poseFrames, styleBlob, styleMesh, forceLinearInterp, observeResize } from './stage.js';
 
 /**
  * A wall of animals under one divider.
@@ -15,7 +15,7 @@ const COLS = 4;
 const SPACING_X = 1.02;
 const SPACING_Y = 0.92;
 const CELL_SPAN = 0.92;
-const TRUNC_DUR = 4.0;   // one shared clock so the wall moves together
+const MAX_LOOP = 8.0;    // seconds; longer clips are sped up to fit
 
 export function initSplitGrid(host, samples, opts = {}) {
   const { startFraction = 0.5, cols = COLS } = opts;
@@ -72,8 +72,11 @@ export function initSplitGrid(host, samples, opts = {}) {
         blobMixer.setTime(0);
         meshMixer.setTime(0);
 
-        // `centre` holds the offset, `inner` the orientation: rotating the group
-        // that also carries the centring offset would swing the cell off its slot.
+        // Four nested groups, because four things have to happen without
+        // arguing: `centre` registers the two representations on each other,
+        // `inner` turns the animal side-on, `drift` puts it on a treadmill, and
+        // `pivot` places and sizes the cell. Rotating the group that also
+        // carries an offset would swing the cell off its slot.
         const centre = new THREE.Group();
         centre.add(meshRoot, blobRoot);
         alignBlobToMesh(blobRoot, meshRoot);
@@ -82,10 +85,14 @@ export function initSplitGrid(host, samples, opts = {}) {
 
         const inner = new THREE.Group();
         inner.add(centre);
-        if (sample.rotateY) inner.rotation.y = sample.rotateY * Math.PI / 180;
+        // Same rule as the hero viewer: curated flip plus a measured side-on turn.
+        inner.rotation.y = ((sample.rotateY || 0) + facingTurn(meshRoot, meshGltf.animations?.[0])) * Math.PI / 180;
+
+        const drift = new THREE.Group();
+        drift.add(inner);
 
         const pivot = new THREE.Group();
-        pivot.add(inner);
+        pivot.add(drift);
         pivot.position.set(
           (col - (inRow - 1) / 2) * SPACING_X,
           ((rows - 1) / 2 - row) * SPACING_Y,
@@ -93,25 +100,27 @@ export function initSplitGrid(host, samples, opts = {}) {
         );
         s.scene.add(pivot);
 
-        // Lay the animal across the screen, centre it in its cell, and put every
-        // species at the same on-screen size.
+        // Now that the cell is oriented, measure the clip. `poseFrames` reports
+        // the animal with its horizontal travel taken out, which is how the wall
+        // shows it -- eight cells this tight cannot have a swimming otter cross
+        // into the badger's. The rest pose would leave a sprawling animal
+        // towering over the others the moment it moves, and the swept envelope
+        // would shrink exactly the ones that travel; this is neither. Diagonal
+        // rather than longest side, so a tall animal and a long one read as the
+        // same weight.
         pivot.updateMatrixWorld(true);
-        let size = restBox(meshRoot).getSize(new THREE.Vector3());
-        if (size.z > size.x) {
-          inner.rotation.y += Math.PI / 2;
-          pivot.updateMatrixWorld(true);
-          size = restBox(meshRoot).getSize(new THREE.Vector3());
-        }
-        // Size on the box the mesh sweeps over the *whole clip*, not its rest
-        // pose -- three.js already keeps that envelope on a morph-target
-        // geometry. A sprawling animal like a bonobo is compact at rest and
-        // enormous mid-stride, and normalising the rest pose leaves it towering
-        // over the others once everything is moving. Diagonal rather than
-        // longest side, for the same reason.
-        const swept = new THREE.Box3().setFromObject(meshRoot).getSize(new THREE.Vector3());
-        pivot.scale.setScalar(CELL_SPAN / Math.max(Math.hypot(swept.x, swept.y), 1e-4));
+        const pose = poseFrames(meshRoot, meshGltf.animations?.[0]);
+        pivot.scale.setScalar(CELL_SPAN / Math.max(Math.hypot(pose.size.x, pose.size.y), 1e-4));
+        // Measured before the scale was applied, so this is in pivot's own units.
+        const home = pivot.position.clone().sub(pose.center);
+        drift.position.copy(home);
 
-        cells.push({ blobRoot, meshRoot, blobMixer, meshMixer, pivot });
+        // Clips here run from one to twenty-five seconds. Truncating them all to
+        // the shortest would freeze most of the wall, so each loops on its own
+        // length instead, sped up enough that no loop outstays its welcome.
+        const dur = meshGltf.animations?.[0]?.duration || blobGltf.animations?.[0]?.duration || 1;
+        cells.push({ blobRoot, meshRoot, blobMixer, meshMixer, pivot, drift, pose, home,
+                     dur, speed: Math.max(1, dur / MAX_LOOP) });
       });
 
       const pivots = s.scene.children.filter((o) => !o.isLight);
@@ -148,8 +157,14 @@ export function initSplitGrid(host, samples, opts = {}) {
     const h = canvasHost.clientHeight;
     if (!w || !h || !cells.length) { r.clear(); return; }
 
-    const t = stage.clock.getElapsedTime() % TRUNC_DUR;
-    for (const c of cells) { c.blobMixer.setTime(t); c.meshMixer.setTime(t); }
+    const t = stage.clock.getElapsedTime();
+    for (const c of cells) {
+      const local = (t * c.speed) % c.dur;
+      c.blobMixer.setTime(local);
+      c.meshMixer.setTime(local);
+      // Subtract this frame's travel, so the animal runs where it is standing.
+      c.drift.position.copy(c.home).sub(c.pose.travelAt(local / c.dur));
+    }
 
     const x = Math.round(w * fraction);
     r.setViewport(0, 0, w, h);

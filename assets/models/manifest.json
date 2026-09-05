@@ -21,102 +21,114 @@
  ],
  "teaser": [
   {
-   "id": "fox",
-   "label": "Fennec Fox",
-   "rotateY": 0,
+   "id": "camel",
+   "label": "Bactrian Camel",
+   "rotateY": 90,
+   "profile": false,
    "action": "",
-   "mesh": "teaser/fox.mesh.glb",
-   "blob": "teaser/fox.blob.glb"
+   "mesh": "teaser/camel.mesh.glb",
+   "blob": "teaser/camel.blob.glb"
   },
   {
-   "id": "elephant",
-   "label": "Indian Elephant",
-   "rotateY": 0,
+   "id": "meerkat",
+   "label": "Meerkat",
+   "rotateY": 90,
+   "profile": false,
    "action": "",
-   "mesh": "teaser/elephant.mesh.glb",
-   "blob": "teaser/elephant.blob.glb"
+   "mesh": "teaser/meerkat.mesh.glb",
+   "blob": "teaser/meerkat.blob.glb"
   },
   {
-   "id": "wallaby",
-   "label": "Red-necked Wallaby",
+   "id": "penguin",
+   "label": "King Penguin",
    "rotateY": 180,
+   "profile": false,
    "action": "",
-   "mesh": "teaser/wallaby.mesh.glb",
-   "blob": "teaser/wallaby.blob.glb"
+   "mesh": "teaser/penguin.mesh.glb",
+   "blob": "teaser/penguin.blob.glb"
   },
   {
-   "id": "warthog",
-   "label": "Common Warthog",
-   "rotateY": 0,
+   "id": "pallascat",
+   "label": "Pallas's Cat",
+   "rotateY": 180,
+   "profile": false,
    "action": "",
-   "mesh": "teaser/warthog.mesh.glb",
-   "blob": "teaser/warthog.blob.glb"
+   "mesh": "teaser/pallascat.mesh.glb",
+   "blob": "teaser/pallascat.blob.glb"
   }
  ],
  "gallery": [
   {
-   "id": "wombat",
-   "label": "Common Wombat",
-   "rotateY": 0,
-   "action": "",
-   "mesh": "gallery/wombat.mesh.glb",
-   "blob": "gallery/wombat.blob.glb"
-  },
-  {
-   "id": "quokka",
-   "label": "Quokka",
-   "rotateY": 0,
-   "action": "",
-   "mesh": "gallery/quokka.mesh.glb",
-   "blob": "gallery/quokka.blob.glb"
-  },
-  {
-   "id": "wilddog",
-   "label": "African Wild Dog",
-   "rotateY": 0,
-   "action": "",
-   "mesh": "gallery/wilddog.mesh.glb",
-   "blob": "gallery/wilddog.blob.glb"
-  },
-  {
-   "id": "addax",
-   "label": "Addax",
-   "rotateY": 0,
-   "action": "",
-   "mesh": "gallery/addax.mesh.glb",
-   "blob": "gallery/addax.blob.glb"
-  },
-  {
-   "id": "badger",
-   "label": "Honey Badger",
-   "rotateY": 0,
-   "action": "",
-   "mesh": "gallery/badger.mesh.glb",
-   "blob": "gallery/badger.blob.glb"
-  },
-  {
    "id": "arcticwolf",
    "label": "Arctic Wolf",
    "rotateY": 0,
+   "profile": false,
    "action": "",
    "mesh": "gallery/arcticwolf.mesh.glb",
    "blob": "gallery/arcticwolf.blob.glb"
   },
   {
-   "id": "platypus",
-   "label": "Platypus",
+   "id": "addax",
+   "label": "Addax",
    "rotateY": 0,
+   "profile": false,
    "action": "",
-   "mesh": "gallery/platypus.mesh.glb",
-   "blob": "gallery/platypus.blob.glb"
+   "mesh": "gallery/addax.mesh.glb",
+   "blob": "gallery/addax.blob.glb"
   },
   {
-   "id": "bonobo",
-   "label": "Bonobo",
-   "rotateY": 0,
+   "id": "kangaroo",
+   "label": "Red Kangaroo",
+   "rotateY": -90,
+   "profile": false,
    "action": "",
-   "mesh": "gallery/bonobo.mesh.glb",
-   "blob": "gallery/bonobo.blob.glb"
+   "mesh": "gallery/kangaroo.mesh.glb",
+   "blob": "gallery/kangaroo.blob.glb"
+  },
+  {
+   "id": "badger",
+   "label": "Honey Badger",
+   "rotateY": 180,
+   "profile": false,
+   "action": "",
+   "mesh": "gallery/badger.mesh.glb",
+   "blob": "gallery/badger.blob.glb"
+  },
+  {
+   "id": "tiger",
+   "label": "Bengal Tiger",
+   "rotateY": 0,
+   "profile": false,
+   "action": "",
+   "mesh": "gallery/tiger.mesh.glb",
+   "blob": "gallery/tiger.blob.glb"
+  },
+  {
+   "id": "otter",
+   "label": "Asian Small-clawed Otter",
+   "rotateY": 0,
+   "profile": false,
+   "action": "",
+   "mesh": "gallery/otter.mesh.glb",
+   "blob": "gallery/otter.blob.glb"
+  },
+  {
+   "id": "brownbear",
+   "label": "Himalayan Brown Bear",
+   "rotateY": 0,
+   "profile": false,
+   "action": "",
+   "mesh": "gallery/brownbear.mesh.glb",
+   "blob": "gallery/brownbear.blob.glb"
+  },
+  {
+   "id": "chimpanzee",
+   "label": "Western Chimpanzee",
+   "rotateY": 90,
+   "profile": false,
+   "action": "",
+   "mesh": "gallery/chimpanzee.mesh.glb",
+   "blob": "gallery/chimpanzee.blob.glb"
   }
  ],
  "stage1": [
@@ -237,27 +249,27 @@
    "label": "Bengal Tiger",
    "rotateY": 180,
    "nudgeX": 0.16,
+   "nudgeY": 0.15,
    "mesh": "editing/tiger.mesh.glb",
-   "blob": "editing/tiger.blob.glb",
-   "nudgeY": 0.15
+   "blob": "editing/tiger.blob.glb"
   },
   {
    "id": "elephant",
    "label": "African Elephant",
    "rotateY": 0,
    "nudgeX": 0.0,
+   "nudgeY": 0.15,
    "mesh": "editing/elephant.mesh.glb",
-   "blob": "editing/elephant.blob.glb",
-   "nudgeY": 0.15
+   "blob": "editing/elephant.blob.glb"
   },
   {
    "id": "bear",
    "label": "Grizzly Bear",
    "rotateY": 90,
    "nudgeX": 0.0,
+   "nudgeY": 0.0,
    "mesh": "editing/bear.mesh.glb",
-   "blob": "editing/bear.blob.glb",
-   "nudgeY": 0.0
+   "blob": "editing/bear.blob.glb"
   }
  ]
 }

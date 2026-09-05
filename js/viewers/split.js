@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createStage, loadGLB, pairModels, fitCamera, playClip, styleBlob, styleMesh, observeResize } from './stage.js';
+import { createStage, loadGLB, pairModels, fitCamera, facingTurn, poseFrames, playClip, styleBlob, styleMesh, observeResize } from './stage.js';
 
 /**
  * Blob | mesh split viewer.
@@ -40,6 +40,12 @@ export function initSplit(host, samples, opts = {}) {
     const w = canvasHost.clientWidth;
     const h = canvasHost.clientHeight;
     if (!w || !h || !current) { r.clear(); return; }
+    // Read the clock off the mixer, not off `stage.clock`: the shared tick has
+    // already taken this frame's delta out of it.
+    if (current.dur && current.meshMixer) {
+      const u = (current.meshMixer.time % current.dur) / current.dur;
+      current.drift.position.copy(current.pose.travelAt(u)).negate();
+    }
     const x = Math.round(w * fraction);
 
     r.setViewport(0, 0, w, h);
@@ -77,7 +83,7 @@ export function initSplit(host, samples, opts = {}) {
     if (token !== loadToken) return;   // a faster click won the race
 
     if (current) {
-      stage.scene.remove(current.pair);
+      stage.scene.remove(current.drift);
       stage.mixers.length = 0;
     }
 
@@ -89,13 +95,30 @@ export function initSplit(host, samples, opts = {}) {
     // Bone nodes carry no default transform -- they exist only as animation
     // tracks -- so the clip has to be applied before anything measures them.
     playClip(stage, blobGltf, blobRoot);
-    playClip(stage, meshGltf, meshRoot);
-    const { pair } = pairModels(meshRoot, blobRoot, { align: s.align, rotateY: s.rotateY || 0 });
-    stage.scene.add(pair);
-    fitCamera(stage, [pair]);
-    stage.onResize = () => fitCamera(stage, [pair]);
+    const meshMixer = playClip(stage, meshGltf, meshRoot);
+    // scene_5 curated which end faces the camera; the side-on turn is measured.
+    const { pair } = pairModels(meshRoot, blobRoot, {
+      align: s.align, profile: false,
+      rotateY: (s.rotateY || 0) + facingTurn(meshRoot, meshGltf.animations?.[0]),
+    });
+    // Several of these clips travel, and one animal in one frame is exactly the
+    // case where that shows: fitted to the pose it starts in, a walking meerkat
+    // leaves the panel a second later. `drift` cancels the travel each frame and
+    // the camera is fitted to what is left.
+    const drift = new THREE.Group();
+    drift.add(pair);
+    stage.scene.add(drift);
+    // From the top: `poseFrames` reads world matrices, and the groups above the
+    // mesh were transformed a moment ago -- measuring before they are refreshed
+    // puts the box somewhere the animal is not, and the camera aims there.
+    drift.updateMatrixWorld(true);
+    const pose = poseFrames(meshRoot, meshGltf.animations?.[0]);
+    const box = new THREE.Box3().setFromCenterAndSize(pose.center, pose.size);
+    fitCamera(stage, [drift], { box });
+    stage.onResize = () => fitCamera(stage, [drift], { box });
 
-    current = { pair, blobRoot, meshRoot };
+    const dur = meshGltf.animations?.[0]?.duration || 0;
+    current = { drift, blobRoot, meshRoot, pose, dur, meshMixer };
     host.classList.remove('is-loading');
   }
 
