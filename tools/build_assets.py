@@ -88,8 +88,8 @@ STAGE1 = [
 # Paths are relative to data/ because these two pools are laid out differently.
 CORRESPOND = [
     ("skunk",     "stage1/s093_Striped_Skunk_Male_enterburrowunderground/blob_nopiles.glb",    "Striped Skunk",    0),
-    ("cassowary", "teaser/blob/Cassowary_Male__cassowary_male__anima_107a3ec7af0b.glb",        "Cassowary",        0),
-    ("camel",     "stage1/s002_Bactrian_Camel_Juvenile_fighttauntreact/blob_nopiles.glb",      "Bactrian Camel",   0),
+    ("cassowary", "teaser/blob/Cassowary_Male__cassowary_male__anima_107a3ec7af0b.glb",        "Cassowary",        150),
+    ("camel",     "stage1/s002_Bactrian_Camel_Juvenile_fighttauntreact/blob_nopiles.glb",      "Bactrian Camel",   -150),
     # Two before this one read badly here -- a rhino whose horn ellipsoids jitter
     # frame to frame, then an elephant -- and a wobble is the first thing the eye
     # lands on in a row of otherwise still bones.

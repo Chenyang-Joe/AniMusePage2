@@ -179,13 +179,13 @@
   {
    "id": "cassowary",
    "label": "Cassowary",
-   "rotateY": 0,
+   "rotateY": 150,
    "blob": "correspond/cassowary.blob.glb"
   },
   {
    "id": "camel",
    "label": "Bactrian Camel",
-   "rotateY": 0,
+   "rotateY": -150,
    "blob": "correspond/camel.blob.glb"
   },
   {
