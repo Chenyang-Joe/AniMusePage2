@@ -179,19 +179,19 @@
   {
    "id": "cassowary",
    "label": "Cassowary",
-   "rotateY": 150,
+   "rotateY": 120,
    "blob": "correspond/cassowary.blob.glb"
   },
   {
    "id": "camel",
    "label": "Bactrian Camel",
-   "rotateY": -150,
+   "rotateY": -165,
    "blob": "correspond/camel.blob.glb"
   },
   {
    "id": "buffalo",
    "label": "African Buffalo",
-   "rotateY": 10,
+   "rotateY": 25,
    "blob": "correspond/buffalo.blob.glb"
   }
  ],
